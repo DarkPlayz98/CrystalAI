@@ -399,6 +399,20 @@ input.addEventListener('keydown', function(e) { if (e.key === 'Enter' && !e.shif
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/sw.js');
     }
+// Brutally force the Android hardware status bar to pitch black
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(async () => {
+        if (window.Capacitor && window.Capacitor.Plugins.StatusBar) {
+            try {
+                await window.Capacitor.Plugins.StatusBar.setBackgroundColor({ color: '#000000' });
+                await window.Capacitor.Plugins.StatusBar.setOverlaysWebView({ overlay: false });
+            } catch (e) {
+                console.log("Status bar sync failed", e);
+            }
+        }
+    }, 500); // Slight delay ensures the native layer is fully awake
+});
+      
 </script> 
 </body>
 </html>
