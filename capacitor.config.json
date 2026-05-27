@@ -7,8 +7,14 @@
   },
   "plugins": {
     "StatusBar": {
+      "overlaysWebView": false,
       "style": "DARK",
       "backgroundColor": "#000000"
+    },
+    "GoogleAuth": {
+      "scopes": ["profile", "email"],
+      "serverClientId": "390279102837-u12a9h0n65uo9orbaa4h3j0anvleses9.apps.googleusercontent.com",
+      "forceCodeForRefreshToken": true
     }
   }
 }
