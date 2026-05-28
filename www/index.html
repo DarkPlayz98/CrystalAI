@@ -126,7 +126,6 @@
             </button>
         </div>
     </aside>
-
     <div class="flex flex-col h-full relative">
         <header class="flex justify-between items-center p-4 pt-[max(env(safe-area-inset-top,16px),16px)] z-30 relative bg-white/80 backdrop-blur-md">
             <button onclick="toggleSidebar()" class="text-slate-600 p-1"><svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
@@ -284,8 +283,24 @@ if(auth) {
         }
     });
 }
-
-function signInWithGoogle(btn) { if(!auth) return; btn.classList.add('btn-loading'); const provider = new firebase.auth.GoogleAuthProvider(); auth.signInWithPopup(provider).catch((error) => { btn.classList.remove('btn-loading'); showError(error.message); }); }
+     async function signInWithGoogle(btn) { 
+    if(!auth) return; 
+    btn.classList.add('btn-loading'); 
+    try {
+        // 1. Trigger the Native Android Google login dialog
+        const googleUser = await window.Capacitor.Plugins.GoogleAuth.signIn();
+        
+        // 2. Hand the native token over to Firebase
+        const credential = firebase.auth.GoogleAuthProvider.credential(googleUser.authentication.idToken);
+        await auth.signInWithCredential(credential);
+        
+        console.log("Native Google Sign-In Successful!");
+    } catch (error) {
+        console.error("Google Sign-in failed:", error);
+        showError("Sign-in cancelled or failed.");
+        btn.classList.remove('btn-loading');
+    }
+}
 function loginEmail(btn) { const email = document.getElementById('email-input').value.trim(); const password = document.getElementById('password-input').value.trim(); if(!email || !password) return showError("Please enter email and password."); btn.classList.add('btn-loading'); auth.signInWithEmailAndPassword(email, password).catch((error) => { btn.classList.remove('btn-loading'); showError(error.message); }); }
 function signupEmail(btn) { const email = document.getElementById('email-input').value.trim(); const password = document.getElementById('password-input').value.trim(); if(!email || !password) return showError("Please enter email and password."); btn.classList.add('btn-loading'); auth.createUserWithEmailAndPassword(email, password).catch((error) => { btn.classList.remove('btn-loading'); showError(error.message); }); }
 function signOutUser() { if(auth) auth.signOut(); document.body.classList.remove('sidebar-open'); chatHistory = []; document.getElementById('sidebar-list').innerHTML = ''; }
@@ -395,10 +410,11 @@ window.submitMessage = async function(e) {
 const input = document.getElementById('message');
 input.addEventListener('input', function() { this.style.height = "auto"; this.style.height = Math.min(this.scrollHeight, 100) + "px"; });
 input.addEventListener('keydown', function(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); window.submitMessage(e); } });
- // PASTE IT RIGHT HERE
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js');
-    }
+
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js');
+}
+
 // Brutally force the Android hardware status bar to pitch black
 document.addEventListener('DOMContentLoaded', () => {
     setTimeout(async () => {
