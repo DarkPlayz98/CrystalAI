@@ -61,7 +61,7 @@
 
 </head>  
 <body class="relative">
-       <div id="login-screen" class="fixed inset-0 flex-col items-center justify-center px-8">
+    <div id="login-screen" class="fixed inset-0 flex-col items-center justify-center px-8">
         <div class="w-full max-w-sm">
             <div class="mb-12 w-14 h-14">
                 <svg class="w-full h-full text-white" viewBox="0 0 32 32" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -126,7 +126,7 @@
             </button>
         </div>
     </aside>
-        <div class="flex flex-col h-full relative">
+    <div class="flex flex-col h-full relative">
         <header class="flex justify-between items-center p-4 pt-[max(env(safe-area-inset-top,16px),16px)] z-30 relative bg-white/80 backdrop-blur-md">
             <button onclick="toggleSidebar()" class="text-slate-600 p-1"><svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
             <div class="flex items-center gap-2 absolute left-1/2 transform -translate-x-1/2">
@@ -163,12 +163,16 @@
         </main>
 
         <div id="input-wrapper" class="relative">
-            <div id="attachment-menu" class="absolute bottom-[110%] left-2 transform translate-y-2 opacity-0 pointer-events-none transition-all duration-200 ease-out bg-slate-800 text-white text-[13px] font-medium py-2.5 px-4 rounded-xl shadow-xl z-50">
-                Attachment feature coming soon!
-                <div class="absolute top-full left-4 -mt-[1px] border-[6px] border-transparent border-t-slate-800"></div>
+            <input type="file" id="file-input" class="hidden" accept="image/*" onchange="window.handleFileUpload(event)">
+            
+            <div id="attachment-preview" class="hidden absolute bottom-[110%] left-2 p-2 bg-white border border-slate-200 rounded-xl shadow-lg items-center gap-3 z-50">
+                <img id="preview-img" class="w-14 h-14 object-cover rounded-lg border border-slate-100">
+                <button onclick="window.removeAttachment(event)" class="text-slate-400 hover:text-red-500 bg-slate-50 p-1.5 rounded-full transition">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                </button>
             </div>
 
-            <button onclick="window.toggleAttachmentMenu(event)" class="text-slate-400 hover:text-indigo-500 transition flex items-center justify-center w-9 h-9 flex-shrink-0 self-end mb-[2px] mr-1">
+            <button onclick="window.triggerAttachment(event)" class="text-slate-400 hover:text-indigo-500 transition flex items-center justify-center w-9 h-9 flex-shrink-0 self-end mb-[2px] mr-1">
                 <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"></path></svg>
             </button>
             
@@ -181,7 +185,7 @@
             </button>
         </div>
     </div>
-  <script>
+    <script>
 const firebaseConfig = {
   apiKey: "AIzaSyB2yW0RWDLqLiV097LM4VM6SHolDfX39Sc",
   authDomain: "crystal-ai-c5ae2.firebaseapp.com",
@@ -196,11 +200,11 @@ try { firebase.initializeApp(firebaseConfig); } catch(e) {}
 const auth = firebase.auth ? firebase.auth() : null;
 const db = firebase.firestore ? firebase.firestore() : null;
 
-// Replace with your Render URL
 const BACKEND_URL = "https://crystal-ai-php6.onrender.com";
 let isProcessing = false;
 let chatHistory = [];
 let currentChatId = null; 
+let currentAttachment = null; // Stores our selected image
 
 const RAW_LOGO_SVG = `<svg class="w-full h-full" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16 2L3 10L16 18L29 10L16 2Z" fill="url(#grad-top4)"/><path d="M3 10L16 30L16 18L3 10Z" fill="url(#grad-left4)"/><path d="M29 10L16 30L16 18L29 10Z" fill="url(#grad-right4)"/><defs><linearGradient id="grad-top4" x1="16" y1="2" x2="16" y2="18" gradientUnits="userSpaceOnUse"><stop stop-color="#38bdf8"/><stop offset="1" stop-color="#3b82f6"/></linearGradient><linearGradient id="grad-left4" x1="3" y1="10" x2="16" y2="30" gradientUnits="userSpaceOnUse"><stop stop-color="#2563eb"/><stop offset="1" stop-color="#1e1b4b"/></linearGradient><linearGradient id="grad-right4" x1="29" y1="10" x2="16" y2="30" gradientUnits="userSpaceOnUse"><stop stop-color="#8b5cf6"/><stop offset="1" stop-color="#4c1d95"/></linearGradient></defs></svg>`;
 
@@ -209,13 +213,31 @@ function showEmailForm() { document.getElementById('auth-buttons').classList.add
 function hideEmailForm() { document.getElementById('email-form').style.display = 'none'; document.getElementById('auth-buttons').classList.remove('hidden'); document.getElementById('login-error').classList.add('hidden'); }
 function toggleSidebar() { document.body.classList.toggle('sidebar-open'); }
 
-window.toggleAttachmentMenu = function(e) {
+// Attachment Logic
+window.triggerAttachment = function(e) {
     if(e) e.preventDefault();
-    const menu = document.getElementById('attachment-menu');
-    menu.classList.remove('opacity-0', 'translate-y-2', 'pointer-events-none');
-    setTimeout(() => {
-        menu.classList.add('opacity-0', 'translate-y-2', 'pointer-events-none');
-    }, 2500);
+    document.getElementById('file-input').click();
+};
+
+window.handleFileUpload = function(e) {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        currentAttachment = event.target.result;
+        document.getElementById('preview-img').src = currentAttachment;
+        document.getElementById('attachment-preview').classList.remove('hidden');
+        document.getElementById('attachment-preview').classList.add('flex');
+    };
+    reader.readAsDataURL(file);
+};
+
+window.removeAttachment = function(e) {
+    if(e) e.preventDefault();
+    currentAttachment = null;
+    document.getElementById('file-input').value = '';
+    document.getElementById('attachment-preview').classList.remove('flex');
+    document.getElementById('attachment-preview').classList.add('hidden');
 };
 
 function startNewChat() { 
@@ -266,6 +288,7 @@ function loadChat(chatId, messages) {
     toggleSidebar();
 }
 
+// DYNAMIC STATUS BAR LOGIC MOVED INSIDE AUTH LISTENER
 if(auth) {
     auth.onAuthStateChanged((user) => {
         const loginScreen = document.getElementById('login-screen');
@@ -276,28 +299,35 @@ if(auth) {
             document.getElementById('user-email').textContent = emailText;
             document.getElementById('user-initial').textContent = emailText.charAt(0).toUpperCase();
             loadSidebar(); 
+            
+            // Logged in: Force white status bar with dark icons
+            if (window.Capacitor && window.Capacitor.Plugins.StatusBar) {
+                window.Capacitor.Plugins.StatusBar.setBackgroundColor({ color: '#ffffff' }).catch(console.error);
+                window.Capacitor.Plugins.StatusBar.setStyle({ style: 'LIGHT' }).catch(console.error);
+            }
         } else {
             loginScreen.style.display = 'flex';
             document.querySelectorAll('.btn-loading').forEach(b => b.classList.remove('btn-loading')); 
             hideEmailForm();
+            
+            // Logged out: Force black status bar with light icons
+            if (window.Capacitor && window.Capacitor.Plugins.StatusBar) {
+                window.Capacitor.Plugins.StatusBar.setBackgroundColor({ color: '#000000' }).catch(console.error);
+                window.Capacitor.Plugins.StatusBar.setStyle({ style: 'DARK' }).catch(console.error);
+            }
         }
     });
 }
-    async function signInWithGoogle(btn) { 
+
+async function signInWithGoogle(btn) { 
     if(!auth) return; 
     btn.classList.add('btn-loading'); 
     try {
-        // 1. Trigger the Native Android Google login dialog
         const googleUser = await window.Capacitor.Plugins.GoogleAuth.signIn();
-        
-        // 2. Hand the native token over to Firebase
         const credential = firebase.auth.GoogleAuthProvider.credential(googleUser.authentication.idToken);
         await auth.signInWithCredential(credential);
-        
-        console.log("Native Google Sign-In Successful!");
     } catch (error) {
         console.error("Google Sign-in failed:", error);
-        // This will print the exact Google Developer code if it fails
         showError("Code: " + (error.code || "N/A") + " - " + (error.message || JSON.stringify(error)));
         btn.classList.remove('btn-loading');
     }
@@ -335,7 +365,8 @@ window.copyToClipboard = function(btn) {
     });
 };
 
-window.addBubble = function(text, kind, isTyping = false) {
+// Updated addBubble to allow HTML injections for user attachments
+window.addBubble = function(text, kind, isTyping = false, isHTML = false) {
     hideEmptyState();
     const chatInner = document.getElementById('chat-inner');
     const chatArea = document.getElementById('chat-container');
@@ -344,9 +375,14 @@ window.addBubble = function(text, kind, isTyping = false) {
     if (kind === "bot") { wrapper.innerHTML = `<div class="avatar">${RAW_LOGO_SVG}</div>`; }
     const bubble = document.createElement('div');
     bubble.className = "bubble";
+    
     if (isTyping) { bubble.innerHTML = `<div class="typing-indicator"><span></span><span></span><span></span></div>`; } 
     else if (kind === "bot") { bubble.innerHTML = `<div class="main-content">${window.parseMarkdown(text)}</div>`; } 
-    else { bubble.textContent = text; }
+    else { 
+        if (isHTML) { bubble.innerHTML = text; } 
+        else { bubble.textContent = text; } 
+    }
+    
     wrapper.appendChild(bubble); chatInner.appendChild(wrapper);
     setTimeout(() => chatArea.scrollTo({ top: chatArea.scrollHeight, behavior: 'smooth' }), 50);
     return bubble;
@@ -359,19 +395,35 @@ window.submitMessage = async function(e) {
     const input = document.getElementById('message');
     const sendBtn = document.getElementById('sendBtn');
     const text = input.value.trim();
-    if(!text) return;
+    
+    // Stop if empty text AND no image
+    if(!text && !currentAttachment) return;
 
     isProcessing = true; input.value = ""; input.style.height = "auto"; sendBtn.disabled = true;
-    window.addBubble(text, "user");
+    
+    // Check if we are sending an image to display in the bubble
+    let displayHtml = text;
+    if(currentAttachment) {
+        const safeText = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        displayHtml = `<img src="${currentAttachment}" class="max-w-full rounded-lg mb-2 object-contain max-h-48">` + (safeText ? `<br>${safeText}` : '');
+    }
+    
+    window.addBubble(displayHtml, "user", false, !!currentAttachment);
     const loadingBubble = window.addBubble("", "bot", true);
 
-    chatHistory.push({ role: "user", content: text });
+    const payloadMessage = text || "Sent an image."; 
+    chatHistory.push({ role: "user", content: payloadMessage });
     if (chatHistory.length > 20) chatHistory = chatHistory.slice(chatHistory.length - 20);
 
+    // Save attachment for payload, then clear UI
+    const attachmentToSend = currentAttachment;
+    window.removeAttachment();
+
     try {
+        // Now sending image base64 directly to your Render backend
         const response = await fetch(`${BACKEND_URL}/api/chat`, {
             method: "POST", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message: text, messages: chatHistory }) 
+            body: JSON.stringify({ message: payloadMessage, messages: chatHistory, image: attachmentToSend }) 
         });
         
         const responseText = await response.text(); 
@@ -415,21 +467,6 @@ input.addEventListener('keydown', function(e) { if (e.key === 'Enter' && !e.shif
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js');
 }
-
-// Brutally force the Android hardware status bar to pitch black
-document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(async () => {
-        if (window.Capacitor && window.Capacitor.Plugins.StatusBar) {
-            try {
-                await window.Capacitor.Plugins.StatusBar.setBackgroundColor({ color: '#000000' });
-                await window.Capacitor.Plugins.StatusBar.setOverlaysWebView({ overlay: false });
-            } catch (e) {
-                console.log("Status bar sync failed", e);
-            }
-        }
-    }, 500); 
-});
-      
 </script> 
 </body>
 </html>
