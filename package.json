@@ -4,7 +4,8 @@
   "description": "Crystal AI Native Android App",
   "main": "index.js",
   "scripts": {
-    "build": "echo 'Using raw web assets'"
+    "build": "echo 'Using raw web assets'",
+    "generate-assets": "npx capacitor-assets generate --android"
   },
   "dependencies": {
     "@capacitor/android": "^6.0.0",
@@ -12,5 +13,8 @@
     "@capacitor/core": "^6.0.0",
     "@capacitor/status-bar": "^6.0.0",
     "@codetrix-studio/capacitor-google-auth": "^3.3.6"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5"
   }
 }
