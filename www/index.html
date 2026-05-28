@@ -17,7 +17,7 @@
     body { background-color: var(--bg-color); color: var(--text-color); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; overscroll-behavior-y: none; height: 100dvh; overflow: hidden; transition: background-color 0.3s, color 0.3s; }  
     ::-webkit-scrollbar { display: none; } * { scrollbar-width: none; -ms-overflow-style: none; }  
 
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }  
+    @keyframes slideUpFade { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }  
     @keyframes spin { to { transform: rotate(360deg); } }  
 
     #login-screen { display: none; background-color: #000000; z-index: 100; color: white; }  
@@ -30,23 +30,30 @@
     #sidebar { background-color: var(--sidebar-bg); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 4px 0 15px rgba(0,0,0,0.05); }  
     .sidebar-open #sidebar { transform: translateX(0); }  
     .sidebar-open #sidebar-overlay { opacity: 1; pointer-events: auto; }  
-    .sidebar-btn { color: var(--text-color); border-color: var(--border-color); }
-    .sidebar-btn:hover { background-color: var(--sidebar-hover); }
 
-    #chat-container { height: calc(100dvh - 140px); overflow-y: auto; padding: 16px; scroll-behavior: smooth; }  
-    .message { display: flex; margin-bottom: 24px; animation: fadeIn 0.3s ease; width: 100%; }  
+    #chat-container { height: calc(100dvh - 90px); overflow-y: auto; padding: 16px; scroll-behavior: smooth; }  
+    .message { display: flex; margin-bottom: 24px; animation: slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; width: 100%; opacity: 0; }  
     .message.bot { flex-direction: row; } .message.user { flex-direction: row-reverse; }  
     .avatar { width: 34px; height: 34px; flex-shrink: 0; margin-right: 12px; margin-left: 12px; }  
     .bubble { max-width: 85%; padding: 12px 18px; font-size: 15.5px; line-height: 1.6; word-wrap: break-word; }  
     .user .bubble { background: var(--bubble-user); color: var(--text-color); border-radius: 20px 20px 4px 20px; }  
     .bot .bubble { background: var(--bubble-bot); color: var(--text-color); border-radius: 20px 20px 20px 4px; }  
 
+    /* NEW TABLE STYLING */
+    table { border-collapse: collapse; width: 100%; margin: 16px 0; border-radius: 8px; overflow: hidden; font-size: 14px; box-shadow: 0 0 0 1px var(--border-color); }
+    th, td { padding: 10px 14px; border-bottom: 1px solid var(--border-color); border-right: 1px solid var(--border-color); text-align: left; }
+    th { background-color: rgba(99,102,241,0.05); font-weight: 600; color: var(--text-color); }
+    tr:last-child td { border-bottom: none; } td:last-child, th:last-child { border-right: none; }
+    
+    /* NEW EMPTY STATE CHIP STYLING */
+    .empty-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 20px; max-width: 90%; }
+    .empty-chip { background: var(--bubble-user); border: 1px solid var(--border-color); padding: 10px 16px; border-radius: 20px; font-size: 14px; font-weight: 500; color: var(--text-color); cursor: pointer; transition: all 0.2s; }
+    .empty-chip:active { transform: scale(0.95); border-color: #6366f1; color: #6366f1; }
+
     #input-wrapper { position: fixed; bottom: env(safe-area-inset-bottom, 16px); left: 16px; right: 16px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 30px; display: flex; flex-direction: column; padding: 8px 6px 8px 12px; box-shadow: 0 -4px 20px rgba(0,0,0,0.03); z-index: 40; transition: background-color 0.3s, border-color 0.3s; }  
-    .quick-prompts { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 4px; border-bottom: 1px solid var(--border-color); white-space: nowrap; }
-    .quick-chip { background: var(--bubble-user); color: var(--text-color); padding: 6px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid var(--border-color); }
     .input-row { display: flex; align-items: flex-end; width: 100%; }
     textarea { flex: 1; background: transparent; color: var(--text-color); border: none; padding: 8px; font-size: 16px; resize: none; outline: none; max-height: 120px; }  
-    .icon-btn { color: #94a3b8; transition: color 0.2s, transform 0.2s; display: flex; items-center; justify-center; width: 38px; height: 38px; flex-shrink: 0; }
+    .icon-btn { color: #94a3b8; transition: color 0.2s, transform 0.2s; display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; flex-shrink: 0; }
     .icon-btn:active { transform: scale(0.9); }
     .icon-btn.active { color: #ef4444; animation: pulse 1.5s infinite; }
     .send-btn { background: #4f46e5; color: white; border: none; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s; flex-shrink: 0; }  
@@ -56,9 +63,6 @@
     .typing-indicator span { width: 6px; height: 6px; background-color: #6366f1; border-radius: 50%; display: inline-block; animation: bounce 1.4s infinite ease-in-out both; }  
     .typing-indicator span:nth-child(1) { animation-delay: -0.32s; } .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }  
     @keyframes bounce { 0%, 80%, 100% { transform: scale(0); opacity: 0.3; } 40% { transform: scale(1); opacity: 1; } }  
-    
-    /* Code Block Styling */
-    pre { background: #1e293b !important; color: #f8fafc !important; }
 </style>
 </head>  
 <body class="relative">
@@ -119,7 +123,6 @@
             </div>
             <button onclick="toggleSettings()" class="text-slate-500 hover:text-indigo-500"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></button>
         </div>
-        
         <div class="p-4 border-b border-[var(--border-color)] bg-[var(--sidebar-hover)] flex items-center justify-between cursor-pointer" onclick="toggleCopilot()">
             <div>
                 <div class="text-sm font-bold text-indigo-500">Game Dev Copilot</div>
@@ -127,9 +130,7 @@
             </div>
             <div id="copilot-dot" class="w-3 h-3 rounded-full bg-gray-300"></div>
         </div>
-        
         <div id="sidebar-list" class="flex-1 overflow-y-auto p-4 flex flex-col gap-2"></div>
-        
         <div class="p-4 border-t border-[var(--border-color)]">
             <button onclick="startNewChat()" class="w-full py-3 bg-[#0f172a] hover:bg-slate-800 text-white rounded-xl text-sm font-bold">New Chat</button>
             <button onclick="signOutUser()" class="w-full mt-2 py-2 text-xs font-semibold text-red-500">Logout</button>
@@ -143,20 +144,19 @@
         </header>
 
         <main id="chat-container" class="relative flex-1">
-            <div id="empty-state" class="absolute inset-0 flex flex-col items-center justify-center pb-24 z-10 pointer-events-none">
-                <h2 class="text-xl tracking-wide opacity-50">How can I help you today?</h2>
+            <div id="empty-state" class="absolute inset-0 flex flex-col items-center justify-center pb-24 z-10 transition-opacity duration-300">
+                <h2 class="text-2xl font-bold tracking-wide text-gray-400">How can I help you today?</h2>
+                <div class="empty-chips">
+                    <button class="empty-chip" onclick="injectPrompt('Write a Luau script for an NPC roaming system')">NPC Roaming</button>
+                    <button class="empty-chip" onclick="injectPrompt('Generate procedural map logic in Luau')">Map Gen</button>
+                    <button class="empty-chip" onclick="injectPrompt('How do I optimize Roblox memory usage?')">Memory Fix</button>
+                    <button class="empty-chip" onclick="injectPrompt('Review this script and fix errors')">Review Code</button>
+                </div>
             </div>
             <div id="chat-inner" class="pb-36 relative z-20 flex flex-col"></div>
         </main>
 
         <div id="input-wrapper">
-            <div class="quick-prompts">
-                <button class="quick-chip" onclick="injectPrompt('Write a Luau script for an NPC roaming system')">NPC Roaming</button>
-                <button class="quick-chip" onclick="injectPrompt('Generate procedural map logic in Luau')">Map Gen</button>
-                <button class="quick-chip" onclick="injectPrompt('How do I optimize Roblox memory usage?')">Memory Fix</button>
-                <button class="quick-chip" onclick="injectPrompt('Review this script and fix errors')">Review Code</button>
-            </div>
-
             <input type="file" id="file-input" class="hidden" accept="image/*" onchange="window.handleFileUpload(event)">
             <div id="attachment-preview" class="hidden absolute bottom-[120%] left-2 p-2 bg-[var(--bg-color)] border border-[var(--border-color)] rounded-xl shadow-lg items-center gap-3">
                 <img id="preview-img" class="w-14 h-14 object-cover rounded-lg">
@@ -175,7 +175,7 @@
             </div>
         </div>
         </div>
-        <script>
+       <script>
 const firebaseConfig = { apiKey: "AIzaSyB2yW0RWDLqLiV097LM4VM6SHolDfX39Sc", authDomain: "crystal-ai-c5ae2.firebaseapp.com", projectId: "crystal-ai-c5ae2", storageBucket: "crystal-ai-c5ae2.firebasestorage.app", messagingSenderId: "390279102837", appId: "1:390279102837:web:260915ff71e8597536533c", measurementId: "G-KXMM9D9HMV" };
 try { firebase.initializeApp(firebaseConfig); } catch(e) {}
 const auth = firebase.auth ? firebase.auth() : null;
@@ -183,38 +183,46 @@ const db = firebase.firestore ? firebase.firestore() : null;
 const BACKEND_URL = "https://crystal-ai-php6.onrender.com";
 
 let isProcessing = false; let chatHistory = []; let currentChatId = null; let currentAttachment = null;
-let isDarkMode = false; let isCopilot = false; let sysInstructions = "";
-let recognition = null; let isRecording = false;
+let isDarkMode = false; let isCopilot = false; let sysInstructions = ""; let isRecording = false;
 
-// Hardware Vibrate Helper
 const vibrate = async () => { if (window.Capacitor?.Plugins?.Haptics) { try { await window.Capacitor.Plugins.Haptics.impact({ style: 'LIGHT' }); } catch(e){} } };
 
-// Voice Recognition Setup
-if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
-    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-    recognition = new SpeechRec();
-    recognition.continuous = false; recognition.interimResults = true;
-    recognition.onresult = (event) => { document.getElementById('message').value = event.results[0][0].transcript; document.getElementById('message').style.height = "auto"; document.getElementById('message').style.height = document.getElementById('message').scrollHeight + "px"; };
-    recognition.onend = () => { isRecording = false; document.getElementById('mic-btn').classList.remove('active'); };
+// NATIVE VOICE RECOGNITION
+async function toggleVoiceRecording() {
+    try {
+        if (!window.Capacitor?.Plugins?.SpeechRecognition) return alert("Native Speech Plugin not found. Rebuilding APK...");
+        const SpeechRecognition = window.Capacitor.Plugins.SpeechRecognition;
+        
+        const hasPerm = await SpeechRecognition.checkPermissions();
+        if (hasPerm.speechRecognition !== 'granted') await SpeechRecognition.requestPermissions();
+        
+        if (isRecording) {
+            await SpeechRecognition.stop(); isRecording = false; document.getElementById('mic-btn').classList.remove('active');
+        } else {
+            vibrate(); isRecording = true; document.getElementById('mic-btn').classList.add('active');
+            
+            SpeechRecognition.addListener('partialResults', (data) => {
+                if(data.matches && data.matches.length > 0) {
+                    const input = document.getElementById('message');
+                    input.value = data.matches[0]; input.style.height = "auto"; input.style.height = input.scrollHeight + "px";
+                }
+            });
+            const result = await SpeechRecognition.start({ language: "en-US", maxResults: 1, prompt: "Speak now..." });
+            if(result.matches && result.matches.length > 0) document.getElementById('message').value = result.matches[0];
+            
+            isRecording = false; document.getElementById('mic-btn').classList.remove('active');
+        }
+    } catch (e) {
+        console.error(e); isRecording = false; document.getElementById('mic-btn').classList.remove('active');
+    }
 }
 
-function toggleVoiceRecording() {
-    if (!recognition) return alert("Voice input not supported on this browser engine.");
-    if (isRecording) { recognition.stop(); } else { vibrate(); recognition.start(); isRecording = true; document.getElementById('mic-btn').classList.add('active'); }
-}
+function injectPrompt(text) { document.getElementById('message').value = text; vibrate(); window.submitMessage(); }
 
-function injectPrompt(text) { document.getElementById('message').value = text; vibrate(); }
-
-// UI & Settings Logic
 function toggleSidebar() { document.body.classList.toggle('sidebar-open'); vibrate(); }
 function toggleSettings() { const m = document.getElementById('settings-modal'); if(m.classList.contains('hidden')) { m.classList.remove('hidden'); m.style.display = 'flex'; setTimeout(() => m.classList.remove('opacity-0'), 10); document.getElementById('custom-instructions').value = sysInstructions; } else { m.classList.add('opacity-0'); setTimeout(() => { m.classList.add('hidden'); m.style.display = 'none'; }, 300); } }
 
-function toggleCopilot() {
-    isCopilot = !isCopilot; vibrate();
-    const dot = document.getElementById('copilot-dot');
-    dot.className = isCopilot ? "w-3 h-3 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.8)]" : "w-3 h-3 rounded-full bg-gray-300";
-}
-
+function toggleCopilot() { isCopilot = !isCopilot; vibrate(); document.getElementById('copilot-dot').className = isCopilot ? "w-3 h-3 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.8)]" : "w-3 h-3 rounded-full bg-gray-300"; }
 function toggleDarkMode() {
     isDarkMode = !isDarkMode; vibrate();
     if(isDarkMode) {
@@ -227,7 +235,6 @@ function toggleDarkMode() {
         if(window.Capacitor?.Plugins?.StatusBar) { window.Capacitor.Plugins.StatusBar.setBackgroundColor({color: '#ffffff'}); window.Capacitor.Plugins.StatusBar.setStyle({style: 'LIGHT'}); }
     }
 }
-
 function saveSettings() { sysInstructions = document.getElementById('custom-instructions').value; toggleSettings(); }
 
 window.triggerAttachment = function(e) { if(e) e.preventDefault(); document.getElementById('file-input').click(); };
@@ -235,42 +242,58 @@ window.handleFileUpload = function(e) { const file = e.target.files[0]; if(!file
 window.removeAttachment = function(e) { if(e) e.preventDefault(); currentAttachment = null; document.getElementById('file-input').value = ''; document.getElementById('attachment-preview').classList.remove('flex'); document.getElementById('attachment-preview').classList.add('hidden'); };
 
 function startNewChat() { document.body.classList.remove('sidebar-open'); document.getElementById('chat-inner').innerHTML = ''; document.getElementById('empty-state').style.display = 'flex'; setTimeout(() => document.getElementById('empty-state').style.opacity = '1', 50); isProcessing = false; document.getElementById('sendBtn').disabled = false; chatHistory = []; currentChatId = null; }
-function hideEmptyState() { const emptyState = document.getElementById('empty-state'); if(emptyState && emptyState.style.opacity !== '0') { emptyState.style.opacity = '0'; setTimeout(() => emptyState.style.display = 'none', 400); } }
+function hideEmptyState() { const emptyState = document.getElementById('empty-state'); if(emptyState && emptyState.style.opacity !== '0') { emptyState.style.opacity = '0'; setTimeout(() => emptyState.style.display = 'none', 300); } }
 
-// Advanced Code Export
 window.exportCode = async function(btn) {
-    vibrate(); const pre = btn.parentElement.nextElementSibling; const code = pre.innerText;
+    vibrate(); const pre = btn.parentElement.parentElement.nextElementSibling; const code = pre.innerText;
     let fileName = `snippet_${Date.now()}.txt`;
-    if(code.includes('function') && code.includes('end')) fileName = `script_${Date.now()}.lua`; // Luau auto-detect
+    if(code.includes('function') && code.includes('end')) fileName = `script_${Date.now()}.lua`; 
     else if(code.includes('const') || code.includes('let')) fileName = `script_${Date.now()}.js`;
     
     if (window.Capacitor?.Plugins?.Filesystem) {
         try {
             await window.Capacitor.Plugins.Filesystem.writeFile({ path: fileName, data: code, directory: 'DOCUMENTS', encoding: 'utf8' });
-            btn.textContent = "Saved to Docs!"; setTimeout(() => btn.textContent = "Export", 2000);
+            btn.textContent = "Saved!"; setTimeout(() => btn.textContent = "Export", 2000);
         } catch(e) { console.error(e); btn.textContent = "Error"; }
-    } else {
-        const blob = new Blob([code], { type: 'text/plain' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = fileName; a.click();
-        btn.textContent = "Downloaded!"; setTimeout(() => btn.textContent = "Export", 2000);
     }
 };
 
-window.copyToClipboard = function(btn) {
-    vibrate(); const pre = btn.parentElement.nextElementSibling; navigator.clipboard.writeText(pre.innerText).then(() => { btn.textContent = "Copied!"; setTimeout(() => btn.textContent = "Copy", 2000); });
-};
+window.copyToClipboard = function(btn) { vibrate(); const pre = btn.parentElement.parentElement.nextElementSibling; navigator.clipboard.writeText(pre.innerText).then(() => { btn.textContent = "Copied!"; setTimeout(() => btn.textContent = "Copy", 2000); }); };
 
+// MASSIVE MARKDOWN UPGRADE (Tables & Pro Code Blocks)
 window.parseMarkdown = function(text) {
     if (!text || typeof text !== "string") return "Error reading response.";
     let cleanedText = text.replace(/<think>[\s\S]*?(?:<\/think>|$)/gi, '').trim();
     if (!cleanedText) return "Processing...";
     let html = cleanedText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    
+    // 1. MAC-STYLE CODE BLOCKS
     const codeBlockRegex = /\x60\x60\x60([a-zA-Z0-9-]*)\n?([\s\S]*?)(?:\x60\x60\x60|$)/g;
     html = html.replace(codeBlockRegex, (match, language, snippet) => {
         const langLabel = language ? language.toUpperCase() : "CODE";
-        return `<div class="mt-4 mb-4 rounded-xl overflow-hidden border border-[var(--border-color)]"><div class="bg-slate-800 text-slate-400 text-xs py-2 px-3 flex justify-between items-center font-semibold border-b border-slate-700"><span class="font-mono tracking-wider">${langLabel}</span><div class="flex gap-3"><button class="text-indigo-400 hover:text-indigo-300" onclick="window.exportCode(this)">Export</button><button class="text-indigo-400 hover:text-indigo-300" onclick="window.copyToClipboard(this)">Copy</button></div></div><pre class="p-4 overflow-x-auto text-sm font-mono" style="white-space: pre-wrap; word-break: break-word;"><code>${snippet.trim()}</code></pre></div>`;
+        return `<div class="mt-5 mb-5 rounded-xl overflow-hidden border border-slate-700 bg-[#0d1117] shadow-lg"><div class="bg-slate-800 text-slate-300 text-[11px] py-2 px-4 flex justify-between items-center font-bold tracking-wider uppercase border-b border-slate-700"><div class="flex items-center gap-2"><div class="flex gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-red-500"></div><div class="w-2.5 h-2.5 rounded-full bg-yellow-500"></div><div class="w-2.5 h-2.5 rounded-full bg-green-500"></div></div><span class="ml-2">${langLabel}</span></div><div class="flex gap-3"><button class="hover:text-white transition" onclick="window.exportCode(this)">Export</button><button class="hover:text-white transition" onclick="window.copyToClipboard(this)">Copy</button></div></div><pre class="p-4 overflow-x-auto text-[13px] font-mono text-gray-200 leading-relaxed" style="white-space: pre-wrap; word-break: break-word;"><code>${snippet.trim()}</code></pre></div>`;
     });
+    
+    // 2. INLINE CODE & BOLD/ITALIC
     html = html.replace(/\x60([^\x60\n]+)\x60/g, '<code style="background:rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.2); padding:2px 6px; border-radius:6px; color:#6366f1; font-family:monospace; font-size:0.9em;">$1</code>');
     html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>'); html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+    
+    // 3. MARKDOWN TABLES
+    html = html.replace(/(?:\|.*\|\n?)+/g, (match) => {
+        const rows = match.trim().split('\n');
+        if (rows.length < 2 || !rows[1].includes('---')) return match; 
+        let tableHtml = '<div class="overflow-x-auto"><table>';
+        rows.forEach((row, index) => {
+            if (row.includes('---')) return; 
+            const cells = row.split('|').filter((c, i, arr) => !(i === 0 && c.trim() === '') && !(i === arr.length - 1 && c.trim() === ''));
+            tableHtml += '<tr>';
+            cells.forEach(cell => { tableHtml += index === 0 ? `<th>${cell.trim()}</th>` : `<td>${cell.trim()}</td>`; });
+            tableHtml += '</tr>';
+        });
+        tableHtml += '</table></div>';
+        return tableHtml;
+    });
+
     html = html.replace(/^\s*[-*] (.*$)/gim, '<li class="ml-4 list-disc mb-1">$1</li>');
     html = html.replace(/(<li.*?>.*?<\/li>\n?)+/g, '<ul class="mb-4">$&</ul>');
     let blocks = html.split('\n\n'); for (let i = 0; i < blocks.length; i++) { if (!blocks[i].startsWith('<div') && !blocks[i].startsWith('<ul')) blocks[i] = `<p class="mb-3">${blocks[i].replace(/\n/g, '<br>')}</p>`; }
@@ -305,7 +328,6 @@ window.submitMessage = async function(e) {
     window.addBubble(displayHtml, "user", false, !!currentAttachment); const loadingBubble = window.addBubble("", "bot", true);
     const payloadMessage = text || "Sent an image."; 
     
-    // Inject Context based on toggles before sending
     let dynamicContext = "";
     if (isCopilot) dynamicContext += "SYSTEM INSTRUCTION: You are an expert game development copilot. Prioritize Luau syntax, strict optimization for mobile-friendly environments, and procedural logic mechanics. ";
     if (sysInstructions) dynamicContext += `USER CUSTOM INSTRUCTION: ${sysInstructions} `;
@@ -336,7 +358,6 @@ const input = document.getElementById('message');
 input.addEventListener('input', function() { this.style.height = "auto"; this.style.height = Math.min(this.scrollHeight, 120) + "px"; });
 input.addEventListener('keydown', function(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); window.submitMessage(e); } });
 
-// Firebase & Theme Initialization
 if(auth) {
     auth.onAuthStateChanged((user) => {
         const ls = document.getElementById('login-screen');
