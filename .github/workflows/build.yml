@@ -4,6 +4,9 @@ on:
   push:
     branches: [ main ]
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -36,7 +39,7 @@ jobs:
         cat <<EOF > android/app/src/main/res/values/google_auth_strings.xml
         <?xml version="1.0" encoding="utf-8"?>
         <resources>
-            <string name="390279102837-u12a9h0n65uo9orbaa4h3j0anvleses9.apps.googleusercontent.com"</string>
+            <string name="server_client_id">390279102837-u12a9h0n65uo9orbaa4h3j0anvleses9.apps.googleusercontent.com</string>
         </resources>
         EOF
 
@@ -67,7 +70,7 @@ jobs:
     - name: Publish Raw APK Release
       uses: ncipollo/release-action@v1
       with:
-        artifacts: ${{steps.sign_app.outputs.signedReleaseFile}}
+        artifacts: "android/app/build/outputs/apk/release/*.apk"
         tag: "latest"
         name: "Crystal AI (Latest Build)"
         body: "Tap the .apk file below to install directly."
