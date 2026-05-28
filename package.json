@@ -6,10 +6,11 @@
   "scripts": {
     "build": "echo 'Using raw web assets'"
   },
-    "dependencies": {
+  "dependencies": {
     "@capacitor/android": "^6.0.0",
     "@capacitor/cli": "^6.0.0",
     "@capacitor/core": "^6.0.0",
+    "@capacitor/status-bar": "^6.0.0",
     "@codetrix-studio/capacitor-google-auth": "^3.3.6"
-    }
+  }
 }
