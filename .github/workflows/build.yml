@@ -64,9 +64,14 @@ jobs:
         keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
         keyPassword: ${{ secrets.KEY_PASSWORD }}
 
-    - name: Upload Finished APK Artifact
-      uses: actions/upload-artifact@v4
+        - name: Publish Raw APK Release
+      uses: ncipollo/release-action@v1
       with:
-        name: Crystal-AI-Native-APK
-        path: ${{steps.sign_app.outputs.signedReleaseFile}}
+        artifacts: ${{steps.sign_app.outputs.signedReleaseFile}}
+        tag: "latest"
+        name: "Crystal AI (Latest Build)"
+        body: "Tap the `.apk` file below to install directly."
+        allowUpdates: true
+        makeLatest: true
+        token: ${{ secrets.GITHUB_TOKEN }}
         
