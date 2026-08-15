@@ -20,12 +20,19 @@ jobs:
       - name: Clone Existing Destination Frontend Repo
         env:
           DEST_REPO: "DarkPlayz98/CrystalAI"
-          SYNC_TOKEN: ${{ secrets.REPO_SYNC_TOKEN }}
+          SYNC_TOKEN: ${{ secrets['Enter Crystal Repos Sync Token'] || secrets.ENTER_CRYSTAL_REPOS_SYNC_TOKEN || secrets.REPO_SYNC_TOKEN || secrets.CRYSTAL_REPOS_SYNC_TOKEN || secrets.CRYSTAL_REPO_SYNC_TOKEN || secrets.GH_PAT_TOKEN || secrets.PAT_TOKEN }}
         run: |
-          # Clone the actual target repo with its existing history and workflows
-          git clone "https://${SYNC_TOKEN}@github.com/${DEST_REPO}.git" dest-frontend
+          if [ -z "$SYNC_TOKEN" ]; then
+            echo "::error::Missing GitHub PAT secret! Please ensure your secret (e.g., 'Enter Crystal Repos Sync Token' or 'REPO_SYNC_TOKEN') is configured under Settings -> Secrets and variables -> Actions."
+            exit 1
+          fi
+          # Clone the target repo with its existing history and workflows
+          git clone "https://x-access-token:${SYNC_TOKEN}@github.com/${DEST_REPO}.git" dest-frontend
 
       - name: Merge and Update Frontend Files without Overwriting Workflows
+        env:
+          DEST_REPO: "DarkPlayz98/CrystalAI"
+          SYNC_TOKEN: ${{ secrets['Enter Crystal Repos Sync Token'] || secrets.ENTER_CRYSTAL_REPOS_SYNC_TOKEN || secrets.REPO_SYNC_TOKEN || secrets.CRYSTAL_REPOS_SYNC_TOKEN || secrets.CRYSTAL_REPO_SYNC_TOKEN || secrets.GH_PAT_TOKEN || secrets.PAT_TOKEN }}
         run: |
           cd dest-frontend
           
@@ -54,7 +61,7 @@ jobs:
           git add -A
           if ! git diff --staged --quiet; then
             git commit -m "Auto-sync Frontend UI updates from bug-fix repo (${{ github.sha }})"
-            git push origin main
+            git push "https://x-access-token:${SYNC_TOKEN}@github.com/${DEST_REPO}.git" main
           else
             echo "No frontend changes detected to sync."
           fi
@@ -72,12 +79,19 @@ jobs:
       - name: Clone Existing Destination Backend Repo
         env:
           DEST_REPO: "DarkPlayz98/Crystal-AI"
-          SYNC_TOKEN: ${{ secrets.REPO_SYNC_TOKEN }}
+          SYNC_TOKEN: ${{ secrets['Enter Crystal Repos Sync Token'] || secrets.ENTER_CRYSTAL_REPOS_SYNC_TOKEN || secrets.REPO_SYNC_TOKEN || secrets.CRYSTAL_REPOS_SYNC_TOKEN || secrets.CRYSTAL_REPO_SYNC_TOKEN || secrets.GH_PAT_TOKEN || secrets.PAT_TOKEN }}
         run: |
-          # Clone the actual target repo with its existing history
-          git clone "https://${SYNC_TOKEN}@github.com/${DEST_REPO}.git" dest-backend
+          if [ -z "$SYNC_TOKEN" ]; then
+            echo "::error::Missing GitHub PAT secret! Please ensure your secret (e.g., 'Enter Crystal Repos Sync Token' or 'REPO_SYNC_TOKEN') is configured under Settings -> Secrets and variables -> Actions."
+            exit 1
+          fi
+          # Clone the target repo with its existing history
+          git clone "https://x-access-token:${SYNC_TOKEN}@github.com/${DEST_REPO}.git" dest-backend
 
       - name: Merge and Update Backend Files
+        env:
+          DEST_REPO: "DarkPlayz98/Crystal-AI"
+          SYNC_TOKEN: ${{ secrets['Enter Crystal Repos Sync Token'] || secrets.ENTER_CRYSTAL_REPOS_SYNC_TOKEN || secrets.REPO_SYNC_TOKEN || secrets.CRYSTAL_REPOS_SYNC_TOKEN || secrets.CRYSTAL_REPO_SYNC_TOKEN || secrets.GH_PAT_TOKEN || secrets.PAT_TOKEN }}
         run: |
           cd dest-backend
 
@@ -98,7 +112,7 @@ jobs:
           git add -A
           if ! git diff --staged --quiet; then
             git commit -m "Auto-sync Backend AI updates from bug-fix repo (${{ github.sha }})"
-            git push origin main
+            git push "https://x-access-token:${SYNC_TOKEN}@github.com/${DEST_REPO}.git" main
           else
             echo "No backend changes detected to sync."
           fi

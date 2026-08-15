@@ -3082,6 +3082,36 @@
             return base ? `${base}${cleanRoute}` : cleanRoute;
         };
 
+        window.fetchCrystalApi = async function(route, options = {}) {
+            const primaryEndpoint = window.getApiEndpoint(route);
+            const cleanRoute = route.startsWith('/') ? route : '/' + route;
+
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 20000);
+                const res = await fetch(primaryEndpoint, {
+                    ...options,
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+                return res;
+            } catch (err) {
+                // If primaryEndpoint was an absolute custom URL or external host that failed, auto-fallback to relative route
+                if (primaryEndpoint !== cleanRoute) {
+                    console.warn(`Primary endpoint ${primaryEndpoint} failed (${err.message}). Trying fallback ${cleanRoute}...`);
+                    const fallbackController = new AbortController();
+                    const fbTimeoutId = setTimeout(() => fallbackController.abort(), 20000);
+                    const fbRes = await fetch(cleanRoute, {
+                        ...options,
+                        signal: fallbackController.signal
+                    });
+                    clearTimeout(fbTimeoutId);
+                    return fbRes;
+                }
+                throw err;
+            }
+        };
+
         window.testAndSaveBackendUrl = async function() {
             if (typeof triggerHaptic === 'function') triggerHaptic();
             const input = document.getElementById('custom-backend-url');
@@ -5628,9 +5658,7 @@ print("Luau script execution finished.")
                     });
                 }
 
-                const apiEndpoint = window.getApiEndpoint('/api/chat');
-
-                const responsePromise = fetch(apiEndpoint, {
+                const responsePromise = window.fetchCrystalApi('/api/chat', {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
@@ -6661,9 +6689,7 @@ print("Luau script execution finished.")
             }
 
             try {
-                const apiEndpoint = window.getApiEndpoint('/api/chat');
-
-                const res = await fetch(apiEndpoint, {
+                const res = await window.fetchCrystalApi('/api/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -6742,9 +6768,7 @@ print("Luau script execution finished.")
             }
 
             try {
-                const apiEndpoint = window.getApiEndpoint('/api/chat');
-
-                const res = await fetch(apiEndpoint, {
+                const res = await window.fetchCrystalApi('/api/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -6790,9 +6814,7 @@ print("Luau script execution finished.")
             btn.innerHTML = `<span class="animate-spin"><i class="fa-solid fa-spinner"></i></span> Summarizing...`;
 
             try {
-                const apiEndpoint = window.getApiEndpoint('/api/chat');
-
-                const res = await fetch(apiEndpoint, {
+                const res = await window.fetchCrystalApi('/api/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
