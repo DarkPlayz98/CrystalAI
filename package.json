@@ -1,0 +1,31 @@
+{
+  "name": "crystal-ai",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port=3000 --host=0.0.0.0",
+    "start": "node server.js",
+    "build": "mkdir -p dist www && (if [ -f index.html ]; then cp index.html dist/index.html && cp index.html www/index.html; fi) && (if [ -f terms.html ]; then cp terms.html dist/terms.html && cp terms.html www/terms.html; fi) && (if [ -d www ] && [ -f www/index.html ]; then cp -r www/* dist/ 2>/dev/null || true; fi)",
+    "preview": "vite preview",
+    "clean": "rm -rf dist",
+    "lint": "echo 'No linting needed for pure HTML app'"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.4.1",
+    "@capacitor/app": "^8.1.1",
+    "@capacitor/core": "^8.4.1",
+    "@capacitor/filesystem": "^8.1.2",
+    "@capacitor/geolocation": "^8.2.0",
+    "@capacitor/haptics": "^8.0.2",
+    "@capacitor/status-bar": "^8.0.2",
+    "@capgo/capacitor-navigation-bar": "^8.2.5",
+    "@codetrix-studio/capacitor-google-auth": "^3.4.0-rc.4",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "vite": "^6.2.3"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.4.1"
+  }
+}
