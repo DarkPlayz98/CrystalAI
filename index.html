@@ -12,6 +12,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="application-name" content="Crystal">
     <meta name="apple-mobile-web-app-title" content="Crystal">
+    <link rel="icon" type="image/svg+xml" href="/assets/icon.svg">
+    <link rel="apple-touch-icon" href="/assets/icon.png">
     <link rel="manifest" href="/manifest.json">
     
     <title>Crystal - Personal Assistant</title>
@@ -1054,6 +1056,38 @@
                             <button id="typing-synth-toggle" onclick="toggleOption('typing-synth')" class="w-12 h-6 bg-indigo-500 rounded-full relative transition-colors duration-300">
                                 <div id="typing-synth-knob" class="w-5 h-5 bg-white rounded-full absolute top-0.5 left-0.5 transition-transform duration-300 shadow transform translate-x-[24px]"></div>
                             </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 3.5: BACKEND & SERVICE CONNECTION -->
+                <div class="flex flex-col gap-3">
+                    <div class="flex items-center justify-between px-1">
+                        <h2 class="text-xs font-bold uppercase tracking-wider text-indigo-400 opacity-90">Backend Connection</h2>
+                        <span id="backend-status-indicator" class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span>Auto-Configured</span>
+                        </span>
+                    </div>
+                    
+                    <div class="p-5 bg-[var(--bubble-bot)] rounded-2xl border border-[var(--glass-border)] shadow-sm flex flex-col gap-3">
+                        <p class="text-xs opacity-70 leading-relaxed font-medium">
+                            Configure your custom or self-hosted Crystal AI backend server endpoint (e.g. for Android APKs, local dev servers, or Render/Cloud Run instances). Leave blank to use the active host.
+                        </p>
+                        
+                        <div class="flex flex-col gap-1.5">
+                            <label for="custom-backend-url" class="font-bold text-xs uppercase tracking-wider opacity-60">Backend Service URL</label>
+                            <div class="flex gap-2">
+                                <input type="url" id="custom-backend-url" class="flex-1 bg-[var(--input-bg)] border border-[var(--border-color)] text-[var(--text-color)] p-2.5 rounded-xl text-xs outline-none focus:border-indigo-500 font-mono transition-colors" placeholder="https://your-server.run.app">
+                                <button type="button" onclick="testAndSaveBackendUrl()" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-bold text-xs rounded-xl transition-all shadow-xs flex items-center gap-1.5 flex-shrink-0">
+                                    <span id="test-backend-btn-text">Test & Save</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between pt-2 border-t border-[var(--border-color)]/30 text-[11px]">
+                            <span class="text-[var(--text-color)] opacity-60">Current Active Target:</span>
+                            <span id="active-backend-display" class="font-mono text-indigo-400 font-semibold truncate max-w-[240px] text-right">Auto</span>
                         </div>
                     </div>
                 </div>
@@ -2625,6 +2659,23 @@
                 const nameEl = document.getElementById('custom-username');
                 if (nameEl) nameEl.value = savedUser;
 
+                const savedBackendUrl = (localStorage.getItem('crystal_backend_api') || '').trim();
+                const backendInput = document.getElementById('custom-backend-url');
+                const backendDisplay = document.getElementById('active-backend-display');
+                const backendIndicator = document.getElementById('backend-status-indicator');
+
+                if (backendInput) backendInput.value = savedBackendUrl;
+                if (backendDisplay) backendDisplay.textContent = savedBackendUrl || 'Auto (Relative)';
+                if (backendIndicator) {
+                    if (savedBackendUrl) {
+                        backendIndicator.className = 'text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5';
+                        backendIndicator.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><span>Custom URL</span>';
+                    } else {
+                        backendIndicator.className = 'text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5';
+                        backendIndicator.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span>Auto-Configured</span>';
+                    }
+                }
+
                 const savedTier = localStorage.getItem('selected_crystal_tier') || 'crystal_core';
                 if (typeof selectCrystalTier === 'function') {
                     selectCrystalTier(savedTier, false);
@@ -3006,6 +3057,94 @@
                 setTimeout(() => m.classList.add('hidden'), 300);
             }
         }
+
+        window.openSettingsModal = function() {
+            toggleSettings();
+        };
+
+        window.getApiBaseUrl = function() {
+            const savedBackend = (localStorage.getItem('crystal_backend_api') || '').trim();
+            if (savedBackend) {
+                return savedBackend.replace(/\/+$/, '');
+            }
+            const isNativeApp = typeof window.Capacitor !== 'undefined' && 
+                                ((window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) || 
+                                 (window.Capacitor.getPlatform && window.Capacitor.getPlatform() !== 'web'));
+            if (isNativeApp || window.location.protocol === 'file:' || window.location.protocol === 'capacitor:') {
+                return 'https://ais-pre-ou77fkmqnai5ygl3akges5-278962941255.asia-southeast1.run.app';
+            }
+            return '';
+        };
+
+        window.getApiEndpoint = function(route = '/api/chat') {
+            const base = window.getApiBaseUrl();
+            const cleanRoute = route.startsWith('/') ? route : '/' + route;
+            return base ? `${base}${cleanRoute}` : cleanRoute;
+        };
+
+        window.testAndSaveBackendUrl = async function() {
+            if (typeof triggerHaptic === 'function') triggerHaptic();
+            const input = document.getElementById('custom-backend-url');
+            const btnText = document.getElementById('test-backend-btn-text');
+            const display = document.getElementById('active-backend-display');
+            const indicator = document.getElementById('backend-status-indicator');
+            
+            let rawUrl = (input ? input.value : '').trim();
+            
+            if (!rawUrl) {
+                localStorage.removeItem('crystal_backend_api');
+                if (display) display.textContent = 'Auto (Relative)';
+                if (indicator) {
+                    indicator.className = 'text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5';
+                    indicator.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span>Auto-Configured</span>';
+                }
+                if (typeof showToast === 'function') showToast("Backend target reset to Auto.");
+                return;
+            }
+
+            if (!rawUrl.startsWith('http://') && !rawUrl.startsWith('https://')) {
+                rawUrl = 'https://' + rawUrl;
+                if (input) input.value = rawUrl;
+            }
+            rawUrl = rawUrl.replace(/\/+$/, '');
+
+            if (btnText) btnText.textContent = 'Testing...';
+            if (indicator) {
+                indicator.className = 'text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-1.5';
+                indicator.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span><span>Testing...</span>';
+            }
+
+            try {
+                const testUrl = `${rawUrl}/api/models`;
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 6000);
+
+                const res = await fetch(testUrl, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' },
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+
+                localStorage.setItem('crystal_backend_api', rawUrl);
+                if (display) display.textContent = rawUrl;
+                if (indicator) {
+                    indicator.className = 'text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5';
+                    indicator.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><span>Connected</span>';
+                }
+                if (typeof showToast === 'function') showToast("Backend Connected & Saved Successfully!");
+            } catch (err) {
+                localStorage.setItem('crystal_backend_api', rawUrl);
+                if (display) display.textContent = rawUrl;
+                if (indicator) {
+                    indicator.className = 'text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-1.5';
+                    indicator.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span><span>Saved</span>';
+                }
+                if (typeof showToast === 'function') showToast("Backend URL Saved.");
+            } finally {
+                if (btnText) btnText.textContent = 'Test & Save';
+            }
+        };
 
         function toggleActionMenu(e) {
             if (e) e.preventDefault();
@@ -5489,21 +5628,7 @@ print("Luau script execution finished.")
                     });
                 }
 
-                const isNativeApp = typeof window.Capacitor !== 'undefined' && 
-                                    ((window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) || 
-                                     (window.Capacitor.getPlatform && window.Capacitor.getPlatform() !== 'web'));
-                
-                let apiEndpoint = '/api/chat';
-                const savedBackend = (localStorage.getItem('crystal_backend_api') || '').trim();
-
-                if (savedBackend) {
-                    const cleanUrl = savedBackend.replace(/\/+$/, '');
-                    apiEndpoint = cleanUrl + '/api/chat';
-                } else if (isNativeApp || window.location.origin.includes('localhost') || window.location.origin.includes('capacitor://')) {
-                    // Fallback URL for standalone Capacitor mobile apps when no backend URL is set
-                    const fallbackHost = 'https://ais-pre-ou77fkmqnai5ygl3akges5-278962941255.asia-southeast1.run.app';
-                    apiEndpoint = (window.location.origin.startsWith('http') && !window.location.origin.includes('localhost') ? '' : fallbackHost) + '/api/chat';
-                }
+                const apiEndpoint = window.getApiEndpoint('/api/chat');
 
                 const responsePromise = fetch(apiEndpoint, {
                     method: "POST",
@@ -6369,16 +6494,6 @@ print("Luau script execution finished.")
 
         // Document launch initializing
         document.addEventListener('DOMContentLoaded', () => {
-            // Automatically persist the active backend URL if loaded in a web browser
-            if (typeof window.Capacitor === 'undefined' || !window.Capacitor.isNativePlatform || !window.Capacitor.isNativePlatform()) {
-                if (window.location.hostname && 
-                    window.location.hostname !== 'localhost' && 
-                    window.location.hostname !== '127.0.0.1' && 
-                    (window.location.hostname.includes('run.app') || window.location.hostname.includes('webcontainer') || window.location.hostname.includes('stackblitz'))) {
-                    localStorage.setItem('crystal_backend_api', window.location.origin);
-                }
-            }
-
             // Capacitor Back Button Interceptor to prevent the app from closing/exiting on Android back presses
             if (typeof window.Capacitor !== 'undefined' && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
                 window.Capacitor.Plugins.App.addListener('backButton', () => {
@@ -6546,20 +6661,7 @@ print("Luau script execution finished.")
             }
 
             try {
-                const isNativeApp = typeof window.Capacitor !== 'undefined' && 
-                                    ((window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) || 
-                                     (window.Capacitor.getPlatform && window.Capacitor.getPlatform() !== 'web'));
-                
-                let apiEndpoint = '/api/chat';
-                const savedBackend = (localStorage.getItem('crystal_backend_api') || '').trim();
-
-                if (savedBackend) {
-                    const cleanUrl = savedBackend.replace(/\/+$/, '');
-                    apiEndpoint = cleanUrl + '/api/chat';
-                } else if (isNativeApp || window.location.origin.includes('localhost') || window.location.origin.includes('capacitor://')) {
-                    const fallbackHost = 'https://ais-pre-ou77fkmqnai5ygl3akges5-278962941255.asia-southeast1.run.app';
-                    apiEndpoint = (window.location.origin.startsWith('http') && !window.location.origin.includes('localhost') ? '' : fallbackHost) + '/api/chat';
-                }
+                const apiEndpoint = window.getApiEndpoint('/api/chat');
 
                 const res = await fetch(apiEndpoint, {
                     method: 'POST',
@@ -6640,20 +6742,7 @@ print("Luau script execution finished.")
             }
 
             try {
-                const isNativeApp = typeof window.Capacitor !== 'undefined' && 
-                                    ((window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) || 
-                                     (window.Capacitor.getPlatform && window.Capacitor.getPlatform() !== 'web'));
-                
-                let apiEndpoint = '/api/chat';
-                const savedBackend = (localStorage.getItem('crystal_backend_api') || '').trim();
-
-                if (savedBackend) {
-                    const cleanUrl = savedBackend.replace(/\/+$/, '');
-                    apiEndpoint = cleanUrl + '/api/chat';
-                } else if (isNativeApp || window.location.origin.includes('localhost') || window.location.origin.includes('capacitor://')) {
-                    const fallbackHost = 'https://ais-pre-ou77fkmqnai5ygl3akges5-278962941255.asia-southeast1.run.app';
-                    apiEndpoint = (window.location.origin.startsWith('http') && !window.location.origin.includes('localhost') ? '' : fallbackHost) + '/api/chat';
-                }
+                const apiEndpoint = window.getApiEndpoint('/api/chat');
 
                 const res = await fetch(apiEndpoint, {
                     method: 'POST',
@@ -6701,20 +6790,7 @@ print("Luau script execution finished.")
             btn.innerHTML = `<span class="animate-spin"><i class="fa-solid fa-spinner"></i></span> Summarizing...`;
 
             try {
-                const isNativeApp = typeof window.Capacitor !== 'undefined' && 
-                                    ((window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) || 
-                                     (window.Capacitor.getPlatform && window.Capacitor.getPlatform() !== 'web'));
-                
-                let apiEndpoint = '/api/chat';
-                const savedBackend = (localStorage.getItem('crystal_backend_api') || '').trim();
-
-                if (savedBackend) {
-                    const cleanUrl = savedBackend.replace(/\/+$/, '');
-                    apiEndpoint = cleanUrl + '/api/chat';
-                } else if (isNativeApp || window.location.origin.includes('localhost') || window.location.origin.includes('capacitor://')) {
-                    const fallbackHost = 'https://ais-pre-ou77fkmqnai5ygl3akges5-278962941255.asia-southeast1.run.app';
-                    apiEndpoint = (window.location.origin.startsWith('http') && !window.location.origin.includes('localhost') ? '' : fallbackHost) + '/api/chat';
-                }
+                const apiEndpoint = window.getApiEndpoint('/api/chat');
 
                 const res = await fetch(apiEndpoint, {
                     method: 'POST',
@@ -7308,7 +7384,7 @@ print("Luau script execution finished.")
                 listEl.innerHTML = `<div class="text-center py-8 text-indigo-400 font-mono text-xs flex items-center justify-center gap-2"><span class="animate-spin"></span> Syncing latest Crystal models pipeline...</div>`;
             }
             try {
-                const url = forceRefresh ? '/api/models?refresh=true' : '/api/models';
+                const url = forceRefresh ? window.getApiEndpoint('/api/models?refresh=true') : window.getApiEndpoint('/api/models');
                 const res = await fetch(url, { method: forceRefresh ? 'POST' : 'GET' });
                 const contentType = res.headers.get('content-type') || '';
                 if (!res.ok || !contentType.includes('application/json')) {

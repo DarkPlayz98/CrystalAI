@@ -9,9 +9,15 @@
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' fill='%236366f1'%3E%3Crect width='512' height='512' rx='128' fill='%230f172a'/%3E%3Cpath d='M256 64L64 200l192 80 192-80L256 64z' fill='%2338bdf8'/%3E%3Cpath d='M64 200l192 248 0-168-192-80z' fill='%234f46e5'/%3E%3Cpath d='M448 200l-192 248 0-168 192-80z' fill='%23818cf8'/%3E%3C/svg%3E",
+      "src": "/assets/icon.svg",
       "sizes": "512x512",
       "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ],
