@@ -37,27 +37,36 @@ jobs:
       run: |
         rm -f capacitor.config.ts
         
-        # 1. Inject and decode Google Services JSON
-        mkdir -p android/app
-        echo "${{ secrets.GOOGLE_SERVICES_JSON }}" | base64 --decode > android/app/google-services.json
+        # 1. Decode Google Services JSON into temporary location
+        TEMP_GS="/tmp/google-services.json"
+        echo "${{ secrets.GOOGLE_SERVICES_JSON }}" | base64 --decode > "$TEMP_GS" 2>/dev/null || true
 
         # 2. Extract actual package_name from google-services.json
-        PKG_NAME=$(node -e "try { const d = JSON.parse(require('fs').readFileSync('android/app/google-services.json', 'utf8')); const pkg = d.client?.[0]?.client_info?.android_client_info?.package_name; if (pkg) console.log(pkg); } catch(e){}")
+        PKG_NAME=$(node -e "try { const d = JSON.parse(require('fs').readFileSync('$TEMP_GS', 'utf8')); const pkg = d.client?.[0]?.client_info?.android_client_info?.package_name; if (pkg) console.log(pkg); } catch(e){}")
         
         if [ -n "$PKG_NAME" ]; then
           echo "Detected package name from google-services.json: $PKG_NAME"
-          # Update capacitor.config.json with the matching appId
           node -e "const fs = require('fs'); const cfg = JSON.parse(fs.readFileSync('capacitor.config.json', 'utf8')); cfg.appId = '$PKG_NAME'; fs.writeFileSync('capacitor.config.json', JSON.stringify(cfg, null, 2));"
         else
-          echo "No package name found in google-services.json, using fallback com.crystal.app"
+          echo "Using default appId from capacitor.config.json"
         fi
 
-        # 3. Add & Sync Android platform with the exact package ID
-        npx cap add android || npx cap sync android
+        # 3. Cleanly initialize the Android platform if gradlew doesn't exist
+        if [ ! -f android/gradlew ]; then
+          rm -rf android
+          npx cap add android
+        fi
+        
         npx cap sync android
-        npx @capacitor/assets generate --android
+        npx @capacitor/assets generate --android || true
 
-        # 4. Double check build.gradle and namespace in case platform was already cached
+        # 4. Copy google-services.json into android/app
+        if [ -f "$TEMP_GS" ]; then
+          mkdir -p android/app
+          cp "$TEMP_GS" android/app/google-services.json
+        fi
+
+        # 5. Ensure package IDs and namespaces match
         if [ -n "$PKG_NAME" ]; then
           find android/ -name "build.gradle" -exec sed -i "s/applicationId \"com.crystal.app\"/applicationId \"$PKG_NAME\"/g" {} + 2>/dev/null || true
           find android/ -name "build.gradle" -exec sed -i "s/namespace \"com.crystal.app\"/namespace \"$PKG_NAME\"/g" {} + 2>/dev/null || true
