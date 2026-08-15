@@ -65,6 +65,7 @@ jobs:
 
     - name: Inject Native Client ID
       run: |
+        mkdir -p android/app/src/main/res/values
         cat <<EOF > android/app/src/main/res/values/google_auth_strings.xml
         <?xml version="1.0" encoding="utf-8"?>
         <resources>

@@ -1,0 +1,104 @@
+name: Sync Frontend and Backend Repositories
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  sync-frontend:
+    name: Sync UI to Frontend Repo (DarkPlayz98/CrystalAI)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Bug-Fix Repo
+        uses: actions/checkout@v4
+        with:
+          path: source-repo
+          fetch-depth: 0
+
+      - name: Clone Existing Destination Frontend Repo
+        env:
+          DEST_REPO: "DarkPlayz98/CrystalAI"
+          SYNC_TOKEN: ${{ secrets.REPO_SYNC_TOKEN }}
+        run: |
+          # Clone the actual target repo with its existing history and workflows
+          git clone "https://${SYNC_TOKEN}@github.com/${DEST_REPO}.git" dest-frontend
+
+      - name: Merge and Update Frontend Files without Overwriting Workflows
+        run: |
+          cd dest-frontend
+          
+          # Copy all UI files from the source repo into dest-frontend
+          [ -f ../source-repo/index.html ] && cp ../source-repo/index.html ./
+          [ -f ../source-repo/terms.html ] && cp ../source-repo/terms.html ./
+          [ -f ../source-repo/manifest.json ] && cp ../source-repo/manifest.json ./
+          [ -f ../source-repo/capacitor.config.json ] && cp ../source-repo/capacitor.config.json ./
+          # Ensure deprecated .ts config is removed so Capacitor doesn't look for TypeScript compiler
+          rm -f ./capacitor.config.ts
+          [ -f ../source-repo/vite.config.js ] && cp ../source-repo/vite.config.js ./
+          [ -f ../source-repo/.gitignore ] && cp ../source-repo/.gitignore ./
+          [ -d ../source-repo/assets ] && rm -rf assets && cp -r ../source-repo/assets ./
+          [ -d ../source-repo/www ] && rm -rf www && cp -r ../source-repo/www ./
+          [ -f ../source-repo/package.json ] && cp ../source-repo/package.json ./
+          [ -f ../source-repo/package-lock.json ] && cp ../source-repo/package-lock.json ./
+
+          # CRITICAL: Always ensure latest build.yml and workflow fixes from source are applied to destination
+          mkdir -p .github/workflows
+          [ -d ../source-repo/.github/workflows ] && cp -r ../source-repo/.github/workflows/* .github/workflows/
+
+          git config user.name "Crystal Sync Bot"
+          git config user.email "bot@crystal.local"
+          
+          # Stage and commit only real changes to the existing repository tree
+          git add -A
+          if ! git diff --staged --quiet; then
+            git commit -m "Auto-sync Frontend UI updates from bug-fix repo (${{ github.sha }})"
+            git push origin main
+          else
+            echo "No frontend changes detected to sync."
+          fi
+
+  sync-backend:
+    name: Sync AI to Backend Repo (DarkPlayz98/Crystal-AI)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Bug-Fix Repo
+        uses: actions/checkout@v4
+        with:
+          path: source-repo
+          fetch-depth: 0
+
+      - name: Clone Existing Destination Backend Repo
+        env:
+          DEST_REPO: "DarkPlayz98/Crystal-AI"
+          SYNC_TOKEN: ${{ secrets.REPO_SYNC_TOKEN }}
+        run: |
+          # Clone the actual target repo with its existing history
+          git clone "https://${SYNC_TOKEN}@github.com/${DEST_REPO}.git" dest-backend
+
+      - name: Merge and Update Backend Files
+        run: |
+          cd dest-backend
+
+          # Copy server, AI modules, and configs from source repo
+          [ -f ../source-repo/server.js ] && cp ../source-repo/server.js ./
+          [ -f ../source-repo/api.js ] && cp ../source-repo/api.js ./
+          [ -f ../source-repo/package.json ] && cp ../source-repo/package.json ./
+          [ -f ../source-repo/package-lock.json ] && cp ../source-repo/package-lock.json ./
+          [ -f ../source-repo/bun.lock ] && cp ../source-repo/bun.lock ./
+          [ -f ../source-repo/.env.example ] && cp ../source-repo/.env.example ./
+          [ -f ../source-repo/.gitignore ] && cp ../source-repo/.gitignore ./
+          [ -d ../source-repo/memory ] && rm -rf memory && cp -r ../source-repo/memory ./
+
+          git config user.name "Crystal Sync Bot"
+          git config user.email "bot@crystal.local"
+          
+          # Stage and commit only real changes
+          git add -A
+          if ! git diff --staged --quiet; then
+            git commit -m "Auto-sync Backend AI updates from bug-fix repo (${{ github.sha }})"
+            git push origin main
+          else
+            echo "No backend changes detected to sync."
+          fi
