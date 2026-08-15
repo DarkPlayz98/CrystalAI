@@ -33,14 +33,35 @@ jobs:
       run: |
         npm run build
 
-    - name: Initialize Android Platform
+    - name: Initialize Android Platform and Configure Google Services
       run: |
-        npx cap add android
+        rm -f capacitor.config.ts
+        
+        # 1. Inject and decode Google Services JSON
+        mkdir -p android/app
+        echo "${{ secrets.GOOGLE_SERVICES_JSON }}" | base64 --decode > android/app/google-services.json
+
+        # 2. Extract actual package_name from google-services.json
+        PKG_NAME=$(node -e "try { const d = JSON.parse(require('fs').readFileSync('android/app/google-services.json', 'utf8')); const pkg = d.client?.[0]?.client_info?.android_client_info?.package_name; if (pkg) console.log(pkg); } catch(e){}")
+        
+        if [ -n "$PKG_NAME" ]; then
+          echo "Detected package name from google-services.json: $PKG_NAME"
+          # Update capacitor.config.json with the matching appId
+          node -e "const fs = require('fs'); const cfg = JSON.parse(fs.readFileSync('capacitor.config.json', 'utf8')); cfg.appId = '$PKG_NAME'; fs.writeFileSync('capacitor.config.json', JSON.stringify(cfg, null, 2));"
+        else
+          echo "No package name found in google-services.json, using fallback com.crystal.app"
+        fi
+
+        # 3. Add & Sync Android platform with the exact package ID
+        npx cap add android || npx cap sync android
         npx cap sync android
         npx @capacitor/assets generate --android
 
-    - name: Inject Google Services JSON
-      run: echo "${{ secrets.GOOGLE_SERVICES_JSON }}" | base64 --decode > android/app/google-services.json
+        # 4. Double check build.gradle and namespace in case platform was already cached
+        if [ -n "$PKG_NAME" ]; then
+          find android/ -name "build.gradle" -exec sed -i "s/applicationId \"com.crystal.app\"/applicationId \"$PKG_NAME\"/g" {} + 2>/dev/null || true
+          find android/ -name "build.gradle" -exec sed -i "s/namespace \"com.crystal.app\"/namespace \"$PKG_NAME\"/g" {} + 2>/dev/null || true
+        fi
 
     - name: Inject Native Client ID
       run: |
