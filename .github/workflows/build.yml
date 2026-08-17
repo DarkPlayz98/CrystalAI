@@ -101,6 +101,26 @@ jobs:
           distribution: 'zulu'
           java-version: '21'
 
+      - name: Validate and Repair Gradle Wrapper
+        run: |
+          mkdir -p android/gradle/wrapper
+          WRAPPER_JAR="android/gradle/wrapper/gradle-wrapper.jar"
+          
+          # Test if the existing gradle-wrapper.jar is a valid uncorrupted zip archive
+          if [ ! -f "$WRAPPER_JAR" ] || ! unzip -t "$WRAPPER_JAR" >/dev/null 2>&1; then
+            echo "::warning::Detected missing or corrupt gradle-wrapper.jar. Restoring valid Gradle Wrapper..."
+            # Check plugin backup or download clean wrapper jar
+            if [ -f "node_modules/@codetrix-studio/capacitor-google-auth/android/gradle/wrapper/gradle-wrapper.jar" ]; then
+              cp node_modules/@codetrix-studio/capacitor-google-auth/android/gradle/wrapper/gradle-wrapper.jar "$WRAPPER_JAR"
+            else
+              curl -sSL "https://raw.githubusercontent.com/gradle/gradle/v8.14.3/gradle/wrapper/gradle-wrapper.jar" -o "$WRAPPER_JAR" 2>/dev/null || \
+              curl -sSL "https://github.com/gradle/gradle/raw/master/gradle/wrapper/gradle-wrapper.jar" -o "$WRAPPER_JAR"
+            fi
+          fi
+
+          # Ensure gradlew has executable permissions
+          chmod +x android/gradlew || true
+
       - name: Compile Unsigned Release APK
         run: |
           cd android

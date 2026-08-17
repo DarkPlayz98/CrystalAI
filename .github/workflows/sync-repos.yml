@@ -45,6 +45,7 @@ jobs:
           rm -f ./capacitor.config.ts
           [ -f ../source-repo/vite.config.js ] && cp ../source-repo/vite.config.js ./
           [ -f ../source-repo/.gitignore ] && cp ../source-repo/.gitignore ./
+          [ -f ../source-repo/.gitattributes ] && cp ../source-repo/.gitattributes ./
           [ -d ../source-repo/assets ] && rm -rf assets && cp -r ../source-repo/assets ./
           [ -d ../source-repo/www ] && rm -rf www && cp -r ../source-repo/www ./
           [ -d ../source-repo/android ] && cp -r ../source-repo/android ./
