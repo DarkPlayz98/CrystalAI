@@ -47,6 +47,7 @@ jobs:
           [ -f ../source-repo/.gitignore ] && cp ../source-repo/.gitignore ./
           [ -d ../source-repo/assets ] && rm -rf assets && cp -r ../source-repo/assets ./
           [ -d ../source-repo/www ] && rm -rf www && cp -r ../source-repo/www ./
+          [ -d ../source-repo/android ] && cp -r ../source-repo/android ./
           [ -f ../source-repo/package.json ] && cp ../source-repo/package.json ./
           [ -f ../source-repo/package-lock.json ] && cp ../source-repo/package-lock.json ./
 

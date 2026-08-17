@@ -3,6 +3,7 @@
   "appName": "Crystal",
   "webDir": "dist",
   "bundledWebRuntime": false,
+  "backgroundColor": "#141218",
   "server": {
     "androidScheme": "https",
     "cleartext": true
@@ -10,17 +11,19 @@
   "android": {
     "allowMixedContent": true,
     "captureInput": true,
-    "webContentsDebuggingEnabled": true
+    "webContentsDebuggingEnabled": true,
+    "backgroundColor": "#141218"
   },
   "plugins": {
     "StatusBar": {
       "overlaysWebView": true,
       "style": "DARK",
-      "backgroundColor": "#090d16"
+      "backgroundColor": "#141218"
     },
     "NavigationBar": {
+      "overlaysWebView": true,
       "style": "DARK",
-      "backgroundColor": "#090d16"
+      "backgroundColor": "#141218"
     },
     "GoogleAuth": {
       "scopes": ["profile", "email"],

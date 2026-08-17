@@ -1038,13 +1038,33 @@
                     <h2 class="text-xs font-bold uppercase tracking-wider text-indigo-400 opacity-90 px-1">Audio & Feedback</h2>
                     
                     <div class="flex flex-col divide-y divide-[var(--border-color)]/30 bg-[var(--bubble-bot)] rounded-2xl border border-[var(--glass-border)] shadow-sm overflow-hidden">
+                        <div class="flex flex-col p-4 gap-2.5 hover:bg-[var(--sidebar-hover)]/40 transition-colors">
+                            <div class="flex items-center justify-between">
+                                <div class="flex flex-col">
+                                    <span class="font-semibold text-sm">Haptic Feedback</span>
+                                    <span class="text-[11px] opacity-50 font-medium">Tactile motor vibrations on touch & interaction</span>
+                                </div>
+                                <button id="haptic-toggle" onclick="toggleOption('haptic')" class="w-12 h-6 bg-indigo-500 rounded-full relative transition-colors duration-300">
+                                    <div id="haptic-knob" class="w-5 h-5 bg-white rounded-full absolute top-0.5 left-0.5 transition-transform duration-300 shadow transform translate-x-[24px]"></div>
+                                </button>
+                            </div>
+                            <!-- Haptic Test Chips -->
+                            <div class="flex items-center gap-1.5 pt-1">
+                                <span class="text-[10px] font-mono opacity-50 uppercase mr-1">Test:</span>
+                                <button type="button" onclick="triggerHaptic('light')" class="px-2.5 py-1 text-[11px] font-medium rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 active:scale-95 transition-all">Light</button>
+                                <button type="button" onclick="triggerHaptic('medium')" class="px-2.5 py-1 text-[11px] font-medium rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 active:scale-95 transition-all">Medium</button>
+                                <button type="button" onclick="triggerHaptic('heavy')" class="px-2.5 py-1 text-[11px] font-medium rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 active:scale-95 transition-all">Heavy</button>
+                                <button type="button" onclick="triggerHaptic('success')" class="px-2.5 py-1 text-[11px] font-medium rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 active:scale-95 transition-all">Success</button>
+                            </div>
+                        </div>
+
                         <div class="flex items-center justify-between p-4 hover:bg-[var(--sidebar-hover)]/40 transition-colors">
                             <div class="flex flex-col">
-                                <span class="font-semibold text-sm">Haptic Feedback</span>
-                                <span class="text-[11px] opacity-50 font-medium">Tactile vibrations on touch controls</span>
+                                <span class="font-semibold text-sm">Android App Permissions</span>
+                                <span class="text-[11px] opacity-50 font-medium">Verify vibration, microphone & location access</span>
                             </div>
-                            <button id="haptic-toggle" onclick="toggleOption('haptic')" class="w-12 h-6 bg-indigo-500 rounded-full relative transition-colors duration-300">
-                                <div id="haptic-knob" class="w-5 h-5 bg-white rounded-full absolute top-0.5 left-0.5 transition-transform duration-300 shadow transform translate-x-[24px]"></div>
+                            <button type="button" onclick="requestAndroidPermissions(); triggerHaptic('success');" class="px-3 py-1.5 text-xs font-semibold rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white shadow-xs active:scale-95 transition-all">
+                                Request
                             </button>
                         </div>
 
@@ -1056,38 +1076,6 @@
                             <button id="typing-synth-toggle" onclick="toggleOption('typing-synth')" class="w-12 h-6 bg-indigo-500 rounded-full relative transition-colors duration-300">
                                 <div id="typing-synth-knob" class="w-5 h-5 bg-white rounded-full absolute top-0.5 left-0.5 transition-transform duration-300 shadow transform translate-x-[24px]"></div>
                             </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- SECTION 3.5: BACKEND & SERVICE CONNECTION -->
-                <div class="flex flex-col gap-3">
-                    <div class="flex items-center justify-between px-1">
-                        <h2 class="text-xs font-bold uppercase tracking-wider text-indigo-400 opacity-90">Backend Connection</h2>
-                        <span id="backend-status-indicator" class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                            <span>Auto-Configured</span>
-                        </span>
-                    </div>
-                    
-                    <div class="p-5 bg-[var(--bubble-bot)] rounded-2xl border border-[var(--glass-border)] shadow-sm flex flex-col gap-3">
-                        <p class="text-xs opacity-70 leading-relaxed font-medium">
-                            Configure your custom or self-hosted Crystal AI backend server endpoint (e.g. for Android APKs, local dev servers, or Render/Cloud Run instances). Leave blank to use the active host.
-                        </p>
-                        
-                        <div class="flex flex-col gap-1.5">
-                            <label for="custom-backend-url" class="font-bold text-xs uppercase tracking-wider opacity-60">Backend Service URL</label>
-                            <div class="flex gap-2">
-                                <input type="url" id="custom-backend-url" class="flex-1 bg-[var(--input-bg)] border border-[var(--border-color)] text-[var(--text-color)] p-2.5 rounded-xl text-xs outline-none focus:border-indigo-500 font-mono transition-colors" placeholder="https://your-server.run.app">
-                                <button type="button" onclick="testAndSaveBackendUrl()" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-bold text-xs rounded-xl transition-all shadow-xs flex items-center gap-1.5 flex-shrink-0">
-                                    <span id="test-backend-btn-text">Test & Save</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center justify-between pt-2 border-t border-[var(--border-color)]/30 text-[11px]">
-                            <span class="text-[var(--text-color)] opacity-60">Current Active Target:</span>
-                            <span id="active-backend-display" class="font-mono text-indigo-400 font-semibold truncate max-w-[240px] text-right">Auto</span>
                         </div>
                     </div>
                 </div>
@@ -1400,10 +1388,13 @@
 
                     <div class="flex flex-col w-full gap-2">
                         <button class="w-full flex justify-between items-center bg-[var(--input-bg)] border border-[var(--border-color)] hover:border-indigo-500 transition-all p-3 rounded-xl font-bold text-xs sm:text-sm text-[var(--text-color)] active:scale-95" onclick="triggerAction('copilot'); injectPrompt('Help me write or explain some code')">
-                            <span>Write some code</span>
+                            <span>💻 Write or analyze code</span>
+                        </button>
+                        <button class="w-full flex justify-between items-center bg-[var(--input-bg)] border border-[var(--border-color)] hover:border-indigo-500 transition-all p-3 rounded-xl font-bold text-xs sm:text-sm text-[var(--text-color)] active:scale-95" onclick="triggerAction('core'); injectPrompt('Solve for x and show verified step-by-step math working: 3x^2 - 12x + 9 = 0')">
+                            <span>📐 Solve math & equations</span>
                         </button>
                         <button class="w-full flex justify-between items-center bg-[var(--input-bg)] border border-[var(--border-color)] hover:border-indigo-500 transition-all p-3 rounded-xl font-bold text-xs sm:text-sm text-[var(--text-color)] active:scale-95" onclick="triggerAction('image'); injectPrompt('Create a picture of a calm cozy coffee shop on a rainy afternoon')">
-                            <span>Create an image</span>
+                            <span>🎨 Create an image</span>
                         </button>
                     </div>
                 </div>
@@ -2580,15 +2571,100 @@
         }
         setInterval(updateClock, 1000);
 
-        // Haptic Trigger
-        function triggerHaptic() {
+        // Android & Web Haptic Trigger Engine
+        function triggerHaptic(type = 'light') {
             if (!settingHaptic) return;
             try {
-                if (typeof window.Capacitor !== 'undefined' && window.Capacitor.Plugins && window.Capacitor.Plugins.Haptics) {
-                    window.Capacitor.Plugins.Haptics.impact({ style: 'LIGHT' });
+                const cap = window.Capacitor;
+                const haptics = cap && cap.Plugins && cap.Plugins.Haptics;
+
+                if (haptics) {
+                    switch (type) {
+                        case 'selection':
+                            if (typeof haptics.selectionStart === 'function') {
+                                haptics.selectionStart();
+                            } else {
+                                haptics.impact({ style: 'LIGHT' });
+                            }
+                            break;
+                        case 'medium':
+                            haptics.impact({ style: 'MEDIUM' });
+                            break;
+                        case 'heavy':
+                            haptics.impact({ style: 'HEAVY' });
+                            break;
+                        case 'success':
+                            haptics.notification({ type: 'SUCCESS' });
+                            break;
+                        case 'warning':
+                            haptics.notification({ type: 'WARNING' });
+                            break;
+                        case 'error':
+                            haptics.notification({ type: 'ERROR' });
+                            break;
+                        case 'vibrate':
+                            haptics.vibrate({ duration: 80 });
+                            break;
+                        case 'light':
+                        default:
+                            haptics.impact({ style: 'LIGHT' });
+                            break;
+                    }
+                } else if (navigator && typeof navigator.vibrate === 'function') {
+                    // HTML5 vibration fallback
+                    switch (type) {
+                        case 'heavy':
+                            navigator.vibrate(45);
+                            break;
+                        case 'medium':
+                            navigator.vibrate(25);
+                            break;
+                        case 'success':
+                            navigator.vibrate([15, 60, 20]);
+                            break;
+                        case 'error':
+                            navigator.vibrate([30, 40, 30, 40, 50]);
+                            break;
+                        case 'light':
+                        default:
+                            navigator.vibrate(12);
+                            break;
+                    }
                 }
-            } catch (e) {}
+            } catch (e) {
+                console.debug("Haptic trigger caught:", e);
+            }
         }
+        window.triggerHaptic = triggerHaptic;
+
+        // Native Android Permission Requester
+        async function requestAndroidPermissions() {
+            try {
+                const cap = window.Capacitor;
+                if (!cap || !cap.Plugins) return;
+
+                // Geolocation Permission Check
+                if (cap.Plugins.Geolocation && typeof cap.Plugins.Geolocation.requestPermissions === 'function') {
+                    try {
+                        const geoStatus = await cap.Plugins.Geolocation.checkPermissions();
+                        if (geoStatus && geoStatus.location !== 'granted' && geoStatus.coarseLocation !== 'granted') {
+                            await cap.Plugins.Geolocation.requestPermissions();
+                        }
+                    } catch (ge) {}
+                }
+
+                // Audio recording permission prompt for speech dictation
+                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                    try {
+                        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                        stream.getTracks().forEach(track => track.stop());
+                    } catch (ae) {}
+                }
+            } catch (err) {
+                console.debug("Permission request handler:", err);
+            }
+        }
+        window.requestAndroidPermissions = requestAndroidPermissions;
 
         // Color alignment with status bars & navigation bars
         function updateSystemBars() {
@@ -2596,22 +2672,21 @@
                 const loginScreen = document.getElementById('login-screen');
                 const isLoginVisible = loginScreen && !loginScreen.classList.contains('hidden');
 
-                let hexColor = '#f8f9fe';
-                let isDarkBg = false;
+                let hexColor = isDarkMode ? '#141218' : '#fffbfe';
+                let isDarkBg = isDarkMode;
 
                 if (isLoginVisible) {
-                    hexColor = '#111318';
+                    hexColor = '#141218';
                     isDarkBg = true;
                 } else if (isGhostMode) {
-                    hexColor = '#0a0000';
-                    isDarkBg = true;
-                } else if (isDarkMode) {
-                    hexColor = '#111318';
+                    hexColor = '#1a0c0e';
                     isDarkBg = true;
                 }
 
-                document.getElementById('theme-color-meta').setAttribute('content', hexColor);
+                const meta = document.getElementById('theme-color-meta');
+                if (meta) meta.setAttribute('content', hexColor);
                 document.body.style.backgroundColor = hexColor;
+                document.documentElement.style.backgroundColor = hexColor;
 
                 // Capacitor plugins configurations
                 if (typeof window.Capacitor !== 'undefined' && window.Capacitor.Plugins) {
@@ -3063,23 +3138,13 @@
         };
 
         window.getApiBaseUrl = function() {
-            const savedBackend = (localStorage.getItem('crystal_backend_api') || '').trim();
-            if (savedBackend) {
-                return savedBackend.replace(/\/+$/, '');
-            }
-            const isNativeApp = typeof window.Capacitor !== 'undefined' && 
-                                ((window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) || 
-                                 (window.Capacitor.getPlatform && window.Capacitor.getPlatform() !== 'web'));
-            if (isNativeApp || window.location.protocol === 'file:' || window.location.protocol === 'capacitor:') {
-                return 'https://ais-pre-ou77fkmqnai5ygl3akges5-278962941255.asia-southeast1.run.app';
-            }
-            return '';
+            return 'https://crystal-ai-php6.onrender.com';
         };
 
         window.getApiEndpoint = function(route = '/api/chat') {
-            const base = window.getApiBaseUrl();
+            const base = window.getApiBaseUrl().replace(/\/+$/, '');
             const cleanRoute = route.startsWith('/') ? route : '/' + route;
-            return base ? `${base}${cleanRoute}` : cleanRoute;
+            return `${base}${cleanRoute}`;
         };
 
         window.fetchCrystalApi = async function(route, options = {}) {
@@ -3088,7 +3153,7 @@
 
             try {
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 20000);
+                const timeoutId = setTimeout(() => controller.abort(), 35000);
                 const res = await fetch(primaryEndpoint, {
                     ...options,
                     signal: controller.signal
@@ -3096,83 +3161,23 @@
                 clearTimeout(timeoutId);
                 return res;
             } catch (err) {
-                // If primaryEndpoint was an absolute custom URL or external host that failed, auto-fallback to relative route
+                // If primary remote endpoint fails, fallback to relative local route if available
                 if (primaryEndpoint !== cleanRoute) {
                     console.warn(`Primary endpoint ${primaryEndpoint} failed (${err.message}). Trying fallback ${cleanRoute}...`);
-                    const fallbackController = new AbortController();
-                    const fbTimeoutId = setTimeout(() => fallbackController.abort(), 20000);
-                    const fbRes = await fetch(cleanRoute, {
-                        ...options,
-                        signal: fallbackController.signal
-                    });
-                    clearTimeout(fbTimeoutId);
-                    return fbRes;
+                    try {
+                        const fallbackController = new AbortController();
+                        const fbTimeoutId = setTimeout(() => fallbackController.abort(), 20000);
+                        const fbRes = await fetch(cleanRoute, {
+                            ...options,
+                            signal: fallbackController.signal
+                        });
+                        clearTimeout(fbTimeoutId);
+                        return fbRes;
+                    } catch (fbErr) {
+                        throw err;
+                    }
                 }
                 throw err;
-            }
-        };
-
-        window.testAndSaveBackendUrl = async function() {
-            if (typeof triggerHaptic === 'function') triggerHaptic();
-            const input = document.getElementById('custom-backend-url');
-            const btnText = document.getElementById('test-backend-btn-text');
-            const display = document.getElementById('active-backend-display');
-            const indicator = document.getElementById('backend-status-indicator');
-            
-            let rawUrl = (input ? input.value : '').trim();
-            
-            if (!rawUrl) {
-                localStorage.removeItem('crystal_backend_api');
-                if (display) display.textContent = 'Auto (Relative)';
-                if (indicator) {
-                    indicator.className = 'text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5';
-                    indicator.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span>Auto-Configured</span>';
-                }
-                if (typeof showToast === 'function') showToast("Backend target reset to Auto.");
-                return;
-            }
-
-            if (!rawUrl.startsWith('http://') && !rawUrl.startsWith('https://')) {
-                rawUrl = 'https://' + rawUrl;
-                if (input) input.value = rawUrl;
-            }
-            rawUrl = rawUrl.replace(/\/+$/, '');
-
-            if (btnText) btnText.textContent = 'Testing...';
-            if (indicator) {
-                indicator.className = 'text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-1.5';
-                indicator.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span><span>Testing...</span>';
-            }
-
-            try {
-                const testUrl = `${rawUrl}/api/models`;
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 6000);
-
-                const res = await fetch(testUrl, {
-                    method: 'GET',
-                    headers: { 'Accept': 'application/json' },
-                    signal: controller.signal
-                });
-                clearTimeout(timeoutId);
-
-                localStorage.setItem('crystal_backend_api', rawUrl);
-                if (display) display.textContent = rawUrl;
-                if (indicator) {
-                    indicator.className = 'text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5';
-                    indicator.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><span>Connected</span>';
-                }
-                if (typeof showToast === 'function') showToast("Backend Connected & Saved Successfully!");
-            } catch (err) {
-                localStorage.setItem('crystal_backend_api', rawUrl);
-                if (display) display.textContent = rawUrl;
-                if (indicator) {
-                    indicator.className = 'text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-1.5';
-                    indicator.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span><span>Saved</span>';
-                }
-                if (typeof showToast === 'function') showToast("Backend URL Saved.");
-            } finally {
-                if (btnText) btnText.textContent = 'Test & Save';
             }
         };
 
@@ -5278,6 +5283,119 @@ print("Luau script execution finished.")
             initializeFidgetToy();
         };
 
+        // Thinking Process Feed Component
+        window.renderThinkingFeedHtml = function(cleansedThinking, durationSec, thoughtWordCount, hasRealThoughts) {
+            let steps = [];
+
+            if (hasRealThoughts && cleansedThinking) {
+                const rawParagraphs = cleansedThinking.split(/\n{2,}|\n(?=[•\-\*\d\.\#\[])/g).map(s => s.trim()).filter(Boolean);
+                if (rawParagraphs.length > 0) {
+                    steps = rawParagraphs.map((para, index) => {
+                        let title = `Stage ${index + 1}: Reasoning Node`;
+                        let content = para;
+
+                        if (/intent|understand|query|analyze|goal|context/i.test(para.substring(0, 100))) {
+                            title = "Intent & Context Analysis";
+                        } else if (/logic|approach|method|architecture|plan|step/i.test(para.substring(0, 100))) {
+                            title = "Logical Breakdown & Hypotheses";
+                        } else if (/edge|constraint|check|verify|valid|test|error/i.test(para.substring(0, 100))) {
+                            title = "Constraint & Edge Verification";
+                        } else if (/synthes|conclu|final|format|solut|deliver/i.test(para.substring(0, 100))) {
+                            title = "Synthesis & Formulation";
+                        } else if (para.startsWith('•') || para.startsWith('-') || para.startsWith('*')) {
+                            const firstLine = para.split('\n')[0].replace(/^[•\-\*\#\d\.\s]+/, '');
+                            if (firstLine.length > 0 && firstLine.length < 50) {
+                                title = firstLine;
+                                content = para.split('\n').slice(1).join('\n') || firstLine;
+                            }
+                        }
+
+                        content = content.replace(/^[•\-\*]\s*/, '').trim();
+
+                        return {
+                            title,
+                            content,
+                            badge: `Step ${index + 1}`
+                        };
+                    });
+                }
+            }
+
+            if (steps.length === 0) {
+                steps = [
+                    {
+                        title: "Intent & Context Analysis",
+                        badge: "Step 1",
+                        content: "Analyzed the user's prompt context, query intent, and conversation history."
+                    },
+                    {
+                        title: "Logical Breakdown & Reasoning",
+                        badge: "Step 2",
+                        content: "Evaluated core principles, key hypotheses, and structured response components."
+                    },
+                    {
+                        title: "Verification & Formatting",
+                        badge: "Step 3",
+                        content: `Verified factual consistency, applied markdown formatting, and finalized output in ${durationSec}s.`
+                    }
+                ];
+            }
+
+            const stepCardsHtml = steps.map((s, idx) => `
+                <div class="flex items-start gap-3 p-2.5 rounded-xl bg-indigo-950/20 border border-indigo-500/15 hover:border-indigo-500/30 transition-colors">
+                    <div class="flex flex-col items-center shrink-0 mt-0.5">
+                        <span class="w-5 h-5 rounded-full bg-indigo-500/20 border border-indigo-400/40 text-indigo-300 font-mono text-[10px] font-bold flex items-center justify-center">${idx + 1}</span>
+                        ${idx < steps.length - 1 ? '<span class="w-0.5 h-3 bg-indigo-500/20 my-0.5"></span>' : ''}
+                    </div>
+                    <div class="flex flex-col gap-0.5 min-w-0 flex-1">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-[11px] text-indigo-300">${escapeHtml(s.title)}</span>
+                            <span class="text-[9px] font-mono opacity-60 text-indigo-300/80">${s.badge}</span>
+                        </div>
+                        <p class="text-[11px] font-sans leading-relaxed text-[var(--text-color)] opacity-85 select-text whitespace-pre-wrap">${escapeHtml(s.content)}</p>
+                    </div>
+                </div>
+            `).join('');
+
+            return `
+                <details class="group select-none" open>
+                    <summary class="flex justify-between items-center font-bold tracking-tight text-[var(--text-color)] opacity-90 hover:opacity-100 transition-opacity cursor-pointer outline-none select-none">
+                        <span class="flex items-center gap-2 text-[11px]">
+                            <svg viewBox="0 0 32 32" class="w-4 h-4 animate-gemini-sparkle shrink-0 drop-shadow-[0_0_8px_rgba(99,102,241,0.5)]" fill="none">
+                                <path d="M16 2L2 12L16 18L30 12L16 2Z" fill="#38bdf8"/>
+                                <path d="M2 12L16 30L16 18L2 12Z" fill="#4f46e5"/>
+                                <path d="M30 12L16 30L16 18L30 12Z" fill="#818cf8"/>
+                            </svg>
+                            <span class="gemini-shimmer-text font-bold text-xs tracking-tight">Thinking Process Feed</span>
+                            <span class="text-[10px] font-mono font-medium opacity-85 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/25 text-indigo-300 flex items-center gap-1.5 shadow-xs ml-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                <span>${durationSec}s</span>
+                                ${thoughtWordCount > 0 ? `<span class="opacity-60 font-sans">· ${thoughtWordCount} words</span>` : ''}
+                            </span>
+                        </span>
+                        <div class="flex items-center gap-2">
+                            <span class="transition-transform duration-200 group-open:rotate-180 opacity-60">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </span>
+                        </div>
+                    </summary>
+                    <div class="mt-3 pt-2.5 border-t border-indigo-500/20 flex flex-col gap-2">
+                        ${stepCardsHtml}
+                        ${hasRealThoughts ? `
+                            <details class="mt-1 group/trace text-[10px] font-mono">
+                                <summary class="cursor-pointer opacity-60 hover:opacity-100 flex items-center gap-1.5 py-1 text-indigo-300">
+                                    <span>▸ View Raw Thought Trace</span>
+                                </summary>
+                                <div class="mt-1.5 p-2 rounded-xl bg-black/30 border border-indigo-500/20 font-mono text-[10px] text-indigo-200/80 max-h-48 overflow-y-auto whitespace-pre-wrap select-text leading-relaxed">
+                                    ${escapeHtml(cleansedThinking)}
+                                </div>
+                            </details>
+                        ` : ''}
+                    </div>
+                </details>
+            `;
+        };
+
         // Adding Chat Bubbles dynamically
         function addBubble(text, role, isTyping = false, sources = null, attachmentUrl = null, tokenizerInfo = null, thinkingText = null, searchQuery = null, latencyMs = null) {
             try {
@@ -5389,45 +5507,16 @@ print("Luau script execution finished.")
                     bubbleWrap.appendChild(searchCard);
                 }
 
-                // Thought Process Reasoning Panel
+                // Thought Process Reasoning Feed Panel
                 if (!isTyping && isBot && (thinkingText || showThinking)) {
                     const cleansedThinking = thinkingText ? cleanseThinkingText(thinkingText) : "";
                     const hasRealThoughts = Boolean(cleansedThinking && cleansedThinking.length > 5);
                     const durationSec = latencyMs ? (latencyMs / 1000).toFixed(1) : "0.8";
-                    
-                    const displayThinking = hasRealThoughts 
-                        ? cleansedThinking 
-                        : `• Reviewing prompt context and key concepts.\n• Structuring clear, step-by-step reasoning.\n• Validating logic and edge cases.\n• Response prepared in ${durationSec}s by Crystal.`;
-
-                    const thoughtWordCount = displayThinking.split(/\s+/).filter(Boolean).length;
+                    const thoughtWordCount = cleansedThinking ? cleansedThinking.split(/\s+/).filter(Boolean).length : 0;
                     
                     const reasoningPanel = document.createElement('div');
                     reasoningPanel.className = "mb-2.5 w-full border border-indigo-500/20 bg-indigo-950/15 dark:bg-indigo-950/30 rounded-2xl p-3 text-xs select-none max-w-full overflow-hidden transition-all duration-200 hover:border-indigo-500/35 shadow-sm";
-                    reasoningPanel.innerHTML = `
-                        <details class="group select-none" ${hasRealThoughts || showThinking ? 'open' : ''}>
-                            <summary class="flex justify-between items-center font-bold tracking-tight text-[var(--text-color)] opacity-90 hover:opacity-100 transition-opacity cursor-pointer outline-none select-none">
-                                <span class="flex items-center gap-2 text-[11px]">
-                                    <svg viewBox="0 0 32 32" class="w-4 h-4 animate-gemini-sparkle shrink-0 drop-shadow-[0_0_8px_rgba(99,102,241,0.5)]" fill="none">
-                                        <path d="M16 2L2 12L16 18L30 12L16 2Z" fill="#38bdf8"/>
-                                        <path d="M2 12L16 30L16 18L2 12Z" fill="#4f46e5"/>
-                                        <path d="M30 12L16 30L16 18L30 12Z" fill="#818cf8"/>
-                                    </svg>
-                                    <span class="gemini-shimmer-text font-bold text-xs tracking-tight">Thought Process</span>
-                                    <span class="text-[10px] font-mono font-medium opacity-85 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/25 text-indigo-300 flex items-center gap-1.5 shadow-xs ml-1">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                                        <span>${durationSec}s</span>
-                                        ${thoughtWordCount > 0 ? `<span class="opacity-60 font-sans">· ${thoughtWordCount} words</span>` : ''}
-                                    </span>
-                                </span>
-                                <div class="flex items-center gap-2">
-                                    <span class="transition-transform duration-200 group-open:rotate-180 opacity-60">
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                                    </span>
-                                </div>
-                            </summary>
-                            <div class="mt-2.5 pt-2.5 border-t border-indigo-500/20 font-mono text-[11px] leading-relaxed text-[var(--text-color)] opacity-85 overflow-x-auto select-text whitespace-pre-wrap pl-1">${escapeHtml(displayThinking)}</div>
-                        </details>
-                    `;
+                    reasoningPanel.innerHTML = window.renderThinkingFeedHtml(cleansedThinking, durationSec, thoughtWordCount, hasRealThoughts);
                     bubbleWrap.appendChild(reasoningPanel);
                 }
 
@@ -5462,7 +5551,7 @@ print("Luau script execution finished.")
                                             </svg>
                                             <span class="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-sky-400 animate-ping"></span>
                                         </div>
-                                        <span class="font-bold text-[12px] tracking-wide text-indigo-300 uppercase font-mono">Thinking</span>
+                                        <span class="font-bold text-[12px] tracking-wide text-indigo-300 uppercase font-mono">Thinking Feed</span>
                                     </div>
                                     <div class="flex items-center gap-1.5 text-[10px] font-mono font-bold text-sky-400 bg-sky-500/10 px-2.5 py-1 rounded-full border border-sky-500/20 shadow-xs">
                                         <span id="thinking-timer" class="tabular-nums">Thinking 0.0s</span>
@@ -5471,7 +5560,7 @@ print("Luau script execution finished.")
                                 <div id="live-thinking-feed-lines" class="flex flex-col gap-2 font-mono text-[11px] max-h-[180px] overflow-y-auto pr-1">
                                     <div class="flex items-start gap-2 text-indigo-200/90 leading-tight">
                                         <span class="w-1.5 h-1.5 rounded-full bg-sky-400 shrink-0 mt-1 animate-pulse"></span>
-                                        <span>Organizing thoughts and reasoning steps...</span>
+                                        <span>Organizing reasoning nodes and steps...</span>
                                     </div>
                                 </div>
                             </div>
@@ -5522,10 +5611,6 @@ print("Luau script execution finished.")
                         <button onclick="window.copyBubbleText(this)" class="flex items-center gap-1.5 py-1 px-2.5 rounded-lg bg-[var(--sidebar-hover)] border border-[var(--border-color)] hover:border-indigo-500 hover:text-indigo-400 transition-all active:scale-95">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
                             Copy
-                        </button>
-                        <button onclick="window.openPerspectivePrism(this)" class="flex items-center gap-1.5 py-1 px-2.5 rounded-lg bg-[var(--sidebar-hover)] border border-[var(--border-color)] hover:border-indigo-500 hover:text-indigo-400 transition-all active:scale-95" title="Analyze with Perspective Prism">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="12 2 2 22 22 22"/><line x1="12" y1="8" x2="12" y2="16"/></svg>
-                            Prism Lens
                         </button>
                         <button onclick="window.speakBubbleText(this)" class="flex items-center gap-1.5 py-1 px-2.5 rounded-lg bg-[var(--sidebar-hover)] border border-[var(--border-color)] hover:border-indigo-500 hover:text-indigo-400 transition-all active:scale-95">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
@@ -5663,6 +5748,8 @@ print("Luau script execution finished.")
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         message: text,
+                        account_id: customUsername || localStorage.getItem('crystal_username') || 'crystal_user',
+                        user_id: customUsername || localStorage.getItem('crystal_username') || 'crystal_user',
                         tier: localStorage.getItem('selected_crystal_tier') || 'crystal_core',
                         messages: cleanHistory,
                         persona: personas[activePersona],

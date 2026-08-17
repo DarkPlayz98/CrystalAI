@@ -3,125 +3,152 @@ name: Build Native Android APK
 on:
   push:
     branches: [ main ]
+  workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
   build:
+    name: Build and Sign Android APK
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 22
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
 
-    - name: Install Dependencies
-      run: |
-        npm install --legacy-peer-deps
-        npm install -D @capacitor/assets --legacy-peer-deps
-        npm install @codetrix-studio/capacitor-google-auth --legacy-peer-deps
-        # Fixed: We can safely install @capgo/capacitor-navigation-bar now because 
-        # we have set the Java JDK version below to 21. This prevents the transitive
-        # dependency compilation error with bcprov-jdk18on-1.79.jar requiring JDK 21.
-        npm install @capgo/capacitor-navigation-bar --legacy-peer-deps
+      - name: Install Dependencies
+        run: |
+          npm install --legacy-peer-deps
+          npm install -D @capacitor/assets --legacy-peer-deps
 
-    - name: Build Web Assets
-      run: |
-        npm run build
+      - name: Build Web Assets
+        run: |
+          npm run build
 
-    - name: Initialize Android Platform and Configure Google Services
-      run: |
-        rm -f capacitor.config.ts
-        
-        # 1. Decode Google Services JSON into temporary location
-        TEMP_GS="/tmp/google-services.json"
-        echo "${{ secrets.GOOGLE_SERVICES_JSON }}" | base64 --decode > "$TEMP_GS" 2>/dev/null || true
+      - name: Initialize Android Platform and Configure Google Services
+        run: |
+          rm -f capacitor.config.ts
+          
+          # 1. Decode Google Services JSON into temporary location if secret exists
+          TEMP_GS="/tmp/google-services.json"
+          if [ -n "${{ secrets.GOOGLE_SERVICES_JSON }}" ]; then
+            echo "${{ secrets.GOOGLE_SERVICES_JSON }}" | base64 --decode > "$TEMP_GS" 2>/dev/null || true
+          fi
 
-        # 2. Extract actual package_name from google-services.json
-        PKG_NAME=$(node -e "try { const d = JSON.parse(require('fs').readFileSync('$TEMP_GS', 'utf8')); const pkg = d.client?.[0]?.client_info?.android_client_info?.package_name; if (pkg) console.log(pkg); } catch(e){}")
-        
-        if [ -n "$PKG_NAME" ]; then
-          echo "Detected package name from google-services.json: $PKG_NAME"
-          node -e "const fs = require('fs'); const cfg = JSON.parse(fs.readFileSync('capacitor.config.json', 'utf8')); cfg.appId = '$PKG_NAME'; fs.writeFileSync('capacitor.config.json', JSON.stringify(cfg, null, 2));"
-        else
-          echo "Using default appId from capacitor.config.json"
-        fi
+          # 2. Extract actual package_name from google-services.json
+          PKG_NAME=""
+          if [ -f "$TEMP_GS" ]; then
+            PKG_NAME=$(node -e "try { const d = JSON.parse(require('fs').readFileSync('$TEMP_GS', 'utf8')); const pkg = d.client?.[0]?.client_info?.android_client_info?.package_name; if (pkg) console.log(pkg); } catch(e){}")
+          fi
+          
+          if [ -n "$PKG_NAME" ]; then
+            echo "Detected package name from google-services.json: $PKG_NAME"
+            node -e "const fs = require('fs'); const cfg = JSON.parse(fs.readFileSync('capacitor.config.json', 'utf8')); cfg.appId = '$PKG_NAME'; fs.writeFileSync('capacitor.config.json', JSON.stringify(cfg, null, 2));"
+          else
+            echo "Using default appId from capacitor.config.json"
+          fi
 
-        # 3. Cleanly initialize the Android platform if gradlew doesn't exist
-        if [ ! -f android/gradlew ]; then
-          rm -rf android
-          npx cap add android
-        fi
-        
-        npx cap sync android
-        npx @capacitor/assets generate --android || true
+          # 3. Cleanly initialize or sync the Android platform
+          if [ ! -f android/gradlew ]; then
+            rm -rf android
+            npx cap add android
+          fi
+          
+          npx cap sync android
+          npx @capacitor/assets generate --android 2>/dev/null || true
 
-        # 4. Copy google-services.json into android/app
-        if [ -f "$TEMP_GS" ]; then
-          mkdir -p android/app
-          cp "$TEMP_GS" android/app/google-services.json
-        fi
+          # 4. Copy google-services.json into android/app
+          if [ -f "$TEMP_GS" ]; then
+            mkdir -p android/app
+            cp "$TEMP_GS" android/app/google-services.json
+          fi
 
-        # 5. Ensure package IDs and namespaces match
-        if [ -n "$PKG_NAME" ]; then
-          find android/ -name "build.gradle" -exec sed -i "s/applicationId \"com.crystal.app\"/applicationId \"$PKG_NAME\"/g" {} + 2>/dev/null || true
-          find android/ -name "build.gradle" -exec sed -i "s/namespace \"com.crystal.app\"/namespace \"$PKG_NAME\"/g" {} + 2>/dev/null || true
-        fi
+          # 5. Ensure package IDs and namespaces match
+          if [ -n "$PKG_NAME" ]; then
+            find android/ -name "build.gradle" -exec sed -i "s/applicationId \"com.crystal.app\"/applicationId \"$PKG_NAME\"/g" {} + 2>/dev/null || true
+            find android/ -name "build.gradle" -exec sed -i "s/namespace \"com.crystal.app\"/namespace \"$PKG_NAME\"/g" {} + 2>/dev/null || true
+          fi
 
-    - name: Inject Native Client ID
-      run: |
-        mkdir -p android/app/src/main/res/values
-        cat <<EOF > android/app/src/main/res/values/google_auth_strings.xml
-        <?xml version="1.0" encoding="utf-8"?>
-        <resources>
-            <string name="server_client_id">390279102837-u12a9h0n65uo9orbaa4h3j0anvleses9.apps.googleusercontent.com</string>
-        </resources>
-        EOF
+          # 6. Ensure required Android permissions (VIBRATE, AUDIO, GEO, etc.) are in AndroidManifest.xml
+          MANIFEST="android/app/src/main/AndroidManifest.xml"
+          if [ -f "$MANIFEST" ]; then
+            for PERM in "android.permission.VIBRATE" "android.permission.ACCESS_NETWORK_STATE" "android.permission.RECORD_AUDIO" "android.permission.MODIFY_AUDIO_SETTINGS" "android.permission.ACCESS_COARSE_LOCATION" "android.permission.ACCESS_FINE_LOCATION"; do
+              if ! grep -q "$PERM" "$MANIFEST"; then
+                sed -i "/<\/manifest>/i \    <uses-permission android:name=\"$PERM\" />" "$MANIFEST"
+              fi
+            done
+          fi
 
-    - name: Set up Java JDK 21
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'zulu'
-        # Fixed: Changed from 17 to 21 to resolve the Bouncy Castle (bcprov-jdk18on-1.79.jar) 
-        # compilation error. Gradle 8.2+ and modern Capacitor 6+ are fully compatible 
-        # with JDK 21, allowing compile-time plugins to build flawlessly.
-        java-version: '21'
+      - name: Inject Native Client ID
+        run: |
+          mkdir -p android/app/src/main/res/values
+          cat <<EOF > android/app/src/main/res/values/google_auth_strings.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <string name="server_client_id">390279102837-u12a9h0n65uo9orbaa4h3j0anvleses9.apps.googleusercontent.com</string>
+          </resources>
+          EOF
 
-    - name: Compile Unsigned Release APK
-      run: |
-        cd android
-        chmod +x gradlew
-        ./gradlew assembleRelease
+      - name: Set up Java JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '21'
 
-    - name: Sign APK
-      uses: r0adkll/sign-android-release@v1
-      id: sign_app
-      env:
-        BUILD_TOOLS_VERSION: "34.0.0"
-      with:
-        releaseDirectory: android/app/build/outputs/apk/release
-        signingKeyBase64: ${{ secrets.SIGNING_KEY }}
-        alias: ${{ secrets.ALIAS }}
-        keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
-        keyPassword: ${{ secrets.KEY_PASSWORD }}
+      - name: Compile Unsigned Release APK
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleRelease
 
-    - name: Rename APK to CrystalAI-release
-      run: |
-        mv ${{steps.sign_app.outputs.signedReleaseFile}} CrystalAI-release.apk
+      - name: Sign APK
+        uses: r0adkll/sign-android-release@v1
+        id: sign_app
+        if: ${{ env.SIGNING_KEY != '' }}
+        env:
+          BUILD_TOOLS_VERSION: "34.0.0"
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+        with:
+          releaseDirectory: android/app/build/outputs/apk/release
+          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+          alias: ${{ secrets.ALIAS }}
+          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
 
-    - name: Publish to Release Hub
-      uses: ncipollo/release-action@v1
-      with:
-        artifacts: "CrystalAI-release.apk"
-        tag: "latest"
-        name: "CrystalAI-release"
-        body: "Tap the .apk file below to install directly."
-        allowUpdates: true
-        makeLatest: true
-        owner: "DarkPlayz98" 
-        repo: "Crystal-AI-Releases" 
-        token: ${{ secrets.RELEASE_HUB_TOKEN }}
+      - name: Prepare Release APK Artifact
+        run: |
+          if [ -n "${{ steps.sign_app.outputs.signedReleaseFile }}" ] && [ -f "${{ steps.sign_app.outputs.signedReleaseFile }}" ]; then
+            cp "${{ steps.sign_app.outputs.signedReleaseFile }}" CrystalAI-release.apk
+          else
+            echo "Signing not performed or unsigned fallback used; copying standard release APK"
+            find android/app/build/outputs/apk -name "*.apk" -exec cp {} CrystalAI-release.apk \; || true
+          fi
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: CrystalAI-APK
+          path: CrystalAI-release.apk
+
+      - name: Publish to Release Hub
+        uses: ncipollo/release-action@v1
+        if: ${{ env.RELEASE_HUB_TOKEN != '' }}
+        env:
+          RELEASE_HUB_TOKEN: ${{ secrets.RELEASE_HUB_TOKEN }}
+        with:
+          artifacts: "CrystalAI-release.apk"
+          tag: "latest"
+          name: "CrystalAI-release"
+          body: "Tap the .apk file below to install directly."
+          allowUpdates: true
+          makeLatest: true
+          owner: "DarkPlayz98" 
+          repo: "Crystal-AI-Releases" 
+          token: ${{ secrets.RELEASE_HUB_TOKEN }}
+

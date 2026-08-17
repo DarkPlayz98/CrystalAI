@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite --port=3000 --host=0.0.0.0",
     "start": "node server.js",
-    "build": "mkdir -p dist www && (if [ -f index.html ]; then cp index.html dist/index.html && cp index.html www/index.html; fi) && (if [ -f terms.html ]; then cp terms.html dist/terms.html && cp terms.html www/terms.html; fi) && (if [ -f manifest.json ]; then cp manifest.json dist/manifest.json && cp manifest.json www/manifest.json; fi) && (if [ -d assets ]; then cp -r assets dist/ && cp -r assets www/; fi) && (if [ -d www ] && [ -f www/index.html ]; then cp -r www/* dist/ 2>/dev/null || true; fi)",
+    "build": "mkdir -p dist www && (if [ -f index.html ]; then cp index.html dist/index.html && cp index.html www/index.html; fi) && (if [ -f terms.html ]; then cp terms.html dist/terms.html && cp terms.html www/terms.html; fi) && (if [ -f manifest.json ]; then cp manifest.json dist/manifest.json && cp manifest.json www/manifest.json; fi) && (if [ -d assets ]; then cp -r assets dist/ && cp -r assets www/; fi) && (if [ -d www ] && [ -f www/index.html ]; then cp -r www/* dist/ 2>/dev/null || true; fi) && (if [ -d android/app/src/main/assets/public ]; then cp -r dist/* android/app/src/main/assets/public/ 2>/dev/null || true; fi)",
     "preview": "vite preview",
     "clean": "rm -rf dist",
     "lint": "echo 'No linting needed for pure HTML app'"
