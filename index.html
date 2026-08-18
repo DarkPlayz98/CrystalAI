@@ -1431,13 +1431,16 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
                             <!-- Style Preset -->
                             <div class="flex flex-col gap-1.5">
-                                <span class="text-[9px] font-bold text-gray-400 uppercase tracking-wide">Aesthetic Style</span>
+                                <span class="text-[9px] font-bold text-gray-400 uppercase tracking-wide">Image Model / Style</span>
                                 <div class="flex flex-wrap gap-1.5" id="studio-style-group">
-                                    <button onclick="setStudioStyle('flux')" class="studio-chip selected" data-style="flux">Flux</button>
+                                    <button onclick="setStudioStyle('flux')" class="studio-chip selected" data-style="flux">FLUX.1 Schnell ★</button>
+                                    <button onclick="setStudioStyle('sdxl')" class="studio-chip" data-style="sdxl">SDXL 1.0</button>
+                                    <button onclick="setStudioStyle('lightning')" class="studio-chip" data-style="lightning">SDXL Lightning</button>
+                                    <button onclick="setStudioStyle('dreamshaper')" class="studio-chip" data-style="dreamshaper">DreamShaper LCM</button>
+                                    <button onclick="setStudioStyle('portrait')" class="studio-chip" data-style="portrait">Portrait Plus</button>
                                     <button onclick="setStudioStyle('realism')" class="studio-chip" data-style="realism">Realism</button>
                                     <button onclick="setStudioStyle('anime')" class="studio-chip" data-style="anime">Anime</button>
                                     <button onclick="setStudioStyle('3d')" class="studio-chip" data-style="3d">3D Render</button>
-                                    <button onclick="setStudioStyle('dark')" class="studio-chip" data-style="dark">Gothic</button>
                                 </div>
                             </div>
                             
@@ -5117,7 +5120,13 @@ print("Luau script execution finished.")
 
             thoughtSteps.push(`Understanding request and conversation context...`);
 
-            if (/code|python|javascript|html|css|bug|fix|error|function|api|build|script/i.test(promptLower)) {
+            if (/image|draw|picture|photo|illustration|render|portrait|flux|sdxl|artwork|painting|generate an image/i.test(promptLower) || (typeof personas !== 'undefined' && (personas[activePersona] || '').includes('Image'))) {
+                thoughtSteps.push(`Synthesizing visual prompt aesthetics and scene composition...`);
+                thoughtSteps.push(`Configuring deep neural latent grid (FLUX.1 Schnell / High-Fidelity Diffusion)...`);
+                thoughtSteps.push(`Executing deliberate multi-step denoising iterations...`);
+                thoughtSteps.push(`Refining volumetric lighting, textures, and ray-traced reflections...`);
+                thoughtSteps.push(`Finalizing high-resolution masterpiece render...`);
+            } else if (/code|python|javascript|html|css|bug|fix|error|function|api|build|script/i.test(promptLower)) {
                 thoughtSteps.push(`Analyzing code logic and architecture...`);
                 thoughtSteps.push(`Checking best practices, error handling & edge cases...`);
                 thoughtSteps.push(`Writing clean, well-commented implementation...`);
@@ -7509,9 +7518,10 @@ print("Luau script execution finished.")
                     const tabDecomNum = document.getElementById('groq-tab-decom-num');
                     const lastSync = document.getElementById('groq-last-sync');
 
-                    if (workingCount) workingCount.textContent = data.working_models_count || 0;
+                    const totalActive = (data.crystal_models_count || data.working_models_count || 0);
+                    if (workingCount) workingCount.textContent = totalActive;
                     if (decomCount) decomCount.textContent = data.decommissioned_models_count || 0;
-                    if (tabWorkingNum) tabWorkingNum.textContent = data.working_models_count || 0;
+                    if (tabWorkingNum) tabWorkingNum.textContent = totalActive;
                     if (tabDecomNum) tabDecomNum.textContent = data.decommissioned_models_count || 0;
                     if (lastSync) lastSync.textContent = `Synced: ${new Date(data.last_sync || Date.now()).toLocaleTimeString()}`;
 
@@ -7529,36 +7539,87 @@ print("Luau script execution finished.")
             const listEl = document.getElementById('groq-models-list');
             if (!listEl) return;
 
-            const list = currentGroqTab === 'working' ? (groqModelsData.working_models || []) : (groqModelsData.decommissioned_models || []);
+            if (currentGroqTab === 'working') {
+                let html = '';
 
-            if (list.length === 0) {
-                listEl.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs font-mono">No ${currentGroqTab} models found.</div>`;
-                return;
-            }
-
-            let html = '';
-            list.forEach(m => {
-                if (currentGroqTab === 'working') {
-                    html += `
-                        <div class="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 transition flex items-center justify-between">
-                            <div class="flex flex-col gap-1">
-                                <div class="flex items-center gap-2">
-                                    <span class="font-mono font-bold text-xs text-emerald-300">${m.id}</span>
-                                    <span class="text-[9px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Active</span>
+                // Categorized Models Catalog Section (Exact 1:1 inventory matching provider)
+                if (groqModelsData.crystal_image_models || groqModelsData.crystal_vision_models || groqModelsData.crystal_agent_models || groqModelsData.crystal_text_models) {
+                    const renderCategory = (title, icon, items) => {
+                        if (!items || items.length === 0) return '';
+                        let catHtml = `
+                            <div class="pt-2 pb-1">
+                                <div class="flex items-center gap-1.5 text-xs font-bold text-slate-300 mb-2">
+                                    <span>${icon}</span>
+                                    <span>${title}</span>
                                 </div>
-                                <div class="text-[11px] text-slate-400 flex items-center gap-3">
-                                    ${m.context_window ? `<span>Context: <strong class="text-indigo-300 font-mono">${(m.context_window/1024).toFixed(0)}k tokens</strong></span>` : ''}
+                                <div class="space-y-2">
+                        `;
+                        items.forEach(m => {
+                            const badgeColor = m.tag === 'Free Proxy' ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' :
+                                               m.tag === 'Edge Image' ? 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20' :
+                                               m.tag === 'Vision' ? 'bg-purple-500/10 text-purple-300 border-purple-500/20' :
+                                               m.tag === 'Web Search' ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20' :
+                                               'bg-blue-500/10 text-blue-300 border-blue-500/20';
+
+                            catHtml += `
+                                <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800/80 transition flex items-center justify-between gap-2">
+                                    <div class="flex flex-col gap-0.5 min-w-0">
+                                        <div class="flex items-center gap-2 flex-wrap">
+                                            <span class="font-mono font-bold text-xs text-white">${m.id}</span>
+                                        </div>
+                                        <div class="text-[11px] text-slate-400 line-clamp-1">
+                                            ${m.description || m.name}
+                                        </div>
+                                    </div>
+                                    <span class="text-[9px] font-bold px-2 py-0.5 rounded-md ${badgeColor} border flex-shrink-0 whitespace-nowrap">${m.tag || 'Active'}</span>
+                                </div>
+                            `;
+                        });
+                        catHtml += `</div></div>`;
+                        return catHtml;
+                    };
+
+                    html += renderCategory('Image Generation Models', '🎨', groqModelsData.crystal_image_models);
+                    html += renderCategory('Vision & Multimodal Models', '👁️', groqModelsData.crystal_vision_models);
+                    html += renderCategory('Web Search & Agent Models', '🌐', groqModelsData.crystal_agent_models);
+                    html += renderCategory('Text & Reasoning Models', '📄', groqModelsData.crystal_text_models);
+                } else {
+                    const list = groqModelsData.working_models || [];
+                    if (list.length === 0) {
+                        listEl.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs font-mono">No active models found.</div>`;
+                        return;
+                    }
+                    list.forEach(m => {
+                        html += `
+                            <div class="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 transition flex items-center justify-between">
+                                <div class="flex flex-col gap-1">
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-mono font-bold text-xs text-emerald-300">${m.id}</span>
+                                        <span class="text-[9px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Active</span>
+                                    </div>
+                                    <div class="text-[11px] text-slate-400 flex items-center gap-3">
+                                        ${m.context_window ? `<span>Context: <strong class="text-indigo-300 font-mono">${(m.context_window/1024).toFixed(0)}k tokens</strong></span>` : ''}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    `;
-                } else {
+                        `;
+                    });
+                }
+                listEl.innerHTML = html;
+            } else {
+                const list = groqModelsData.decommissioned_models || [];
+                if (list.length === 0) {
+                    listEl.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs font-mono">No decommissioned models found.</div>`;
+                    return;
+                }
+                let html = '';
+                list.forEach(m => {
                     html += `
                         <div class="p-3.5 rounded-2xl bg-slate-900/50 border border-rose-500/20 opacity-85 flex items-center justify-between">
                             <div class="flex flex-col gap-1">
                                 <div class="flex items-center gap-2">
                                     <span class="font-mono font-bold text-xs text-rose-300 line-through">${m.id}</span>
-                                    <span class="text-[9px] font-bold px-2 py-0.5 rounded-md bg-rose-500/10 text-rose-400 border border-rose-500/20">Decommissioned </span>
+                                    <span class="text-[9px] font-bold px-2 py-0.5 rounded-md bg-rose-500/10 text-rose-400 border border-rose-500/20">Decommissioned</span>
                                 </div>
                                 <div class="text-[11px] text-slate-400">
                                     Status: <span class="text-rose-300/90 font-medium">Decommissioned</span>
@@ -7567,10 +7628,9 @@ print("Luau script execution finished.")
                             <span class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-rose-950 text-rose-400 border border-rose-800">Filtered Out</span>
                         </div>
                     `;
-                }
-            });
-
-            listEl.innerHTML = html;
+                });
+                listEl.innerHTML = html;
+            }
         };
 
         // Global toggleSidebar function with liquid glass drawer control & haptics

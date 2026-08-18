@@ -63,6 +63,13 @@ jobs:
           npx cap sync android
           npx @capacitor/assets generate --android 2>/dev/null || true
 
+          # Guarantee valid, uncorrupted gradle-wrapper.jar is present
+          mkdir -p android/gradle/wrapper
+          if [ ! -f android/gradle/wrapper/gradle-wrapper.jar ] || ! unzip -t android/gradle/wrapper/gradle-wrapper.jar >/dev/null 2>&1; then
+            echo "Repairing gradle-wrapper.jar from local node_modules plugin..."
+            cp node_modules/@codetrix-studio/capacitor-google-auth/android/gradle/wrapper/gradle-wrapper.jar android/gradle/wrapper/gradle-wrapper.jar || true
+          fi
+
           # 4. Copy google-services.json into android/app
           if [ -f "$TEMP_GS" ]; then
             mkdir -p android/app
@@ -101,31 +108,26 @@ jobs:
           distribution: 'zulu'
           java-version: '21'
 
-      - name: Validate and Repair Gradle Wrapper
-        run: |
-          mkdir -p android/gradle/wrapper
-          WRAPPER_JAR="android/gradle/wrapper/gradle-wrapper.jar"
-          
-          # Test if the existing gradle-wrapper.jar is a valid uncorrupted zip archive
-          if [ ! -f "$WRAPPER_JAR" ] || ! unzip -t "$WRAPPER_JAR" >/dev/null 2>&1; then
-            echo "::warning::Detected missing or corrupt gradle-wrapper.jar. Restoring valid Gradle Wrapper..."
-            # Check plugin backup or download clean wrapper jar
-            if [ -f "node_modules/@codetrix-studio/capacitor-google-auth/android/gradle/wrapper/gradle-wrapper.jar" ]; then
-              cp node_modules/@codetrix-studio/capacitor-google-auth/android/gradle/wrapper/gradle-wrapper.jar "$WRAPPER_JAR"
-            else
-              curl -sSL "https://raw.githubusercontent.com/gradle/gradle/v8.14.3/gradle/wrapper/gradle-wrapper.jar" -o "$WRAPPER_JAR" 2>/dev/null || \
-              curl -sSL "https://github.com/gradle/gradle/raw/master/gradle/wrapper/gradle-wrapper.jar" -o "$WRAPPER_JAR"
-            fi
-          fi
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.11.1'
 
-          # Ensure gradlew has executable permissions
-          chmod +x android/gradlew || true
-
-      - name: Compile Unsigned Release APK
+      - name: Ensure Valid Gradle Wrapper and Compile Release APK
         run: |
           cd android
+          # Regenerate Gradle Wrapper using official Gradle toolchain
+          gradle wrapper --gradle-version 8.11.1 --distribution-type bin || true
           chmod +x gradlew
-          ./gradlew assembleRelease
+          
+          # Test gradle-wrapper.jar validity
+          if [ -f "gradle/wrapper/gradle-wrapper.jar" ] && unzip -t "gradle/wrapper/gradle-wrapper.jar" >/dev/null 2>&1; then
+            echo "Gradle wrapper verified successfully."
+            ./gradlew assembleRelease --no-daemon --stacktrace
+          else
+            echo "Executing via Gradle toolchain directly..."
+            gradle assembleRelease --no-daemon --stacktrace
+          fi
 
       - name: Sign APK
         uses: r0adkll/sign-android-release@v1
