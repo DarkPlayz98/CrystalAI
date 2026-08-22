@@ -8058,7 +8058,8 @@ echo "Status: ONLINE"
 
             try {
                 await auth.currentUser.reload();
-                if (auth.currentUser.emailVerified) {
+                const isGoogleUser = (auth.currentUser.providerData && auth.currentUser.providerData.some(p => p.providerId === 'google.com'));
+                if (auth.currentUser.emailVerified || isGoogleUser) {
                     if (banner) {
                         banner.className = 'w-full p-3 rounded-2xl text-xs bg-emerald-50 border border-emerald-200 text-emerald-800 text-center';
                         banner.innerHTML = '<div class="flex flex-col gap-0.5"><span class="font-bold text-xs text-emerald-800">Your email has been verified</span><span class="text-[11px] text-emerald-700">You can now sign in with your new account</span></div>';
@@ -9802,11 +9803,12 @@ echo "Status: ONLINE"
                         localStorage.removeItem('crystal_local_guest');
                         document.getElementById('login-screen').classList.add('hidden');
                         
-                        // Check if user is a guest (anonymous or guest fallback account)
+                        // Check if user is a guest (anonymous or guest fallback account) or Google authenticated
                         const isGuestUser = u.isAnonymous || (u.email && u.email.startsWith('guest_') && u.email.endsWith('@crystal-ai.app'));
+                        const isGoogleUser = (u.providerData && u.providerData.some(p => p.providerId === 'google.com'));
 
-                        if (!isGuestUser) {
-                            // Check if user authenticated via email/password and requires email verification
+                        if (!isGuestUser && !isGoogleUser) {
+                            // Check if user authenticated strictly via email/password and requires email verification
                             const isEmailPassUser = u.providerData && u.providerData.some(p => p.providerId === 'password');
                             if (isEmailPassUser && !u.emailVerified) {
                                 showEmailVerificationScreen(u.email);
