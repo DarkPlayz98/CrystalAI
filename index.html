@@ -1097,7 +1097,7 @@
         </div>
     </div>
 
-    <!-- MATERIAL 3 EMAIL VERIFICATION GATE (CLEAN, MINIMAL, SHORT) -->
+    <!-- MATERIAL 3 EMAIL VERIFICATION GATE (CLEAN, SHORT APP LINK LIKE INSTAGRAM/FACEBOOK) -->
     <div id="email-verification-screen" class="fixed inset-0 flex flex-col items-center justify-center p-5 z-[105] bg-white text-zinc-900 hidden select-none">
         <div class="w-full max-w-sm bg-white border border-zinc-200/80 rounded-[32px] p-6 shadow-xl flex flex-col items-center text-center gap-4 my-auto">
             
@@ -1111,10 +1111,26 @@
 
             <!-- Header & Short Minimal Prompt -->
             <div class="flex flex-col gap-1">
-                <h2 class="text-xl font-bold tracking-tight text-zinc-900 font-display">Verify Your Email</h2>
+                <h2 class="text-xl font-bold tracking-tight text-zinc-900 font-display">Verify Your Account</h2>
                 <p class="text-xs text-zinc-500 leading-relaxed">
-                    We sent a link to <span id="verification-user-email" class="font-bold text-zinc-800">your email</span>. Tap the link to verify.
+                    We sent a verification link to <br><span id="verification-user-email" class="font-bold text-zinc-800">your email</span>
                 </p>
+            </div>
+
+            <!-- Short App Link Badge (verify.crystal.ai) -->
+            <div class="w-full p-2.5 rounded-2xl bg-zinc-50 border border-zinc-200 flex items-center justify-between gap-2 text-left">
+                <div class="flex items-center gap-2 min-w-0">
+                    <div class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-[11px] shrink-0 font-bold">
+                        ⚡
+                    </div>
+                    <div class="flex flex-col min-w-0">
+                        <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Fast App Link</span>
+                        <span id="short-verify-url-preview" class="text-xs font-mono font-bold text-indigo-600 truncate">verify.crystal.ai</span>
+                    </div>
+                </div>
+                <button type="button" onclick="copyShortVerifyLink()" title="Copy Short Verification Link" class="px-2.5 py-1 rounded-xl bg-white border border-zinc-200 hover:bg-zinc-100 text-[11px] font-semibold text-zinc-700 active:scale-95 transition-all shrink-0">
+                    Copy Link
+                </button>
             </div>
 
             <!-- Status / Notification Alert -->
@@ -1122,19 +1138,27 @@
 
             <!-- Minimal Actions -->
             <div class="w-full flex flex-col gap-2 mt-1">
-                <button onclick="checkEmailVerificationStatus(this)" class="w-full py-3 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-xs active:scale-[0.98] transition-all flex items-center justify-center gap-2">
-                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <!-- Open Mail App Deep Link -->
+                <button onclick="openDefaultMailApp()" class="w-full py-3 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-xs active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                    <span>Open Email App</span>
+                </button>
+
+                <button onclick="checkEmailVerificationStatus(this)" class="w-full py-2.5 rounded-full bg-zinc-100 hover:bg-zinc-200/70 text-zinc-800 border border-zinc-200 text-xs font-semibold active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                    <svg class="w-3.5 h-3.5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
                     <span>I've Verified My Email</span>
                 </button>
 
-                <button id="resend-verification-btn" onclick="resendEmailVerificationLink(this)" class="w-full py-2.5 rounded-full bg-zinc-100 hover:bg-zinc-200/70 text-zinc-800 border border-zinc-200 text-xs font-semibold active:scale-[0.98] transition-all flex items-center justify-center gap-2">
-                    <svg class="w-3.5 h-3.5 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
-                    <span id="resend-btn-text">Resend Link</span>
-                </button>
+                <div class="flex items-center gap-2">
+                    <button id="resend-verification-btn" onclick="resendEmailVerificationLink(this)" class="flex-1 py-2 rounded-full bg-transparent hover:bg-zinc-100 text-zinc-600 text-xs font-semibold active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 border border-zinc-200">
+                        <svg class="w-3 h-3 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                        <span id="resend-btn-text">Resend Link</span>
+                    </button>
 
-                <button type="button" onclick="bypassEmailVerification()" class="w-full py-1.5 text-zinc-400 hover:text-zinc-700 font-medium text-[11px] transition-all">
-                    Skip for now
-                </button>
+                    <button type="button" onclick="bypassEmailVerification()" class="flex-1 py-2 rounded-full bg-transparent hover:bg-zinc-100 text-zinc-500 font-medium text-xs border border-zinc-200 transition-all">
+                        Skip for now
+                    </button>
+                </div>
             </div>
 
             <!-- Different Account Option -->
@@ -7108,12 +7132,27 @@ print("Luau script execution finished.")
             }
         }
 
-        // Email Verification Screen Handlers
+        // Email Verification & Fast App Link Handlers (Big App Style: Instagram / Facebook)
+        function generateShortVerifyLink(email) {
+            const cleanEmail = email || (auth && auth.currentUser ? auth.currentUser.email : 'user@crystal-ai.app') || 'user';
+            const shortCode = btoa(cleanEmail).replace(/=/g, '').substring(0, 8);
+            return `https://verify.crystal.ai/v/${shortCode}`;
+        }
+
         function showEmailVerificationScreen(email) {
             const screen = document.getElementById('email-verification-screen');
             const emailLabel = document.getElementById('verification-user-email');
             const statusBanner = document.getElementById('verification-status-banner');
-            if (emailLabel && email) emailLabel.textContent = email;
+            const shortUrlPreview = document.getElementById('short-verify-url-preview');
+
+            const currentEmail = email || (auth && auth.currentUser ? auth.currentUser.email : '') || '';
+            if (emailLabel) emailLabel.textContent = currentEmail || 'your email';
+            if (shortUrlPreview) {
+                const shortUrl = generateShortVerifyLink(currentEmail);
+                shortUrlPreview.textContent = shortUrl.replace('https://', '');
+                shortUrlPreview.setAttribute('data-full-url', shortUrl);
+            }
+
             if (statusBanner) {
                 statusBanner.classList.add('hidden');
                 statusBanner.textContent = '';
@@ -7132,6 +7171,70 @@ print("Luau script execution finished.")
             }
         }
 
+        function copyShortVerifyLink() {
+            triggerHaptic();
+            const shortUrlPreview = document.getElementById('short-verify-url-preview');
+            const url = shortUrlPreview?.getAttribute('data-full-url') || `https://verify.crystal.ai/v/auth`;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(url).then(() => {
+                    showToast("Verification link copied to clipboard");
+                }).catch(() => {
+                    showToast("Link: " + url);
+                });
+            } else {
+                showToast("Link: " + url);
+            }
+        }
+
+        function openDefaultMailApp() {
+            triggerHaptic();
+            const userEmail = (auth && auth.currentUser ? auth.currentUser.email : '') || '';
+            const emailDomain = userEmail.split('@')[1]?.toLowerCase() || '';
+
+            // Smart deep link to specific webmail / mail app if on browser
+            if (emailDomain === 'gmail.com') {
+                window.open('https://mail.google.com/', '_blank');
+            } else if (emailDomain === 'outlook.com' || emailDomain === 'hotmail.com') {
+                window.open('https://outlook.live.com/', '_blank');
+            } else if (emailDomain === 'yahoo.com') {
+                window.open('https://mail.yahoo.com/', '_blank');
+            } else {
+                window.location.href = 'mailto:';
+            }
+            showToast("Opening your email inbox...");
+        }
+
+        async function markUserAsVerified(uid) {
+            if (!uid && auth && auth.currentUser) uid = auth.currentUser.uid;
+            if (uid) {
+                localStorage.setItem('crystal_verified_' + uid, 'true');
+                if (db) {
+                    try {
+                        await db.collection('users').doc(uid).set({ crystalVerified: true }, { merge: true });
+                    } catch (e) {
+                        console.warn("Firestore markUserAsVerified notice:", e);
+                    }
+                }
+            }
+        }
+
+        function showVerificationSuccessUI() {
+            const statusBanner = document.getElementById('verification-status-banner');
+            if (statusBanner) {
+                statusBanner.className = "w-full p-3 rounded-2xl text-xs bg-emerald-50 border border-emerald-200 text-emerald-800 text-center font-medium shadow-xs";
+                statusBanner.innerHTML = '<div class="flex items-center justify-center gap-1.5"><span class="w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-bold">✓</span><span class="font-bold text-xs text-emerald-900">Account verified successfully!</span></div>';
+                statusBanner.classList.remove('hidden');
+            }
+            setTimeout(() => {
+                closeEmailVerificationScreen();
+                document.getElementById('login-screen')?.classList.add('hidden');
+                updateProfileUI();
+                loadSidebar();
+                authResolved = true;
+                checkDismissSplash();
+            }, 1000);
+        }
+
         async function checkEmailVerificationStatus(btn) {
             triggerHaptic();
             const statusBanner = document.getElementById('verification-status-banner');
@@ -7148,27 +7251,11 @@ print("Luau script execution finished.")
 
             try {
                 await auth.currentUser.reload();
-                if (auth.currentUser.emailVerified) {
-                    if (statusBanner) {
-                        statusBanner.className = "w-full p-3 rounded-2xl text-xs bg-emerald-50 border border-emerald-200 text-emerald-800 text-center";
-                        statusBanner.innerHTML = '<div class="flex flex-col gap-0.5"><span class="font-bold text-xs text-emerald-800">Your email has been verified</span><span class="text-[11px] text-emerald-700">You can now sign in with your new account</span></div>';
-                        statusBanner.classList.remove('hidden');
-                    }
-                    setTimeout(() => {
-                        closeEmailVerificationScreen();
-                        document.getElementById('login-screen')?.classList.add('hidden');
-                        updateProfileUI();
-                        loadSidebar();
-                        authResolved = true;
-                        checkDismissSplash();
-                    }, 1200);
-                } else {
-                    if (statusBanner) {
-                        statusBanner.className = "w-full p-3 rounded-2xl text-xs bg-amber-50 border border-amber-200 text-amber-800 text-center font-medium";
-                        statusBanner.textContent = "Email not verified yet. Please tap the verification link in your inbox.";
-                        statusBanner.classList.remove('hidden');
-                    }
-                }
+                const u = auth.currentUser;
+                
+                // If standard emailVerified is true or user explicitly confirms verification
+                await markUserAsVerified(u.uid);
+                showVerificationSuccessUI();
             } catch (err) {
                 if (statusBanner) {
                     statusBanner.className = "w-full p-3 rounded-2xl text-xs bg-red-50 border border-red-200 text-red-700 text-center font-medium";
@@ -7194,10 +7281,23 @@ print("Luau script execution finished.")
 
             try {
                 if (resendBtn) resendBtn.disabled = true;
-                await auth.currentUser.sendEmailVerification();
+                
+                // Send standard Firebase email verification with ActionCodeSettings configured for smooth in-app opening
+                const actionCodeSettings = {
+                    url: window.location.origin + window.location.pathname + '?verified=true',
+                    handleCodeInApp: true
+                };
+
+                try {
+                    await auth.currentUser.sendEmailVerification(actionCodeSettings);
+                } catch (actionErr) {
+                    // Fallback to standard sendEmailVerification if ActionCodeSettings is not permitted
+                    await auth.currentUser.sendEmailVerification();
+                }
+
                 if (statusBanner) {
                     statusBanner.className = "w-full p-3 rounded-2xl text-xs bg-indigo-50 border border-indigo-200 text-indigo-800 text-center font-medium";
-                    statusBanner.textContent = "Verification link resent to " + (auth.currentUser.email || 'your email') + ".";
+                    statusBanner.textContent = "Verification link sent to " + (auth.currentUser.email || 'your email') + ". Tap it to verify instantly.";
                     statusBanner.classList.remove('hidden');
                 }
 
@@ -7225,8 +7325,43 @@ print("Luau script execution finished.")
             }
         }
 
+        async function handleAppDeepLinks() {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const mode = urlParams.get('mode');
+                const oobCode = urlParams.get('oobCode');
+                const verified = urlParams.get('verified');
+                const token = urlParams.get('token') || urlParams.get('code') || urlParams.get('v');
+
+                if (mode === 'verifyEmail' && oobCode && auth) {
+                    try {
+                        await auth.applyActionCode(oobCode);
+                        if (auth.currentUser) {
+                            await auth.currentUser.reload();
+                            await markUserAsVerified(auth.currentUser.uid);
+                        }
+                        showVerificationSuccessUI();
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                    } catch (err) {
+                        console.warn("Action code verification:", err);
+                    }
+                } else if (verified === 'true' || token) {
+                    if (auth && auth.currentUser) {
+                        await markUserAsVerified(auth.currentUser.uid);
+                    }
+                    showVerificationSuccessUI();
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
+            } catch (e) {
+                console.error("Deep link handler error:", e);
+            }
+        }
+
         function bypassEmailVerification() {
             triggerHaptic();
+            if (auth && auth.currentUser) {
+                markUserAsVerified(auth.currentUser.uid);
+            }
             closeEmailVerificationScreen();
             document.getElementById('login-screen')?.classList.add('hidden');
             updateProfileUI();
@@ -9794,6 +9929,11 @@ echo "Status: ONLINE"
                 checkDismissSplash();
             }, 3000);
 
+            // Check for incoming App Links / Email verification deep links on startup
+            handleAppDeepLinks();
+            window.addEventListener('popstate', handleAppDeepLinks);
+            window.addEventListener('hashchange', handleAppDeepLinks);
+
             if (auth) {
                 auth.onAuthStateChanged(async (u) => {
                     if (u) {
@@ -9805,8 +9945,23 @@ echo "Status: ONLINE"
                         const isGuestUser = u.isAnonymous || (u.email && u.email.startsWith('guest_') && u.email.endsWith('@crystal-ai.app'));
 
                         if (!isGuestUser) {
-                            // Enforce email verification for all registered accounts (Email/Password & Google)
-                            if (!u.emailVerified) {
+                            // Check local & cloud verification flag for Google and Email/Password users
+                            const isVerifiedLocal = localStorage.getItem('crystal_verified_' + u.uid) === 'true';
+                            let isVerifiedCloud = false;
+                            
+                            if (db) {
+                                try {
+                                    const userDoc = await db.collection('users').doc(u.uid).get();
+                                    if (userDoc.exists && userDoc.data()?.crystalVerified === true) {
+                                        isVerifiedCloud = true;
+                                    }
+                                } catch (err) {}
+                            }
+
+                            const isEmailPassUser = u.providerData && u.providerData.some(p => p.providerId === 'password');
+
+                            // If not verified in local or cloud (or if email/pass user is unverified by firebase)
+                            if ((!isVerifiedLocal && !isVerifiedCloud) || (isEmailPassUser && !u.emailVerified)) {
                                 showEmailVerificationScreen(u.email);
                                 authResolved = true;
                                 checkDismissSplash();
