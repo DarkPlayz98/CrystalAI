@@ -22,6 +22,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <!-- Android App Links for Fast Verification & In-App Routing (Instagram/Facebook Style) -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="verify.crystal.ai" />
+                <data android:scheme="https" android:host="crystal-ai.app" />
+                <data android:scheme="crystal" />
+            </intent-filter>
+
         </activity>
 
         <provider
