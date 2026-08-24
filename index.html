@@ -6854,6 +6854,10 @@ print("Luau script execution finished.")
                                 grantOfflineAccess: true
                             });
                         }
+                        // Sign out of previous native session first so the Google Account chooser appears
+                        if (typeof window.Capacitor.Plugins.GoogleAuth.signOut === 'function') {
+                            try { await window.Capacitor.Plugins.GoogleAuth.signOut(); } catch (e) {}
+                        }
                         const googleUser = await window.Capacitor.Plugins.GoogleAuth.signIn();
                         if (googleUser && googleUser.authentication && googleUser.authentication.idToken) {
                             const credential = firebase.auth.GoogleAuthProvider.credential(googleUser.authentication.idToken);
@@ -6862,29 +6866,45 @@ print("Luau script execution finished.")
                             throw new Error("No idToken received from native Google Auth.");
                         }
                     } catch (nativeErr) {
-                        console.warn("Native GoogleAuth failed, trying browser pop-up fallback...", nativeErr);
-                        try {
-                            const provider = new firebase.auth.GoogleAuthProvider();
-                            await auth.signInWithPopup(provider);
-                        } catch (popupErr) {
-                            console.warn("Browser pop-up failed, trying redirect fallback...", popupErr);
-                            const provider = new firebase.auth.GoogleAuthProvider();
-                            await auth.signInWithRedirect(provider);
-                        }
+                        console.warn("Native GoogleAuth failed, using browser pop-up with account picker...", nativeErr);
+                        const provider = new firebase.auth.GoogleAuthProvider();
+                        provider.setCustomParameters({ prompt: 'select_account' });
+                        await auth.signInWithPopup(provider);
                     }
                 } else {
                     const provider = new firebase.auth.GoogleAuthProvider();
+                    provider.setCustomParameters({ prompt: 'select_account' });
                     try {
                         await auth.signInWithPopup(provider);
                     } catch (popupErr) {
-                        console.warn("Popup blocked, trying redirect fallback...", popupErr);
-                        await auth.signInWithRedirect(provider);
+                        console.warn("Popup error:", popupErr);
+                        if (popupErr.code === 'auth/popup-closed-by-user') {
+                            throw popupErr;
+                        } else if (popupErr.code === 'auth/popup-blocked') {
+                            // If popup was blocked by browser, notify user or retry
+                            throw new Error("Google sign-in popup was blocked. Please allow popups for this site.");
+                        } else {
+                            throw popupErr;
+                        }
                     }
                 }
             } catch (e) {
                 console.error("Google login failure:", e);
                 let msg = e.message || "Google auth failed.";
-                if (window.self !== window.top) {
+                if (e.code === 'auth/missing-initial-state' || (msg && msg.includes('missing initial state'))) {
+                    msg = "Session state was reset. Retrying with fresh Google sign-in...";
+                    try {
+                        try { sessionStorage.clear(); } catch(err) {}
+                        const retryProvider = new firebase.auth.GoogleAuthProvider();
+                        retryProvider.setCustomParameters({ prompt: 'select_account' });
+                        await auth.signInWithPopup(retryProvider);
+                        return;
+                    } catch (retryErr) {
+                        msg = "Sign in was interrupted. Please tap 'Sign In with Google' again.";
+                    }
+                } else if (e.code === 'auth/popup-closed-by-user') {
+                    msg = "Sign-in cancelled. Please try again.";
+                } else if (window.self !== window.top) {
                     msg += " (Inside an iframe preview, browser security blocks Google sign-in popups. Please open in a new tab or use 'Continue as Guest' / Email login).";
                 }
                 document.getElementById('login-error').textContent = msg;
@@ -7417,10 +7437,22 @@ print("Luau script execution finished.")
             checkDismissSplash();
         }
 
-        function signOutUser() {
+        async function signOutUser() {
             localStorage.removeItem('crystal_local_guest');
             isLocalGuest = false;
-            if (auth) auth.signOut();
+            try {
+                sessionStorage.clear();
+            } catch (e) {}
+            if (auth) {
+                try {
+                    await auth.signOut();
+                } catch (e) {}
+            }
+            if (typeof window.Capacitor !== 'undefined' && window.Capacitor.Plugins && window.Capacitor.Plugins.GoogleAuth) {
+                try {
+                    await window.Capacitor.Plugins.GoogleAuth.signOut();
+                } catch (e) {}
+            }
             closeEmailVerificationScreen();
             document.body.classList.remove('sidebar-open');
             chatHistory = [];
@@ -9982,6 +10014,13 @@ echo "Status: ONLINE"
             window.addEventListener('hashchange', handleAppDeepLinks);
 
             if (auth) {
+                // Safely handle any pending redirect results without crashing on storage partition mismatch
+                if (typeof auth.getRedirectResult === 'function') {
+                    auth.getRedirectResult().catch((redirectErr) => {
+                        console.warn("Handled redirect initial-state partition notice:", redirectErr.code || redirectErr.message);
+                    });
+                }
+
                 auth.onAuthStateChanged(async (u) => {
                     if (u) {
                         isLocalGuest = false;
