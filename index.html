@@ -7135,7 +7135,7 @@ print("Luau script execution finished.")
             return `https://verify.crystal.ai/v/${shortCode}`;
         }
 
-        function showEmailVerificationScreen(email) {
+        async function showEmailVerificationScreen(email, autoSend = true) {
             const screen = document.getElementById('email-verification-screen');
             const emailLabel = document.getElementById('verification-user-email');
             const statusBanner = document.getElementById('verification-status-banner');
@@ -7149,13 +7149,38 @@ print("Luau script execution finished.")
                 shortUrlPreview.setAttribute('data-full-url', shortUrl);
             }
 
-            if (statusBanner) {
-                statusBanner.classList.add('hidden');
-                statusBanner.textContent = '';
-            }
             if (screen) {
                 screen.classList.remove('hidden');
                 screen.classList.add('flex');
+            }
+
+            // Auto-send verification email if user is logged in and not yet verified
+            if (autoSend && auth && auth.currentUser && !auth.currentUser.emailVerified) {
+                try {
+                    await auth.currentUser.sendEmailVerification();
+                    if (statusBanner) {
+                        statusBanner.className = "w-full p-3 rounded-2xl text-xs bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-center font-medium shadow-xs";
+                        statusBanner.innerHTML = `
+                            <div class="flex flex-col gap-0.5">
+                                <span class="font-bold text-indigo-700 dark:text-indigo-300">Verification Link Sent</span>
+                                <span class="text-[11px] opacity-80">Link sent to <strong>${currentEmail}</strong>. Check Inbox & Spam.</span>
+                            </div>
+                        `;
+                        statusBanner.classList.remove('hidden');
+                    }
+                } catch (e) {
+                    console.warn("Auto sendEmailVerification status:", e);
+                    if (statusBanner) {
+                        if (e.code === 'auth/too-many-requests') {
+                            statusBanner.className = "w-full p-3 rounded-2xl text-xs bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-300 text-center font-medium shadow-xs";
+                            statusBanner.textContent = "A verification email was sent. Please check your inbox and spam folder.";
+                        } else {
+                            statusBanner.className = "w-full p-3 rounded-2xl text-xs bg-zinc-500/10 border border-zinc-500/20 text-[var(--text-color)] text-center font-medium shadow-xs";
+                            statusBanner.textContent = "Tap 'Resend Link' if you did not receive the email.";
+                        }
+                        statusBanner.classList.remove('hidden');
+                    }
+                }
             }
         }
 
@@ -7217,8 +7242,8 @@ print("Luau script execution finished.")
         function showVerificationSuccessUI() {
             const statusBanner = document.getElementById('verification-status-banner');
             if (statusBanner) {
-                statusBanner.className = "w-full p-3 rounded-2xl text-xs bg-emerald-50 border border-emerald-200 text-emerald-800 text-center font-medium shadow-xs";
-                statusBanner.innerHTML = '<div class="flex items-center justify-center gap-1.5"><span class="w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-bold">✓</span><span class="font-bold text-xs text-emerald-900">Account verified successfully!</span></div>';
+                statusBanner.className = "w-full p-3 rounded-2xl text-xs bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300 text-center font-medium shadow-xs";
+                statusBanner.innerHTML = '<div class="flex items-center justify-center gap-1.5"><span class="w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-bold">✓</span><span class="font-bold text-xs">Account verified successfully!</span></div>';
                 statusBanner.classList.remove('hidden');
             }
             setTimeout(() => {
@@ -7228,7 +7253,7 @@ print("Luau script execution finished.")
                 loadSidebar();
                 authResolved = true;
                 checkDismissSplash();
-            }, 1000);
+            }, 900);
         }
 
         async function checkEmailVerificationStatus(btn) {
@@ -7249,12 +7274,28 @@ print("Luau script execution finished.")
                 await auth.currentUser.reload();
                 const u = auth.currentUser;
                 
-                // If standard emailVerified is true or user explicitly confirms verification
-                await markUserAsVerified(u.uid);
-                showVerificationSuccessUI();
+                // Strictly enforce that the email is verified
+                if (u && u.emailVerified) {
+                    await markUserAsVerified(u.uid);
+                    showVerificationSuccessUI();
+                } else {
+                    if (statusBanner) {
+                        statusBanner.className = "w-full p-3.5 rounded-2xl text-xs bg-amber-500/10 border border-amber-500/30 text-amber-800 dark:text-amber-300 text-center font-medium shadow-xs";
+                        statusBanner.innerHTML = `
+                            <div class="flex items-start justify-center gap-2 text-left">
+                                <span class="text-amber-500 text-base font-bold shrink-0 mt-0.5">⚠️</span>
+                                <div class="flex flex-col">
+                                    <span class="font-bold text-xs text-amber-900 dark:text-amber-200">Email Not Verified Yet</span>
+                                    <span class="text-[11px] opacity-80 text-amber-800 dark:text-amber-300">Please click the verification link in your inbox or spam folder, then tap this button.</span>
+                                </div>
+                            </div>
+                        `;
+                        statusBanner.classList.remove('hidden');
+                    }
+                }
             } catch (err) {
                 if (statusBanner) {
-                    statusBanner.className = "w-full p-3 rounded-2xl text-xs bg-red-50 border border-red-200 text-red-700 text-center font-medium";
+                    statusBanner.className = "w-full p-3 rounded-2xl text-xs bg-red-500/10 border border-red-500/30 text-red-700 dark:text-red-300 text-center font-medium";
                     statusBanner.textContent = err.message || "Failed to check verification status.";
                     statusBanner.classList.remove('hidden');
                 }
@@ -7323,7 +7364,7 @@ print("Luau script execution finished.")
                 }, 1000);
             } catch (err) {
                 if (statusBanner) {
-                    statusBanner.className = "w-full p-3 rounded-2xl text-xs bg-red-50 border border-red-200 text-red-700 text-center font-medium";
+                    statusBanner.className = "w-full p-3 rounded-2xl text-xs bg-red-500/10 border border-red-500/30 text-red-700 dark:text-red-300 text-center font-medium";
                     statusBanner.textContent = err.message || "Could not resend email.";
                     statusBanner.classList.remove('hidden');
                 }
@@ -9951,23 +9992,8 @@ echo "Status: ONLINE"
                         const isGuestUser = u.isAnonymous || (u.email && u.email.startsWith('guest_') && u.email.endsWith('@crystal-ai.app'));
 
                         if (!isGuestUser) {
-                            // Check local & cloud verification flag for Google and Email/Password users
-                            const isVerifiedLocal = localStorage.getItem('crystal_verified_' + u.uid) === 'true';
-                            let isVerifiedCloud = false;
-                            
-                            if (db) {
-                                try {
-                                    const userDoc = await db.collection('users').doc(u.uid).get();
-                                    if (userDoc.exists && userDoc.data()?.crystalVerified === true) {
-                                        isVerifiedCloud = true;
-                                    }
-                                } catch (err) {}
-                            }
-
-                            const isEmailPassUser = u.providerData && u.providerData.some(p => p.providerId === 'password');
-
-                            // If not verified in local or cloud (or if email/pass user is unverified by firebase)
-                            if ((!isVerifiedLocal && !isVerifiedCloud) || (isEmailPassUser && !u.emailVerified)) {
+                            // Enforce email verification for all non-guest accounts
+                            if (!u.emailVerified) {
                                 showEmailVerificationScreen(u.email);
                                 authResolved = true;
                                 checkDismissSplash();
