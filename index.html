@@ -7064,19 +7064,23 @@ print("Luau script execution finished.")
 
                 const cred = await auth.signInWithEmailAndPassword(email, pass);
                 if (cred.user) {
-                    // Check if email verification is needed for registered user
-                    if (!cred.user.emailVerified) {
-                        showEmailVerificationScreen(cred.user.email);
+                    const u = cred.user;
+                    const isVerifiedLocal = localStorage.getItem('crystal_verified_' + u.uid) === 'true';
+                    let isVerifiedCloud = false;
+                    if (db) {
+                        try {
+                            const userDoc = await db.collection('users').doc(u.uid).get();
+                            if (userDoc.exists && userDoc.data()?.crystalVerified === true) {
+                                isVerifiedCloud = true;
+                            }
+                        } catch (err) {}
+                    }
+                    const isAccountVerified = isVerifiedCloud || isVerifiedLocal || (u.emailVerified === true);
+                    if (!isAccountVerified) {
+                        showEmailVerificationScreen(u.email);
                         authResolved = true;
                         checkDismissSplash();
                         return;
-                    } else {
-                        document.getElementById('login-screen')?.classList.add('hidden');
-                        closeEmailVerificationScreen();
-                        updateProfileUI();
-                        loadSidebar();
-                        authResolved = true;
-                        checkDismissSplash();
                     }
                 }
             } catch (e) {
@@ -7359,8 +7363,8 @@ print("Luau script execution finished.")
             try {
                 await auth.currentUser.reload();
                 const u = auth.currentUser;
-                
-                const isVerifiedFirebase = u && (u.emailVerified === true);
+                const isGoogleUser = u.providerData && u.providerData.some(p => p.providerId === 'google.com');
+                const isVerifiedFirebase = !isGoogleUser && (u.emailVerified === true);
                 const isVerifiedLocal = localStorage.getItem('crystal_verified_' + u.uid) === 'true';
                 let isVerifiedCloud = false;
                 if (db) {
@@ -7372,8 +7376,8 @@ print("Luau script execution finished.")
                     } catch (e) {}
                 }
 
-                // Verify if email was validated via Firebase, Local, or Cloud
-                if (isVerifiedFirebase || isVerifiedLocal || isVerifiedCloud) {
+                // Strictly verify if email was validated via Cloud, Local token, or genuine Firebase verification link
+                if (isVerifiedCloud || isVerifiedLocal || isVerifiedFirebase) {
                     await markUserAsVerified(u.uid);
                     showVerificationSuccessUI();
                 } else {
@@ -7505,27 +7509,27 @@ print("Luau script execution finished.")
                 if (screen && !screen.classList.contains('hidden')) {
                     try {
                         await auth.currentUser.reload();
-                        if (auth.currentUser.emailVerified) {
-                            await markUserAsVerified(auth.currentUser.uid);
+                        const u = auth.currentUser;
+                        const isGoogleUser = u.providerData && u.providerData.some(p => p.providerId === 'google.com');
+                        const isVerifiedFirebase = !isGoogleUser && (u.emailVerified === true);
+                        const isVerifiedLocal = localStorage.getItem('crystal_verified_' + u.uid) === 'true';
+                        let isVerifiedCloud = false;
+                        if (db) {
+                            try {
+                                const userDoc = await db.collection('users').doc(u.uid).get();
+                                if (userDoc.exists && userDoc.data()?.crystalVerified === true) {
+                                    isVerifiedCloud = true;
+                                }
+                            } catch (e) {}
+                        }
+                        if (isVerifiedCloud || isVerifiedLocal || isVerifiedFirebase) {
+                            await markUserAsVerified(u.uid);
                             showVerificationSuccessUI();
                         }
                     } catch (e) {}
                 }
             }
         });
-
-        function bypassEmailVerification() {
-            triggerHaptic();
-            if (auth && auth.currentUser) {
-                markUserAsVerified(auth.currentUser.uid);
-            }
-            closeEmailVerificationScreen();
-            document.getElementById('login-screen')?.classList.add('hidden');
-            updateProfileUI();
-            loadSidebar();
-            authResolved = true;
-            checkDismissSplash();
-        }
 
         async function signOutUser() {
             localStorage.removeItem('crystal_local_guest');
@@ -10146,7 +10150,8 @@ echo "Status: ONLINE"
                                 }
                             }
 
-                            const isVerifiedFirebase = u.emailVerified === true;
+                            const isGoogleUser = u.providerData && u.providerData.some(p => p.providerId === 'google.com');
+                            const isVerifiedFirebase = !isGoogleUser && (u.emailVerified === true);
                             const isVerifiedLocal = localStorage.getItem('crystal_verified_' + u.uid) === 'true';
                             let isVerifiedCloud = false;
                             if (db) {
@@ -10158,19 +10163,22 @@ echo "Status: ONLINE"
                                 } catch (err) {}
                             }
 
-                            if (isVerifiedFirebase && !isVerifiedLocal) {
-                                localStorage.setItem('crystal_verified_' + u.uid, 'true');
-                                if (db) {
-                                    try { await db.collection('users').doc(u.uid).set({ crystalVerified: true }, { merge: true }); } catch (e) {}
-                                }
-                            }
+                            const isAccountVerified = isVerifiedCloud || isVerifiedLocal || isVerifiedFirebase;
 
-                            // Enforce verification for all non-guest accounts (including Google accounts)
-                            if (!isVerifiedFirebase && !isVerifiedLocal && !isVerifiedCloud) {
+                            // Enforce verification for all non-guest accounts (including Google and Email accounts)
+                            if (!isAccountVerified) {
                                 showEmailVerificationScreen(u.email);
                                 authResolved = true;
                                 checkDismissSplash();
                                 return;
+                            }
+
+                            // Sync local and cloud persistence if verified
+                            if (!isVerifiedLocal) {
+                                localStorage.setItem('crystal_verified_' + u.uid, 'true');
+                            }
+                            if (!isVerifiedCloud && db) {
+                                try { await db.collection('users').doc(u.uid).set({ crystalVerified: true }, { merge: true }); } catch (e) {}
                             }
                         }
                         
