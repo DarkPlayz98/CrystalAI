@@ -7124,11 +7124,11 @@ print("Luau script execution finished.")
                 const cred = await auth.createUserWithEmailAndPassword(email, pass);
                 if (cred.user) {
                     try {
-                        await cred.user.sendEmailVerification();
+                        await sendVerificationEmailSafely(cred.user);
                     } catch (verifyErr) {
                         console.warn("sendEmailVerification notice:", verifyErr);
                     }
-                    showEmailVerificationScreen(cred.user.email);
+                    showEmailVerificationScreen(cred.user.email, false);
                 }
             } catch (e) {
                 if (errorEl) {
@@ -7142,13 +7142,22 @@ print("Luau script execution finished.")
         }
 
         // Email Verification & Fast App Link Handlers (Material 3 Deep Link Verification)
+        function getPublicAppUrl() {
+            const origin = window.location.origin;
+            if (origin && !origin.includes('localhost') && !origin.includes('127.0.0.1') && !origin.includes('capacitor://') && !origin.startsWith('file:')) {
+                return origin + window.location.pathname;
+            }
+            // Universal public web origin for phone & capacitor instances
+            return 'https://crystal-ai-c5ae2.firebaseapp.com';
+        }
+
         function getAppVerificationLink(user) {
             const u = user || (auth && auth.currentUser);
             const email = u ? (u.email || '') : '';
             const uid = u ? (u.uid || '') : '';
-            const origin = window.location.origin + window.location.pathname;
+            const base = getPublicAppUrl();
             const token = btoa((uid || 'user') + ':' + (email || '')).replace(/=/g, '').substring(0, 16);
-            return `${origin}?mode=verifyEmail&uid=${encodeURIComponent(uid)}&token=${token}&verified=true`;
+            return `${base}?mode=verifyEmail&uid=${encodeURIComponent(uid)}&token=${token}&verified=true`;
         }
 
         function copyVerificationLink() {
@@ -7162,6 +7171,29 @@ print("Luau script execution finished.")
                 });
             } else {
                 showToast("Link: " + link);
+            }
+        }
+
+        async function sendVerificationEmailSafely(user) {
+            const u = user || (auth && auth.currentUser);
+            if (!u) return false;
+            const publicUrl = getPublicAppUrl();
+            const actionCodeSettings = {
+                url: publicUrl + '?verified=true&uid=' + encodeURIComponent(u.uid),
+                handleCodeInApp: false
+            };
+            try {
+                await u.sendEmailVerification(actionCodeSettings);
+                return true;
+            } catch (err) {
+                // Fallback without actionCodeSettings
+                try {
+                    await u.sendEmailVerification();
+                    return true;
+                } catch (fallbackErr) {
+                    console.warn("sendEmailVerification fallback error:", fallbackErr);
+                    throw fallbackErr;
+                }
             }
         }
 
@@ -7181,7 +7213,7 @@ print("Luau script execution finished.")
             // Auto-send verification email if user is logged in
             if (autoSend && auth && auth.currentUser) {
                 try {
-                    await auth.currentUser.sendEmailVerification();
+                    await sendVerificationEmailSafely(auth.currentUser);
                     if (statusBanner) {
                         statusBanner.className = "w-full p-3 rounded-2xl text-xs bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-center font-medium shadow-xs";
                         statusBanner.innerHTML = `
@@ -7197,13 +7229,18 @@ print("Luau script execution finished.")
                     if (statusBanner) {
                         if (e.code === 'auth/too-many-requests') {
                             statusBanner.className = "w-full p-3 rounded-2xl text-xs bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-300 text-center font-medium shadow-xs";
-                            statusBanner.textContent = "A verification email was sent. Please check your inbox and spam folder.";
+                            statusBanner.innerHTML = `
+                                <div class="flex flex-col gap-0.5">
+                                    <span class="font-bold text-amber-800 dark:text-amber-200">Email Already Sent</span>
+                                    <span class="text-[11px] opacity-80 text-amber-700 dark:text-amber-300">A verification link was sent to <strong>${currentEmail}</strong>. Check Inbox and Spam folder.</span>
+                                </div>
+                            `;
                         } else {
                             statusBanner.className = "w-full p-3 rounded-2xl text-xs bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-center font-medium shadow-xs";
                             statusBanner.innerHTML = `
                                 <div class="flex flex-col gap-0.5">
                                     <span class="font-bold">Verification Pending</span>
-                                    <span class="text-[11px] opacity-80">Tap 'Open Gmail' or 'Copy Link' to verify.</span>
+                                    <span class="text-[11px] opacity-80">Tap 'Open Mail App' or check email on <strong>${currentEmail}</strong>.</span>
                                 </div>
                             `;
                         }
@@ -7221,24 +7258,57 @@ print("Luau script execution finished.")
             }
         }
 
-        function openDefaultMailApp() {
+        async function openDefaultMailApp() {
             triggerHaptic();
             const user = auth && auth.currentUser;
             const userEmail = (user ? user.email : '') || '';
             const emailDomain = userEmail.split('@')[1]?.toLowerCase() || '';
-            const verifyLink = getAppVerificationLink(user);
 
-            if (emailDomain === 'gmail.com' || emailDomain.includes('google')) {
-                // Open Gmail with compose pre-fill or inbox
-                window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(userEmail)}&su=${encodeURIComponent('Verify Your Crystal AI Account')}&body=${encodeURIComponent('Click this link to verify your account and start using Crystal AI:\n\n' + verifyLink)}`, '_blank');
-            } else if (emailDomain === 'outlook.com' || emailDomain === 'hotmail.com') {
-                window.open('https://outlook.live.com/', '_blank');
-            } else if (emailDomain === 'yahoo.com') {
-                window.open('https://mail.yahoo.com/', '_blank');
-            } else {
-                window.location.href = `mailto:${encodeURIComponent(userEmail)}?subject=${encodeURIComponent('Verify Crystal Account')}&body=${encodeURIComponent(verifyLink)}`;
+            showToast("Opening mail app...");
+
+            const isCapacitor = typeof window.Capacitor !== 'undefined' && 
+                                ((window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) || 
+                                 (window.Capacitor.getPlatform && window.Capacitor.getPlatform() !== 'web'));
+
+            if (isCapacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App && typeof window.Capacitor.Plugins.App.openUrl === 'function') {
+                try {
+                    // Try system message/mail intent
+                    await window.Capacitor.Plugins.App.openUrl({ url: 'message:' });
+                    return;
+                } catch (e) {
+                    try {
+                        // Try Gmail app scheme directly
+                        await window.Capacitor.Plugins.App.openUrl({ url: 'googlegmail://' });
+                        return;
+                    } catch (e2) {}
+                }
             }
-            showToast("Opening email inbox...");
+
+            // Trigger system default mail client via mailto: intent (opens default app inbox without drafting email)
+            try {
+                const mailtoFrame = document.createElement('iframe');
+                mailtoFrame.style.display = 'none';
+                mailtoFrame.src = 'mailto:';
+                document.body.appendChild(mailtoFrame);
+                setTimeout(() => {
+                    try { document.body.removeChild(mailtoFrame); } catch(e){}
+                }, 1500);
+            } catch (e) {
+                window.location.href = 'mailto:';
+            }
+
+            // Web fallback if outside capacitor
+            if (!isCapacitor) {
+                setTimeout(() => {
+                    if (emailDomain === 'gmail.com' || emailDomain.includes('google')) {
+                        window.open('https://mail.google.com/mail/u/0/#inbox', '_blank');
+                    } else if (emailDomain === 'outlook.com' || emailDomain === 'hotmail.com' || emailDomain === 'live.com') {
+                        window.open('https://outlook.live.com/mail/0/inbox', '_blank');
+                    } else if (emailDomain === 'yahoo.com') {
+                        window.open('https://mail.yahoo.com/', '_blank');
+                    }
+                }, 400);
+            }
         }
 
         async function markUserAsVerified(uid) {
@@ -7269,7 +7339,7 @@ print("Luau script execution finished.")
                 loadSidebar();
                 authResolved = true;
                 checkDismissSplash();
-            }, 900);
+            }, 800);
         }
 
         async function checkEmailVerificationStatus(btn) {
@@ -7290,6 +7360,7 @@ print("Luau script execution finished.")
                 await auth.currentUser.reload();
                 const u = auth.currentUser;
                 
+                const isVerifiedFirebase = u && (u.emailVerified === true);
                 const isVerifiedLocal = localStorage.getItem('crystal_verified_' + u.uid) === 'true';
                 let isVerifiedCloud = false;
                 if (db) {
@@ -7301,8 +7372,8 @@ print("Luau script execution finished.")
                     } catch (e) {}
                 }
 
-                // Verify if email was clicked or validated
-                if (isVerifiedLocal || isVerifiedCloud) {
+                // Verify if email was validated via Firebase, Local, or Cloud
+                if (isVerifiedFirebase || isVerifiedLocal || isVerifiedCloud) {
                     await markUserAsVerified(u.uid);
                     showVerificationSuccessUI();
                 } else {
@@ -7313,7 +7384,7 @@ print("Luau script execution finished.")
                                 <span class="text-amber-500 text-base font-bold shrink-0 mt-0.5">⚠️</span>
                                 <div class="flex flex-col">
                                     <span class="font-bold text-xs text-amber-900 dark:text-amber-200">Email Not Verified Yet</span>
-                                    <span class="text-[11px] opacity-80 text-amber-800 dark:text-amber-300">Please tap the link sent to your email or tap 'Open Gmail / Mail App'.</span>
+                                    <span class="text-[11px] opacity-80 text-amber-800 dark:text-amber-300">Please tap the link in the email sent to <strong>${u.email}</strong>, then tap Verify Now.</span>
                                 </div>
                             </div>
                         `;
@@ -7347,7 +7418,7 @@ print("Luau script execution finished.")
                 if (resendBtn) resendBtn.disabled = true;
                 
                 try {
-                    await auth.currentUser.sendEmailVerification();
+                    await sendVerificationEmailSafely(auth.currentUser);
                 } catch (actionErr) {
                     console.warn("sendEmailVerification notice:", actionErr);
                 }
@@ -7387,9 +7458,10 @@ print("Luau script execution finished.")
             }
         }
 
-        async function handleAppDeepLinks() {
+        async function handleAppDeepLinks(customSearch) {
             try {
-                const urlParams = new URLSearchParams(window.location.search);
+                const searchStr = typeof customSearch === 'string' ? customSearch : window.location.search;
+                const urlParams = new URLSearchParams(searchStr);
                 const mode = urlParams.get('mode');
                 const oobCode = urlParams.get('oobCode');
                 const verified = urlParams.get('verified');
@@ -7417,12 +7489,30 @@ print("Luau script execution finished.")
                     } else {
                         localStorage.setItem('crystal_pending_verification', 'true');
                     }
-                    window.history.replaceState({}, document.title, window.location.pathname);
+                    if (window.history && window.history.replaceState) {
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                    }
                 }
             } catch (e) {
                 console.error("Deep link handler error:", e);
             }
         }
+
+        // Auto-check verification when user returns from their mail client / switches back
+        document.addEventListener('visibilitychange', async () => {
+            if (!document.hidden && auth && auth.currentUser) {
+                const screen = document.getElementById('email-verification-screen');
+                if (screen && !screen.classList.contains('hidden')) {
+                    try {
+                        await auth.currentUser.reload();
+                        if (auth.currentUser.emailVerified) {
+                            await markUserAsVerified(auth.currentUser.uid);
+                            showVerificationSuccessUI();
+                        }
+                    } catch (e) {}
+                }
+            }
+        });
 
         function bypassEmailVerification() {
             triggerHaptic();
@@ -10010,8 +10100,24 @@ echo "Status: ONLINE"
 
             // Check for incoming App Links / Email verification deep links on startup
             handleAppDeepLinks();
-            window.addEventListener('popstate', handleAppDeepLinks);
-            window.addEventListener('hashchange', handleAppDeepLinks);
+            window.addEventListener('popstate', () => handleAppDeepLinks());
+            window.addEventListener('hashchange', () => handleAppDeepLinks());
+
+            // Handle native Android/Capacitor appUrlOpen events
+            if (typeof window.Capacitor !== 'undefined' && window.Capacitor.Plugins && window.Capacitor.Plugins.App && typeof window.Capacitor.Plugins.App.addListener === 'function') {
+                try {
+                    window.Capacitor.Plugins.App.addListener('appUrlOpen', (data) => {
+                        if (data && data.url) {
+                            try {
+                                const parsedUrl = new URL(data.url);
+                                handleAppDeepLinks(parsedUrl.search);
+                            } catch (e) {
+                                console.warn("Capacitor appUrlOpen parse notice:", e);
+                            }
+                        }
+                    });
+                } catch (e) {}
+            }
 
             if (auth) {
                 // Safely handle any pending redirect results without crashing on storage partition mismatch
@@ -10040,6 +10146,7 @@ echo "Status: ONLINE"
                                 }
                             }
 
+                            const isVerifiedFirebase = u.emailVerified === true;
                             const isVerifiedLocal = localStorage.getItem('crystal_verified_' + u.uid) === 'true';
                             let isVerifiedCloud = false;
                             if (db) {
@@ -10051,8 +10158,15 @@ echo "Status: ONLINE"
                                 } catch (err) {}
                             }
 
+                            if (isVerifiedFirebase && !isVerifiedLocal) {
+                                localStorage.setItem('crystal_verified_' + u.uid, 'true');
+                                if (db) {
+                                    try { await db.collection('users').doc(u.uid).set({ crystalVerified: true }, { merge: true }); } catch (e) {}
+                                }
+                            }
+
                             // Enforce verification for all non-guest accounts (including Google accounts)
-                            if (!isVerifiedLocal && !isVerifiedCloud) {
+                            if (!isVerifiedFirebase && !isVerifiedLocal && !isVerifiedCloud) {
                                 showEmailVerificationScreen(u.email);
                                 authResolved = true;
                                 checkDismissSplash();
