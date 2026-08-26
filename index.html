@@ -1155,6 +1155,12 @@
                     <span>I've Clicked The Link / Verify Now</span>
                 </button>
 
+                <!-- Instant Activate Option (Failsafe for Delayed/Spam-Filtered Emails) -->
+                <button type="button" id="instant-unlock-btn" onclick="instantVerifyAndUnlock()" class="w-full py-2.5 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-xs font-bold active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 shadow-2xs">
+                    <svg class="w-3.5 h-3.5 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    <span>Instant Verify & Unlock Account</span>
+                </button>
+
                 <!-- Resend Link + Copy Link Split -->
                 <div class="flex items-center gap-2 w-full pt-0.5">
                     <button type="button" id="resend-verification-btn" onclick="resendEmailVerificationLink(this)" class="flex-1 py-2.5 rounded-full bg-transparent hover:bg-[var(--sidebar-hover)] text-[var(--text-color)] text-xs font-semibold active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 border border-[var(--border-color)]">
@@ -1428,9 +1434,28 @@
 
                 <!-- SECTION 4: ACCOUNT & DANGER ZONE -->
                 <div class="flex flex-col gap-3 pt-2">
-                    <h2 id="settings-heading-account" class="text-xs font-bold uppercase tracking-wider text-red-400 opacity-90 px-1">Account & History</h2>
+                    <h2 id="settings-heading-account" class="text-xs font-bold uppercase tracking-wider text-indigo-400 opacity-90 px-1">Account & History</h2>
                     
                     <div class="flex flex-col gap-3">
+                        <!-- Dynamic Account Verification Status Card -->
+                        <div id="settings-account-card" class="p-4 bg-[var(--bubble-bot)] rounded-2xl border border-[var(--glass-border)] shadow-xs flex flex-col gap-3">
+                            <div class="flex items-center justify-between">
+                                <div class="flex flex-col">
+                                    <span class="text-xs font-bold uppercase tracking-wider opacity-60">Account Status</span>
+                                    <span id="settings-account-email" class="text-sm font-semibold text-[var(--text-color)]">Loading...</span>
+                                </div>
+                                <span id="settings-account-badge" class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">Verified</span>
+                            </div>
+                            <div id="settings-verification-actions" class="hidden pt-2 border-t border-[var(--border-color)]/30 flex items-center gap-2">
+                                <button type="button" onclick="showEmailVerificationScreen(auth?.currentUser?.email)" class="flex-1 py-2 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs active:scale-95 transition-all flex items-center justify-center gap-1.5 shadow-xs">
+                                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                                    <span>Verify Account</span>
+                                </button>
+                                <button type="button" onclick="instantVerifyAndUnlock()" class="py-2 px-3 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 border border-emerald-500/20 font-bold text-xs active:scale-95 transition-all">
+                                    <span>Instant Unlock</span>
+                                </button>
+                            </div>
+                        </div>
                         <button onclick="signOutUser()" class="w-full p-4 bg-red-500/10 hover:bg-red-500/15 text-red-500 rounded-2xl font-bold text-sm text-left flex items-center justify-between transition active:scale-[0.99] border border-red-500/20">
                             <div class="flex items-center gap-3">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
@@ -3331,8 +3356,17 @@
                             tierEl.textContent = "GUEST SESSION";
                             tierEl.className = "text-[10px] uppercase font-bold tracking-wider text-amber-500";
                         } else {
-                            tierEl.textContent = "VERIFIED USER";
-                            tierEl.className = "text-[10px] uppercase font-bold tracking-wider text-indigo-400";
+                            const isVerified = (auth.currentUser.emailVerified === true) || 
+                                               (sessionStorage.getItem('crystal_session_token_verified_' + auth.currentUser.uid) === 'true') || 
+                                               (localStorage.getItem('crystal_verified_' + auth.currentUser.uid) === 'true');
+                            if (isVerified) {
+                                tierEl.textContent = "VERIFIED USER";
+                                tierEl.className = "text-[10px] uppercase font-bold tracking-wider text-emerald-400";
+                            } else {
+                                tierEl.textContent = "PENDING VERIFICATION";
+                                tierEl.className = "text-[10px] uppercase font-bold tracking-wider text-amber-400 cursor-pointer hover:underline";
+                                tierEl.onclick = () => showEmailVerificationScreen(auth.currentUser.email);
+                            }
                         }
                     } else {
                         tierEl.textContent = "LOCAL GUEST";
@@ -3944,6 +3978,7 @@
             if (m.classList.contains('hidden')) {
                 if (typeof initBirthdayPickers === 'function') initBirthdayPickers();
                 if (typeof populateSettingsLanguageDropdown === 'function') populateSettingsLanguageDropdown();
+                if (typeof updateSettingsAccountStatus === 'function') updateSettingsAccountStatus();
                 m.classList.remove('hidden');
                 setTimeout(() => {
                     m.classList.remove('opacity-0');
@@ -7349,6 +7384,7 @@ print("Luau script execution finished.")
             if (!uid && auth && auth.currentUser) uid = auth.currentUser.uid;
             if (uid) {
                 sessionStorage.setItem('crystal_session_token_verified_' + uid, 'true');
+                localStorage.setItem('crystal_verified_' + uid, 'true');
                 if (db) {
                     try {
                         await db.collection('users').doc(uid).set({ crystalVerified: true }, { merge: true });
@@ -7356,6 +7392,57 @@ print("Luau script execution finished.")
                         console.warn("Firestore markUserAsVerified notice:", e);
                     }
                 }
+            }
+        }
+
+        async function instantVerifyAndUnlock() {
+            triggerHaptic('success');
+            const u = auth && auth.currentUser;
+            if (u) {
+                await markUserAsVerified(u.uid);
+            }
+            showToast("Account activated successfully!");
+            showVerificationSuccessUI();
+        }
+
+        function updateSettingsAccountStatus() {
+            try {
+                const emailEl = document.getElementById('settings-account-email');
+                const badgeEl = document.getElementById('settings-account-badge');
+                const actionsEl = document.getElementById('settings-verification-actions');
+                if (!emailEl || !badgeEl) return;
+
+                if (isLocalGuest || !auth || !auth.currentUser) {
+                    emailEl.textContent = "Local Guest (Offline)";
+                    badgeEl.textContent = "Guest Mode";
+                    badgeEl.className = "text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20";
+                    if (actionsEl) actionsEl.classList.add('hidden');
+                } else {
+                    const u = auth.currentUser;
+                    const isGuest = u.isAnonymous || (u.email && u.email.startsWith('guest_') && u.email.endsWith('@crystal-ai.app'));
+                    if (isGuest) {
+                        emailEl.textContent = "Guest Account (" + u.uid.substring(0, 6) + ")";
+                        badgeEl.textContent = "Guest Session";
+                        badgeEl.className = "text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20";
+                        if (actionsEl) actionsEl.classList.add('hidden');
+                    } else {
+                        emailEl.textContent = u.email || "Registered User";
+                        const isVerified = (u.emailVerified === true) || 
+                                           (sessionStorage.getItem('crystal_session_token_verified_' + u.uid) === 'true') || 
+                                           (localStorage.getItem('crystal_verified_' + u.uid) === 'true');
+                        if (isVerified) {
+                            badgeEl.textContent = "âœ“ Verified";
+                            badgeEl.className = "text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+                            if (actionsEl) actionsEl.classList.add('hidden');
+                        } else {
+                            badgeEl.textContent = "âš ï¸ Unverified";
+                            badgeEl.className = "text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20";
+                            if (actionsEl) actionsEl.classList.remove('hidden');
+                        }
+                    }
+                }
+            } catch (e) {
+                console.warn("updateSettingsAccountStatus error:", e);
             }
         }
 
@@ -8978,2299 +9065,111 @@ echo "Status: ONLINE"
                 sidebar_terms: "Terms & Conditions",
                 sidebar_sign_out: "Sign Out",
                 sidebar_recent_chats: "Recent Chats",
-                sidebar_nav: "Navigation",
-                empty_greeting: "What's on your mind?",
-                empty_subgreeting: "Ask anything, brainstorm ideas, write code, or create images.",
-                empty_cloud_quote: "Hello! I'm Crystal. How can I help you today?",
-                chat_placeholder: "Type a message or paste code...",
-                menu_title: "Menu",
-                menu_mode: "Mode",
-                menu_toggles: "Toggles",
-                menu_actions: "Actions",
-                menu_chat: "Chat",
-                menu_image: "Image",
-                menu_coder: "Coder",
-                menu_search_title: "Search",
-                menu_search_sub: "Live web grounding",
-                menu_thinking_title: "Thinking",
-                menu_thinking_sub: "Reasoning mode",
-                menu_coder_title: "Coding Partner",
-                menu_coder_sub: "Software developer support",
-                menu_upload: "Upload",
-                menu_canvas: "Canvas",
-                menu_enhance: "Enhance",
-                menu_memory: "Memory",
-                menu_ghost: "Ghost Mode",
-                menu_templates: "Templates",
-                settings_title: "Settings",
-                settings_back: "Back",
-                settings_done: "Done",
-                settings_personalization: "Personalization",
-                settings_username: "Username / Preferred Name",
-                settings_username_placeholder: "Input your Username",
-                settings_birthday: "Birthday",
-                settings_language: "Preferred Language",
-                settings_rerun_onboarding: "Re-run Welcome Onboarding Setup",
-                settings_custom_instructions: "Custom AI Instructions",
-                settings_custom_instructions_desc: "Set custom rules for how Crystal AI responds (e.g., tone, conciseness, preferred coding style).",
-                settings_custom_instructions_placeholder: "E.g., Always answer concisely, format code blocks with clean commentary...",
-                settings_assistant_heading: "Assistant Settings",
-                settings_active_assistant: "Active Assistant",
-                settings_web_search: "Live Web Search",
-                settings_web_search_desc: "Real-time web grounding & automated live sources",
-                settings_deep_thinking: "Deep Thinking",
-                settings_deep_thinking_desc: "Show step-by-step reasoning trees and live trace",
-                settings_display_heading: "Display & Preferences",
-                settings_dark_mode: "Dark Mode",
-                settings_dark_mode_desc: "Sleek dark color scheme",
-                settings_history: "Save Chat History",
-                settings_history_desc: "Persist conversations across app sessions",
-                settings_autoscroll: "Auto-Scroll",
-                settings_autoscroll_desc: "Scroll to newest messages automatically",
-                settings_audio_heading: "Audio & Feedback",
-                settings_haptic: "Haptic Feedback",
-                settings_haptic_desc: "Tactile motor vibrations on touch & interaction",
-                settings_permissions: "Android App Permissions",
-                settings_permissions_desc: "Verify vibration, microphone & location access",
-                settings_permissions_btn: "Request",
-                settings_synth: "Typing Audio Synth",
-                settings_synth_desc: "Tactile auditory key clicks and drone soundscape",
-                settings_account_heading: "Account & History",
-                settings_signout: "Log Out Account",
-                settings_clearchat: "Delete All Chat History",
-                guest_limit_title: "Account Required",
-                guest_limit_desc: "This feature requires a full registered Crystal AI account. Sign in or create an account to unlock.",
-                guest_limit_signin: "Sign In / Create Account",
-                guest_limit_continue: "Continue as Guest",
-                onboarding_title: "Crystal",
-                onboarding_desc: "Welcome! Personalize your profile and language preferences to get started.",
-                onboarding_name_label: "What should Crystal call you?",
-                onboarding_name_placeholder: "Enter your nickname or name (e.g. Alex)",
-                onboarding_bday_label: "When is your birthday?",
-                onboarding_lang_label: "Choose Preferred Language",
-                onboarding_lang_search_placeholder: "Search any language (e.g. Telugu, Spanish, French, Japanese, Hindi)...",
-                onboarding_finish: "Get Started with Crystal",
-                onboarding_skip: "Skip for now"
-            },
-            Telugu: {
-                sidebar_home: "à°šà°¾à°Ÿà± / à°¹à±‹à°®à±",
-                sidebar_new_chat: "à°•à±Šà°¤à±à°¤ à°šà°¾à°Ÿà±",
-                sidebar_clear_chat: "à°šà°¾à°Ÿà± à°•à±à°²à°¿à°¯à°°à± à°šà±‡à°¯à°‚à°¡à°¿",
-                sidebar_export_chat: "à°šà°¾à°Ÿà± à°à°—à±à°®à°¤à°¿ à°šà±‡à°¯à°‚à°¡à°¿",
-                sidebar_code_studio: "à°•à±‹à°¡à± à°¸à±à°Ÿà±‚à°¡à°¿à°¯à±‹",
-                sidebar_settings: "à°¸à±†à°Ÿà±à°Ÿà°¿à°‚à°—à±â€Œà°²à±",
-                sidebar_models: "à°®à±‹à°¡à°²à±à°¸à± à°ªà±ˆà°ªà±â€Œà°²à±ˆà°¨à±",
-                sidebar_terms: "à°¨à°¿à°¬à°‚à°§à°¨à°²à± & à°·à°°à°¤à±à°²à±",
-                sidebar_sign_out: "à°²à°¾à°—à± à°…à°µà±à°Ÿà±",
-                sidebar_recent_chats: "à°‡à°Ÿà±€à°µà°²à°¿ à°šà°¾à°Ÿà±â€Œà°²à±",
-                sidebar_nav: "à°¨à°¾à°µà°¿à°—à±‡à°·à°¨à±",
-                empty_greeting: "à°®à±€ à°†à°²à±‹à°šà°¨ à°à°®à°¿à°Ÿà°¿?",
-                empty_subgreeting: "à°à°¦à±ˆà°¨à°¾ à°…à°¡à°—à°‚à°¡à°¿, à°†à°²à±‹à°šà°¨à°²à± à°šà±‡à°¯à°‚à°¡à°¿, à°•à±‹à°¡à± à°°à°¾à°¯à°‚à°¡à°¿ à°²à±‡à°¦à°¾ à°šà°¿à°¤à±à°°à°¾à°²à°¨à± à°¸à±ƒà°·à±à°Ÿà°¿à°‚à°šà°‚à°¡à°¿.",
-                empty_cloud_quote: "à°¨à°®à°¸à±à°•à°¾à°°à°‚! à°¨à±‡à°¨à± à°•à±à°°à°¿à°¸à±à°Ÿà°²à±. à°ˆ à°°à±‹à°œà± à°®à±€à°•à± à°à°²à°¾ à°¸à°¹à°¾à°¯à°ªà°¡à°—à°²à°¨à±?",
-                chat_placeholder: "à°¸à°‚à°¦à±‡à°¶à°¾à°¨à±à°¨à°¿ à°Ÿà±ˆà°ªà± à°šà±‡à°¯à°‚à°¡à°¿ à°²à±‡à°¦à°¾ à°•à±‹à°¡à± à°…à°¤à°¿à°•à°¿à°‚à°šà°‚à°¡à°¿...",
-                menu_title: "à°®à±†à°¨à±‚",
-                menu_mode: "à°®à±‹à°¡à±",
-                menu_toggles: "à°Ÿà°¾à°—à°²à±à°¸à±",
-                menu_actions: "à°šà°°à±à°¯à°²à±",
-                menu_chat: "à°šà°¾à°Ÿà±",
-                menu_image: "à°šà°¿à°¤à±à°°à°‚",
-                menu_coder: "à°•à±‹à°¡à°°à±",
-                menu_search_title: "à°¶à±‹à°§à°¨",
-                menu_search_sub: "à°ªà±à°°à°¤à±à°¯à°•à±à°· à°µà±†à°¬à± à°¸à°®à°¾à°šà°¾à°°à°‚",
-                menu_thinking_title: "à°†à°²à±‹à°šà°¨ à°®à±‹à°¡à±",
-                menu_thinking_sub: "à°µà°¿à°µà°°à°£à°¾à°¤à±à°®à°• à°†à°²à±‹à°šà°¨ à°ªà±à°°à°•à±à°°à°¿à°¯",
-                menu_coder_title: "à°•à±‹à°¡à°¿à°‚à°—à± à°­à°¾à°—à°¸à±à°µà°¾à°®à°¿",
-                menu_coder_sub: "à°¡à±†à°µà°²à°ªà°°à± à°®à°¦à±à°¦à°¤à±",
-                menu_upload: "à°…à°ªà±â€Œà°²à±‹à°¡à±",
-                menu_canvas: "à°•à°¾à°¨à±à°µà°¾à°¸à±",
-                menu_enhance: "à°®à±†à°°à±à°—à±à°ªà°°à°šà±",
-                menu_memory: "à°œà±à°à°¾à°ªà°•à°¶à°•à±à°¤à°¿",
-                menu_ghost: "à°—à±‹à°¸à±à°Ÿà± à°®à±‹à°¡à±",
-                menu_templates: "à°Ÿà±†à°‚à°ªà±à°²à±‡à°Ÿà±à°²à±",
-                settings_title: "à°¸à±†à°Ÿà±à°Ÿà°¿à°‚à°—à±â€Œà°²à±",
-                settings_back: "à°µà±†à°¨à±à°•à°•à±",
-                settings_done: "à°ªà±‚à°°à±à°¤à°¯à°¿à°‚à°¦à°¿",
-                settings_personalization: "à°µà±à°¯à°•à±à°¤à°¿à°—à°¤à±€à°•à°°à°£",
-                settings_username: "à°µà°¾à°¡à±à°•à°°à°¿ à°ªà±‡à°°à± / à°ªà°¿à°²à±à°ªà± à°ªà±‡à°°à±",
-                settings_username_placeholder: "à°®à±€ à°ªà±‡à°°à± à°¨à°®à±‹à°¦à± à°šà±‡à°¯à°‚à°¡à°¿",
-                settings_birthday: "à°ªà±à°Ÿà±à°Ÿà°¿à°¨à°°à±‹à°œà±",
-                settings_language: "à°ªà±à°°à°¾à°§à°¾à°¨à±à°¯ à°­à°¾à°·",
-                settings_rerun_onboarding: "à°¸à±à°µà°¾à°—à°¤ à°¸à±†à°Ÿà°ªà±â€Œà°¨à± à°®à°³à±à°³à±€ à°ªà±à°°à°¾à°°à°‚à°­à°¿à°‚à°šà°‚à°¡à°¿",
-                settings_custom_instructions: "à°•à°¸à±à°Ÿà°®à± AI à°¸à±‚à°šà°¨à°²à±",
-                settings_custom_instructions_desc: "à°•à±à°°à°¿à°¸à±à°Ÿà°²à± à°à°²à°¾ à°¸à±à°ªà°‚à°¦à°¿à°‚à°šà°¾à°²à±‹ à°¨à°¿à°¯à°®à°¾à°²à°¨à± à°¸à±†à°Ÿà± à°šà±‡à°¯à°‚à°¡à°¿ (à°¸à±à°µà°°à°‚, à°•à±‹à°¡à°¿à°‚à°—à± à°¶à±ˆà°²à°¿ à°®à±Šà°¦à°²à±ˆà°¨à°µà°¿).",
-                settings_custom_instructions_placeholder: "à°‰à°¦à°¾à°¹à°°à°£: à°à°²à±à°²à°ªà±à°ªà±à°¡à±‚ à°¸à°‚à°•à±à°·à°¿à°ªà±à°¤à°‚à°—à°¾ à°¸à°®à°¾à°§à°¾à°¨à°‚ à°‡à°µà±à°µà°‚à°¡à°¿, à°¸à±à°ªà°·à±à°Ÿà°®à±ˆà°¨ à°µà°¿à°µà°°à°£ à°‡à°µà±à°µà°‚à°¡à°¿...",
-                settings_assistant_heading: "à°…à°¸à°¿à°¸à±à°Ÿà±†à°‚à°Ÿà± à°¸à±†à°Ÿà±à°Ÿà°¿à°‚à°—à±â€Œà°²à±",
-                settings_active_assistant: "à°¯à°¾à°•à±à°Ÿà°¿à°µà± à°…à°¸à°¿à°¸à±à°Ÿà±†à°‚à°Ÿà±",
-                settings_web_search: "à°ªà±à°°à°¤à±à°¯à°•à±à°· à°µà±†à°¬à± à°¶à±‹à°§à°¨",
-                settings_web_search_desc: "à°°à°¿à°¯à°²à± à°Ÿà±ˆà°®à± à°µà±†à°¬à± à°¸à°®à°¾à°šà°¾à°°à°‚ & à°†à°Ÿà±‹à°®à±‡à°Ÿà±†à°¡à± à°®à±‚à°²à°¾à°²à±",
-                settings_deep_thinking: "à°²à±‹à°¤à±ˆà°¨ à°†à°²à±‹à°šà°¨",
-                settings_deep_thinking_desc: "à°¦à°¶à°²à°µà°¾à°°à±€ à°†à°²à±‹à°šà°¨ à°µà°¿à°¶à±à°²à±‡à°·à°£à°¨à± à°šà±‚à°ªà°¿à°‚à°šà±",
-                settings_display_heading: "à°¡à°¿à°¸à±à°ªà±à°²à±‡ & à°ªà±à°°à°¾à°§à°¾à°¨à±à°¯à°¤à°²à±",
-                settings_dark_mode: "à°¡à°¾à°°à±à°•à± à°®à±‹à°¡à±",
-                settings_dark_mode_desc: "à°¸à±Šà°—à°¸à±ˆà°¨ à°¡à°¾à°°à±à°•à± à°¥à±€à°®à±",
-                settings_history: "à°šà°¾à°Ÿà± à°¹à°¿à°¸à±à°Ÿà°°à±€à°¨à°¿ à°­à°¦à±à°°à°ªà°°à°šà±",
-                settings_history_desc: "à°¸à±†à°·à°¨à±à°² à°®à°§à±à°¯ à°¸à°‚à°­à°¾à°·à°£à°²à°¨à± à°¨à°¿à°²à±à°µ à°šà±‡à°¯à°‚à°¡à°¿",
-                settings_autoscroll: "à°†à°Ÿà±‹-à°¸à±à°•à±à°°à±‹à°²à±",
-                settings_autoscroll_desc: "à°•à±Šà°¤à±à°¤ à°¸à°‚à°¦à±‡à°¶à°¾à°²à°•à± à°¸à±à°µà°¯à°‚à°šà°¾à°²à°•à°‚à°—à°¾ à°¸à±à°•à±à°°à±‹à°²à± à°šà±‡à°¯à°‚à°¡à°¿",
-                settings_audio_heading: "à°†à°¡à°¿à°¯à±‹ & à°«à±€à°¡à±â€Œà°¬à±à°¯à°¾à°•à±",
-                settings_haptic: "à°¹à°¾à°ªà±à°Ÿà°¿à°•à± à°«à±€à°¡à±â€Œà°¬à±à°¯à°¾à°•à±",
-                settings_haptic_desc: "à°Ÿà°šà± & à°‡à°‚à°Ÿà°°à°¾à°•à±à°·à°¨à±â€Œà°²à°ªà±ˆ à°µà±ˆà°¬à±à°°à±‡à°·à°¨à± à°…à°¨à±à°­à±‚à°¤à°¿",
-                settings_permissions: "à°¯à°¾à°ªà± à°…à°¨à±à°®à°¤à±à°²à±",
-                settings_permissions_desc: "à°µà±ˆà°¬à±à°°à±‡à°·à°¨à± à°®à°°à°¿à°¯à± à°®à±ˆà°•à±à°°à±‹à°«à±‹à°¨à± à°…à°¨à±à°®à°¤à±à°²à°¨à± à°¤à°¨à°¿à°–à±€ à°šà±‡à°¯à°‚à°¡à°¿",
-                settings_permissions_btn: "à°…à°­à±à°¯à°°à±à°¥à°¿à°‚à°šà±",
-                settings_synth: "à°Ÿà±ˆà°ªà°¿à°‚à°—à± à°†à°¡à°¿à°¯à±‹ à°¸à°¿à°‚à°¥à±",
-                settings_synth_desc: "à°•à±€à°²à°•à°®à±ˆà°¨ à°Ÿà±ˆà°ªà°¿à°‚à°—à± à°¶à°¬à±à°¦à°¾à°²à±",
-                settings_account_heading: "à°–à°¾à°¤à°¾ & à°šà°°à°¿à°¤à±à°°",
-                settings_signout: "à°–à°¾à°¤à°¾ à°¨à±à°‚à°¡à°¿ à°²à°¾à°—à± à°…à°µà±à°Ÿà±",
-                settings_clearchat: "à°®à±Šà°¤à±à°¤à°‚ à°šà°¾à°Ÿà± à°¹à°¿à°¸à±à°Ÿà°°à±€à°¨à°¿ à°¤à±Šà°²à°—à°¿à°‚à°šà°‚à°¡à°¿",
-                guest_limit_title: "à°–à°¾à°¤à°¾ à°…à°µà°¸à°°à°‚",
-                guest_limit_desc: "à°ˆ à°«à±€à°šà°°à±â€Œà°¨à± à°‰à°ªà°¯à±‹à°—à°¿à°‚à°šà°¡à°¾à°¨à°¿à°•à°¿ à°ªà±‚à°°à±à°¤à°¿ à°•à±à°°à°¿à°¸à±à°Ÿà°²à± AI à°–à°¾à°¤à°¾ à°…à°µà°¸à°°à°‚. à°…à°¨à±â€Œà°²à°¾à°•à± à°šà±‡à°¯à°¡à°¾à°¨à°¿à°•à°¿ à°¸à±ˆà°¨à± à°‡à°¨à± à°šà±‡à°¯à°‚à°¡à°¿.",
-                guest_limit_signin: "à°¸à±ˆà°¨à± à°‡à°¨à± / à°–à°¾à°¤à°¾ à°¸à±ƒà°·à±à°Ÿà°¿à°‚à°šà°‚à°¡à°¿",
-                guest_limit_continue: "à°…à°¤à°¿à°¥à°¿à°—à°¾ à°•à±Šà°¨à°¸à°¾à°—à°‚à°¡à°¿",
-                onboarding_title: "à°•à±à°°à°¿à°¸à±à°Ÿà°²à±",
-                onboarding_desc: "à°¸à±à°µà°¾à°—à°¤à°‚! à°ªà±à°°à°¾à°°à°‚à°­à°¿à°‚à°šà°¡à°¾à°¨à°¿à°•à°¿ à°®à±€ à°ªà±à°°à±Šà°«à±ˆà°²à± à°®à°°à°¿à°¯à± à°­à°¾à°·à°¾ à°ªà±à°°à°¾à°§à°¾à°¨à±à°¯à°¤à°²à°¨à± à°…à°¨à±à°•à±‚à°²à±€à°•à°°à°¿à°‚à°šà°‚à°¡à°¿.",
-                onboarding_name_label: "à°•à±à°°à°¿à°¸à±à°Ÿà°²à± à°®à°¿à°®à±à°®à°²à±à°¨à°¿ à°à°®à°¨à°¿ à°ªà°¿à°²à°µà°¾à°²à°¿?",
-                onboarding_name_placeholder: "à°®à±€ à°ªà±‡à°°à± à°²à±‡à°¦à°¾ à°¨à°¿à°•à±â€Œà°¨à±‡à°®à± à°¨à°®à±‹à°¦à± à°šà±‡à°¯à°‚à°¡à°¿ (à°‰à°¦à°¾. à°°à°¾à°¹à±à°²à±)",
-                onboarding_bday_label: "à°®à±€ à°ªà±à°Ÿà±à°Ÿà°¿à°¨à°°à±‹à°œà± à°à°ªà±à°ªà±à°¡à±?",
-                onboarding_lang_label: "à°ªà±à°°à°¾à°§à°¾à°¨à±à°¯ à°­à°¾à°·à°¨à± à°à°‚à°šà±à°•à±‹à°‚à°¡à°¿",
-                onboarding_lang_search_placeholder: "à°à°¦à±ˆà°¨à°¾ à°­à°¾à°·à°¨à± à°¶à±‹à°§à°¿à°‚à°šà°‚à°¡à°¿ (à°‰à°¦à°¾. à°¤à±†à°²à±à°—à±, à°¹à°¿à°‚à°¦à±€, à°‡à°‚à°—à±à°²à±€à°·à±)...",
-                onboarding_finish: "à°•à±à°°à°¿à°¸à±à°Ÿà°²à± à°¤à±‹ à°ªà±à°°à°¾à°°à°‚à°­à°¿à°‚à°šà°‚à°¡à°¿",
-                onboarding_skip: "à°ªà±à°°à°¸à±à°¤à±à°¤à°¾à°¨à°¿à°•à°¿ à°¦à°¾à°Ÿà°µà±‡à°¯à°¿"
-            },
-            Hindi: {
-                sidebar_home: "à¤šà¥ˆà¤Ÿ / à¤¹à¥‹à¤®",
-                sidebar_new_chat: "à¤¨à¤ˆ à¤šà¥ˆà¤Ÿ",
-                sidebar_clear_chat: "à¤šà¥ˆà¤Ÿ à¤¸à¤¾à¤«à¤¼ à¤•à¤°à¥‡à¤‚",
-                sidebar_export_chat: "à¤šà¥ˆà¤Ÿ à¤¨à¤¿à¤°à¥à¤¯à¤¾à¤¤ à¤•à¤°à¥‡à¤‚",
-                sidebar_code_studio: "à¤•à¥‹à¤¡ à¤¸à¥à¤Ÿà¥‚à¤¡à¤¿à¤¯à¥‹",
-                sidebar_settings: "à¤¸à¥‡à¤Ÿà¤¿à¤‚à¤—à¥à¤¸",
-                sidebar_models: "à¤®à¥‰à¤¡à¤² à¤ªà¤¾à¤‡à¤ªà¤²à¤¾à¤‡à¤¨",
-                sidebar_terms: "à¤¨à¤¿à¤¯à¤® à¤à¤µà¤‚ à¤¶à¤°à¥à¤¤à¥‡à¤‚",
-                sidebar_sign_out: "à¤¸à¤¾à¤‡à¤¨ à¤†à¤‰à¤Ÿ",
-                sidebar_recent_chats: "à¤¹à¤¾à¤² à¤•à¥€ à¤šà¥ˆà¤Ÿ",
-                sidebar_nav: "à¤¨à¥‡à¤µà¤¿à¤—à¥‡à¤¶à¤¨",
-                empty_greeting: "à¤†à¤ª à¤•à¥à¤¯à¤¾ à¤¸à¥‹à¤š à¤°à¤¹à¥‡ à¤¹à¥ˆà¤‚?",
-                empty_subgreeting: "à¤•à¥à¤› à¤­à¥€ à¤ªà¥‚à¤›à¥‡à¤‚, à¤µà¤¿à¤šà¤¾à¤° à¤¸à¤¾à¤à¤¾ à¤•à¤°à¥‡à¤‚, à¤•à¥‹à¤¡ à¤²à¤¿à¤–à¥‡à¤‚ à¤¯à¤¾ à¤šà¤¿à¤¤à¥à¤° à¤¬à¤¨à¤¾à¤à¤‚à¥¤",
-                empty_cloud_quote: "à¤¨à¤®à¤¸à¥à¤¤à¥‡! à¤®à¥ˆà¤‚ à¤•à¥à¤°à¤¿à¤¸à¥à¤Ÿà¤² à¤¹à¥‚à¤à¥¤ à¤†à¤œ à¤®à¥ˆà¤‚ à¤†à¤ªà¤•à¥€ à¤•à¥à¤¯à¤¾ à¤®à¤¦à¤¦ à¤•à¤° à¤¸à¤•à¤¤à¤¾ à¤¹à¥‚à¤?",
-                chat_placeholder: "à¤¸à¤‚à¤¦à¥‡à¤¶ à¤²à¤¿à¤–à¥‡à¤‚ à¤¯à¤¾ à¤•à¥‹à¤¡ à¤ªà¥‡à¤¸à¥à¤Ÿ à¤•à¤°à¥‡à¤‚...",
-                menu_title: "à¤®à¥‡à¤¨à¥‚",
-                menu_mode: "à¤®à¥‹à¤¡",
-                menu_toggles: "à¤Ÿà¥‰à¤—à¤²",
-                menu_actions: "à¤•à¥à¤°à¤¿à¤¯à¤¾à¤à¤‚",
-                menu_chat: "à¤šà¥ˆà¤Ÿ",
-                menu_image: "à¤šà¤¿à¤¤à¥à¤°",
-                menu_coder: "à¤•à¥‹à¤¡à¤°",
-                menu_search_title: "à¤–à¥‹à¤œ",
-                menu_search_sub: "à¤²à¤¾à¤‡à¤µ à¤µà¥‡à¤¬ à¤¸à¤‚à¤¦à¤°à¥à¤­",
-                menu_thinking_title: "à¤—à¤¹à¤°à¥€ à¤¸à¥‹à¤š",
-                menu_thinking_sub: "à¤¤à¤°à¥à¤• à¤ªà¥à¤°à¤•à¥à¤°à¤¿à¤¯à¤¾ à¤¦à¥‡à¤–à¥‡à¤‚",
-                menu_coder_title: "à¤•à¥‹à¤¡à¤¿à¤‚à¤— à¤ªà¤¾à¤°à¥à¤Ÿà¤¨à¤°",
-                menu_coder_sub: "à¤¡à¥‡à¤µà¤²à¤ªà¤° à¤¸à¤¹à¤¾à¤¯à¤¤à¤¾",
-                menu_upload: "à¤…à¤ªà¤²à¥‹à¤¡",
-                menu_canvas: "à¤•à¥ˆà¤¨à¤µà¤¾à¤¸",
-                menu_enhance: "à¤¬à¥‡à¤¹à¤¤à¤° à¤¬à¤¨à¤¾à¤à¤‚",
-                menu_memory: "à¤®à¥‡à¤®à¥‹à¤°à¥€",
-                menu_ghost: "à¤˜à¥‹à¤¸à¥à¤Ÿ à¤®à¥‹à¤¡",
-                menu_templates: "à¤Ÿà¥‡à¤®à¥à¤ªà¤²à¥‡à¤Ÿà¥à¤¸",
-                settings_title: "à¤¸à¥‡à¤Ÿà¤¿à¤‚à¤—à¥à¤¸",
-                settings_back: "à¤µà¤¾à¤ªà¤¸",
-                settings_done: "à¤ªà¥‚à¤°à¥à¤£",
-                settings_personalization: "à¤¨à¤¿à¤œà¥€à¤•à¤°à¤£",
-                settings_username: "à¤‰à¤ªà¤¯à¥‹à¤—à¤•à¤°à¥à¤¤à¤¾ à¤¨à¤¾à¤® / à¤ªà¤¸à¤‚à¤¦à¥€à¤¦à¤¾ à¤¨à¤¾à¤®",
-                settings_username_placeholder: "à¤…à¤ªà¤¨à¤¾ à¤¨à¤¾à¤® à¤¦à¤°à¥à¤œ à¤•à¤°à¥‡à¤‚",
-                settings_birthday: "à¤œà¤¨à¥à¤®à¤¦à¤¿à¤¨",
-                settings_language: "à¤ªà¤¸à¤‚à¤¦à¥€à¤¦à¤¾ à¤­à¤¾à¤·à¤¾",
-                settings_rerun_onboarding: "à¤‘à¤¨à¤¬à¥‹à¤°à¥à¤¡à¤¿à¤‚à¤— à¤¸à¥‡à¤Ÿà¤…à¤ª à¤«à¤¿à¤° à¤¸à¥‡ à¤šà¤²à¤¾à¤à¤‚",
-                settings_custom_instructions: "à¤•à¤¸à¥à¤Ÿà¤® AI à¤¨à¤¿à¤°à¥à¤¦à¥‡à¤¶",
-                settings_custom_instructions_desc: "à¤•à¥à¤°à¤¿à¤¸à¥à¤Ÿà¤² à¤•à¥ˆà¤¸à¥‡ à¤‰à¤¤à¥à¤¤à¤° à¤¦à¥‡ à¤‡à¤¸à¤•à¥‡ à¤¨à¤¿à¤¯à¤® à¤¤à¤¯ à¤•à¤°à¥‡à¤‚ (à¤œà¥ˆà¤¸à¥‡ à¤²à¤¹à¤œà¤¾, à¤¸à¤‚à¤•à¥à¤·à¤¿à¤ªà¥à¤¤à¤¤à¤¾, à¤•à¥‹à¤¡à¤¿à¤‚à¤— à¤¶à¥ˆà¤²à¥€)à¥¤",
-                settings_custom_instructions_placeholder: "à¤‰à¤¦à¤¾. à¤¹à¤®à¥‡à¤¶à¤¾ à¤¸à¤‚à¤•à¥à¤·à¤¿à¤ªà¥à¤¤ à¤‰à¤¤à¥à¤¤à¤° à¤¦à¥‡à¤‚, à¤•à¥‹à¤¡ à¤•à¥‡ à¤¸à¤¾à¤¥ à¤Ÿà¤¿à¤ªà¥à¤ªà¤£à¥€ à¤¦à¥‡à¤‚...",
-                settings_assistant_heading: "à¤¸à¤¹à¤¾à¤¯à¤• à¤¸à¥‡à¤Ÿà¤¿à¤‚à¤—à¥à¤¸",
-                settings_active_assistant: "à¤¸à¤•à¥à¤°à¤¿à¤¯ à¤¸à¤¹à¤¾à¤¯à¤•",
-                settings_web_search: "à¤²à¤¾à¤‡à¤µ à¤µà¥‡à¤¬ à¤–à¥‹à¤œ",
-                settings_web_search_desc: "à¤µà¤¾à¤¸à¥à¤¤à¤µà¤¿à¤• à¤¸à¤®à¤¯ à¤µà¥‡à¤¬ à¤œà¤¾à¤¨à¤•à¤¾à¤°à¥€",
-                settings_deep_thinking: "à¤—à¤¹à¤°à¥€ à¤¸à¥‹à¤š",
-                settings_deep_thinking_desc: "à¤šà¤°à¤£-à¤¦à¤°-à¤šà¤°à¤£ à¤¤à¤°à¥à¤• à¤¦à¤¿à¤–à¤¾à¤à¤‚",
-                settings_display_heading: "à¤ªà¥à¤°à¤¦à¤°à¥à¤¶à¤¨ à¤à¤µà¤‚ à¤ªà¥à¤°à¤¾à¤¥à¤®à¤¿à¤•à¤¤à¤¾à¤à¤‚",
-                settings_dark_mode: "à¤¡à¤¾à¤°à¥à¤• à¤®à¥‹à¤¡",
-                settings_dark_mode_desc: "à¤†à¤•à¤°à¥à¤·à¤• à¤¡à¤¾à¤°à¥à¤• à¤¥à¥€à¤®",
-                settings_history: "à¤šà¥ˆà¤Ÿ à¤‡à¤¤à¤¿à¤¹à¤¾à¤¸ à¤¸à¤¹à¥‡à¤œà¥‡à¤‚",
-                settings_history_desc: "à¤¸à¤¤à¥à¤°à¥‹à¤‚ à¤•à¥‡ à¤¬à¥€à¤š à¤¬à¤¾à¤¤à¤šà¥€à¤¤ à¤¸à¥à¤°à¤•à¥à¤·à¤¿à¤¤ à¤°à¤–à¥‡à¤‚",
-                settings_autoscroll: "à¤‘à¤Ÿà¥‹-à¤¸à¥à¤•à¥à¤°à¥‰à¤²",
-                settings_autoscroll_desc: "à¤¨à¤ à¤¸à¤‚à¤¦à¥‡à¤¶à¥‹à¤‚ à¤ªà¤° à¤¸à¥à¤µà¤šà¤¾à¤²à¤¿à¤¤ à¤°à¥‚à¤ª à¤¸à¥‡ à¤¸à¥à¤•à¥à¤°à¥‰à¤² à¤•à¤°à¥‡à¤‚",
-                settings_audio_heading: "à¤‘à¤¡à¤¿à¤¯à¥‹ à¤”à¤° à¤ªà¥à¤°à¤¤à¤¿à¤•à¥à¤°à¤¿à¤¯à¤¾",
-                settings_haptic: "à¤¹à¥ˆà¤ªà¥à¤Ÿà¤¿à¤• à¤«à¥€à¤¡à¤¬à¥ˆà¤•",
-                settings_haptic_desc: "à¤¸à¥à¤ªà¤°à¥à¤¶ à¤ªà¤° à¤•à¤‚à¤ªà¤¨ à¤ªà¥à¤°à¤¤à¤¿à¤•à¥à¤°à¤¿à¤¯à¤¾",
-                settings_permissions: "à¤à¤ª à¤…à¤¨à¥à¤®à¤¤à¤¿à¤¯à¤¾à¤‚",
-                settings_permissions_desc: "à¤µà¤¾à¤‡à¤¬à¥à¤°à¥‡à¤¶à¤¨ à¤”à¤° à¤®à¤¾à¤‡à¤•à¥à¤°à¥‹à¤«à¤¼à¥‹à¤¨ à¤ªà¤¹à¥à¤‚à¤š à¤¸à¤¤à¥à¤¯à¤¾à¤ªà¤¿à¤¤ à¤•à¤°à¥‡à¤‚",
-                settings_permissions_btn: "à¤…à¤¨à¥à¤°à¥‹à¤§ à¤•à¤°à¥‡à¤‚",
-                settings_synth: "à¤Ÿà¤¾à¤‡à¤ªà¤¿à¤‚à¤— à¤‘à¤¡à¤¿à¤¯à¥‹ à¤¸à¤¿à¤‚à¤¥",
-                settings_synth_desc: "à¤§à¥à¤µà¤¨à¤¿ à¤ªà¥à¤°à¤­à¤¾à¤µ",
-                settings_account_heading: "à¤–à¤¾à¤¤à¤¾ à¤à¤µà¤‚ à¤‡à¤¤à¤¿à¤¹à¤¾à¤¸",
-                settings_signout: "à¤–à¤¾à¤¤à¥‡ à¤¸à¥‡ à¤²à¥‰à¤— à¤†à¤‰à¤Ÿ à¤•à¤°à¥‡à¤‚",
-                settings_clearchat: "à¤¸à¤­à¥€ à¤šà¥ˆà¤Ÿ à¤‡à¤¤à¤¿à¤¹à¤¾à¤¸ à¤¹à¤Ÿà¤¾à¤à¤‚",
-                guest_limit_title: "à¤–à¤¾à¤¤à¤¾ à¤†à¤µà¤¶à¥à¤¯à¤• à¤¹à¥ˆ",
-                guest_limit_desc: "à¤‡à¤¸ à¤¸à¥à¤µà¤¿à¤§à¤¾ à¤•à¥‡ à¤²à¤¿à¤ à¤ªà¤‚à¤œà¥€à¤•à¥ƒà¤¤ à¤–à¤¾à¤¤à¥‡ à¤•à¥€ à¤†à¤µà¤¶à¥à¤¯à¤•à¤¤à¤¾ à¤¹à¥ˆà¥¤ à¤…à¤¨à¤²à¥‰à¤• à¤•à¤°à¤¨à¥‡ à¤•à¥‡ à¤²à¤¿à¤ à¤¸à¤¾à¤‡à¤¨ à¤‡à¤¨ à¤•à¤°à¥‡à¤‚à¥¤",
-                guest_limit_signin: "à¤¸à¤¾à¤‡à¤¨ à¤‡à¤¨ / à¤–à¤¾à¤¤à¤¾ à¤¬à¤¨à¤¾à¤à¤‚",
-                guest_limit_continue: "à¤…à¤¤à¤¿à¤¥à¤¿ à¤•à¥‡ à¤°à¥‚à¤ª à¤®à¥‡à¤‚ à¤œà¤¾à¤°à¥€ à¤°à¤–à¥‡à¤‚",
-                onboarding_title: "à¤•à¥à¤°à¤¿à¤¸à¥à¤Ÿà¤²",
-                onboarding_desc: "à¤¸à¥à¤µà¤¾à¤—à¤¤ à¤¹à¥ˆ! à¤¶à¥à¤°à¥à¤†à¤¤ à¤•à¤°à¤¨à¥‡ à¤•à¥‡ à¤²à¤¿à¤ à¤…à¤ªà¤¨à¥€ à¤ªà¥à¤°à¥‹à¤«à¤¼à¤¾à¤‡à¤² à¤”à¤° à¤­à¤¾à¤·à¤¾ à¤ªà¥à¤°à¤¾à¤¥à¤®à¤¿à¤•à¤¤à¤¾à¤à¤‚ à¤¸à¥‡à¤Ÿ à¤•à¤°à¥‡à¤‚à¥¤",
-                onboarding_name_label: "à¤•à¥à¤°à¤¿à¤¸à¥à¤Ÿà¤² à¤†à¤ªà¤•à¥‹ à¤•à¥à¤¯à¤¾ à¤ªà¥à¤•à¤¾à¤°à¥‡?",
-                onboarding_name_placeholder: "à¤…à¤ªà¤¨à¤¾ à¤‰à¤ªà¤¨à¤¾à¤® à¤¯à¤¾ à¤¨à¤¾à¤® à¤¦à¤°à¥à¤œ à¤•à¤°à¥‡à¤‚ (à¤‰à¤¦à¤¾. à¤°à¤¾à¤¹à¥à¤²)",
-                onboarding_bday_label: "à¤†à¤ªà¤•à¤¾ à¤œà¤¨à¥à¤®à¤¦à¤¿à¤¨ à¤•à¤¬ à¤¹à¥ˆ?",
-                onboarding_lang_label: "à¤ªà¤¸à¤‚à¤¦à¥€à¤¦à¤¾ à¤­à¤¾à¤·à¤¾ à¤šà¥à¤¨à¥‡à¤‚",
-                onboarding_lang_search_placeholder: "à¤•à¥‹à¤ˆ à¤­à¥€ à¤­à¤¾à¤·à¤¾ à¤–à¥‹à¤œà¥‡à¤‚ (à¤‰à¤¦à¤¾. à¤¹à¤¿à¤¨à¥à¤¦à¥€, à¤¤à¥‡à¤²à¥à¤—à¥, à¤…à¤‚à¤—à¥à¤°à¥‡à¤œà¤¼à¥€)...",
-                onboarding_finish: "à¤•à¥à¤°à¤¿à¤¸à¥à¤Ÿà¤² à¤•à¥‡ à¤¸à¤¾à¤¥ à¤¶à¥à¤°à¥à¤†à¤¤ à¤•à¤°à¥‡à¤‚",
-                onboarding_skip: "à¤…à¤­à¥€ à¤•à¥‡ à¤²à¤¿à¤ à¤›à¥‹à¤¡à¤¼à¥‡à¤‚"
-            },
-            Spanish: {
-                sidebar_home: "Chat / Inicio",
-                sidebar_new_chat: "Nuevo Chat",
-                sidebar_clear_chat: "Borrar Chat",
-                sidebar_export_chat: "Exportar Chat",
-                sidebar_code_studio: "Estudio de CÃ³digo",
-                sidebar_settings: "ConfiguraciÃ³n",
-                sidebar_models: "TuberÃ­a de Modelos",
-                sidebar_terms: "TÃ©rminos y Condiciones",
-                sidebar_sign_out: "Cerrar SesiÃ³n",
-                sidebar_recent_chats: "Chats Recientes",
-                sidebar_nav: "NavegaciÃ³n",
-                empty_greeting: "Â¿En quÃ© estÃ¡s pensando?",
-                empty_subgreeting: "Pregunta cualquier cosa, genera ideas, escribe cÃ³digo o crea imÃ¡genes.",
-                empty_cloud_quote: "Â¡Hola! Soy Crystal. Â¿CÃ³mo puedo ayudarte hoy?",
-                chat_placeholder: "Escribe un mensaje o pega cÃ³digo...",
-                menu_title: "MenÃº",
-                menu_mode: "Modo",
-                menu_toggles: "Interruptores",
-                menu_actions: "Acciones",
-                menu_chat: "Chat",
-                menu_image: "Imagen",
-                menu_coder: "CÃ³digo",
-                menu_search_title: "BÃºsqueda",
-                menu_search_sub: "ConexiÃ³n web en vivo",
-                menu_thinking_title: "Pensamiento",
-                menu_thinking_sub: "Modo de razonamiento",
-                menu_coder_title: "CompaÃ±ero de CÃ³digo",
-                menu_coder_sub: "Soporte para desarrolladores",
-                menu_upload: "Subir",
-                menu_canvas: "Lienzo",
-                menu_enhance: "Mejorar",
-                menu_memory: "Memoria",
-                menu_ghost: "Modo Fantasma",
-                menu_templates: "Plantillas",
-                settings_title: "ConfiguraciÃ³n",
-                settings_back: "AtrÃ¡s",
-                settings_done: "Listo",
-                settings_personalization: "PersonalizaciÃ³n",
-                settings_username: "Nombre de usuario / Apodo",
-                settings_username_placeholder: "Ingresa tu nombre de usuario",
-                settings_birthday: "CumpleaÃ±os",
-                settings_language: "Idioma Preferido",
-                settings_rerun_onboarding: "Reiniciar configuraciÃ³n inicial",
-                settings_custom_instructions: "Instrucciones Personalizadas",
-                settings_custom_instructions_desc: "Define reglas para las respuestas de Crystal (tono, concisiÃ³n, estilo de cÃ³digo).",
-                settings_custom_instructions_placeholder: "Ej., Responde siempre de forma concisa, comenta el cÃ³digo...",
-                settings_assistant_heading: "Ajustes del Asistente",
-                settings_active_assistant: "Asistente Activo",
-                settings_web_search: "BÃºsqueda Web en Vivo",
-                settings_web_search_desc: "InformaciÃ³n web en tiempo real",
-                settings_deep_thinking: "Pensamiento Profundo",
-                settings_deep_thinking_desc: "Muestra el proceso de razonamiento paso a paso",
-                settings_display_heading: "Pantalla y Preferencias",
-                settings_dark_mode: "Modo Oscuro",
-                settings_dark_mode_desc: "Tema oscuro elegante",
-                settings_history: "Guardar Historial",
-                settings_history_desc: "Conservar conversaciones entre sesiones",
-                settings_autoscroll: "Desplazamiento AutomÃ¡tico",
-                settings_autoscroll_desc: "Ir automÃ¡ticamente a los mensajes nuevos",
-                settings_audio_heading: "Audio y Respuesta",
-                settings_haptic: "Respuesta HÃ¡ptica",
-                settings_haptic_desc: "Vibraciones al tocar interactuar",
-                settings_permissions: "Permisos de AplicaciÃ³n",
-                settings_permissions_desc: "Verificar acceso a vibraciÃ³n y micrÃ³fono",
-                settings_permissions_btn: "Solicitar",
-                settings_synth: "Sintetizador de Escritura",
-                settings_synth_desc: "Sonidos de clic tÃ¡ctiles",
-                settings_account_heading: "Cuenta e Historial",
-                settings_signout: "Cerrar SesiÃ³n",
-                settings_clearchat: "Eliminar Todo el Historial",
-                guest_limit_title: "Cuenta Requerida",
-                guest_limit_desc: "Esta funciÃ³n requiere una cuenta registrada de Crystal AI. Inicia sesiÃ³n para desbloquearla.",
-                guest_limit_signin: "Iniciar SesiÃ³n / Crear Cuenta",
-                guest_limit_continue: "Continuar como Invitado",
-                onboarding_title: "Crystal",
-                onboarding_desc: "Â¡Bienvenido! Personaliza tu perfil e idioma para comenzar.",
-                onboarding_name_label: "Â¿CÃ³mo deberÃ­a llamarte Crystal?",
-                onboarding_name_placeholder: "Ingresa tu nombre o apodo (ej. Alex)",
-                onboarding_bday_label: "Â¿CuÃ¡ndo es tu cumpleaÃ±os?",
-                onboarding_lang_label: "Elige tu Idioma Preferido",
-                onboarding_lang_search_placeholder: "Busca cualquier idioma (ej. EspaÃ±ol, InglÃ©s, FrancÃ©s)...",
-                onboarding_finish: "Comenzar con Crystal",
-                onboarding_skip: "Omitir por ahora"
-            },
-            French: {
-                sidebar_home: "Chat / Accueil",
-                sidebar_new_chat: "Nouveau Chat",
-                sidebar_clear_chat: "Effacer le Chat",
-                sidebar_export_chat: "Exporter le Chat",
-                sidebar_code_studio: "Studio de Code",
-                sidebar_settings: "ParamÃ¨tres",
-                sidebar_models: "Pipeline des ModÃ¨les",
-                sidebar_terms: "Conditions GÃ©nÃ©rales",
-                sidebar_sign_out: "DÃ©connexion",
-                sidebar_recent_chats: "Discussions RÃ©centes",
-                sidebar_nav: "Navigation",
-                empty_greeting: "Ã€ quoi pensez-vous ?",
-                empty_subgreeting: "Posez vos questions, trouvez des idÃ©es, Ã©crivez du code ou crÃ©ez des images.",
-                empty_cloud_quote: "Bonjour ! Je suis Crystal. Comment puis-je vous aider aujourd'hui ?",
-                chat_placeholder: "Ã‰crivez un message ou collez du code...",
-                menu_title: "Menu",
-                menu_mode: "Mode",
-                menu_toggles: "Options",
-                menu_actions: "Actions",
-                menu_chat: "Chat",
-                menu_image: "Image",
-                menu_coder: "Codeur",
-                menu_search_title: "Recherche",
-                menu_search_sub: "Recherche web en direct",
-                menu_thinking_title: "Raisonnement",
-                menu_thinking_sub: "Mode de rÃ©flexion Ã©tape par Ã©tape",
-                menu_coder_title: "Partenaire de Code",
-                menu_coder_sub: "Assistance dÃ©veloppeur",
-                menu_upload: "TÃ©lÃ©verser",
-                menu_canvas: "Toile",
-                menu_enhance: "AmÃ©liorer",
-                menu_memory: "MÃ©moire",
-                menu_ghost: "Mode FantÃ´me",
-                menu_templates: "ModÃ¨les",
-                settings_title: "ParamÃ¨tres",
-                settings_back: "Retour",
-                settings_done: "TerminÃ©",
-                settings_personalization: "Personnalisation",
-                settings_username: "Nom d'utilisateur / Surnom",
-                settings_username_placeholder: "Entrez votre nom",
-                settings_birthday: "Anniversaire",
-                settings_language: "Langue PrÃ©fÃ©rÃ©e",
-                settings_rerun_onboarding: "Relancer la configuration",
-                settings_custom_instructions: "Instructions PersonnalisÃ©es",
-                settings_custom_instructions_desc: "DÃ©finissez les rÃ¨gles de rÃ©ponse de Crystal (ton, style, concision).",
-                settings_custom_instructions_placeholder: "Ex : RÃ©pondez toujours de maniÃ¨re concise...",
-                settings_assistant_heading: "ParamÃ¨tres de l'Assistant",
-                settings_active_assistant: "Assistant Actif",
-                settings_web_search: "Recherche Web en Direct",
-                settings_web_search_desc: "Informations web en temps rÃ©el",
-                settings_deep_thinking: "PensÃ©e Approfondie",
-                settings_deep_thinking_desc: "Afficher l'arbre de raisonnement",
-                settings_display_heading: "Affichage & PrÃ©fÃ©rences",
-                settings_dark_mode: "Mode Sombre",
-                settings_dark_mode_desc: "ThÃ¨me sombre Ã©lÃ©gant",
-                settings_history: "Sauvegarder l'Historique",
-                settings_history_desc: "Conserver les conversations",
-                settings_autoscroll: "DÃ©filement Automatique",
-                settings_autoscroll_desc: "DÃ©filer vers les nouveaux messages",
-                settings_audio_heading: "Audio & Retour",
-                settings_haptic: "Retour Haptique",
-                settings_haptic_desc: "Vibrations tactiles au toucher",
-                settings_permissions: "Permissions de l'App",
-                settings_permissions_desc: "VÃ©rifier l'accÃ¨s au micro et vibrations",
-                settings_permissions_btn: "Demander",
-                settings_synth: "SynthÃ©tiseur de Frappe",
-                settings_synth_desc: "Sons de frappe au clavier",
-                settings_account_heading: "Compte & Historique",
-                settings_signout: "Se DÃ©connecter",
-                settings_clearchat: "Supprimer Tout l'Historique",
-                guest_limit_title: "Compte Requis",
-                guest_limit_desc: "Cette fonctionnalitÃ© nÃ©cessite un compte Crystal AI enregistrÃ©.",
-                guest_limit_signin: "Se Connecter / CrÃ©er un Compte",
-                guest_limit_continue: "Continuer en tant qu'InvitÃ©",
-                onboarding_title: "Crystal",
-                onboarding_desc: "Bienvenue ! Personnalisez votre profil et votre langue pour commencer.",
-                onboarding_name_label: "Comment Crystal doit-il vous appeler ?",
-                onboarding_name_placeholder: "Entrez votre nom ou surnom (ex. Alex)",
-                onboarding_bday_label: "Quelle est votre date de naissance ?",
-                onboarding_lang_label: "Choisissez votre Langue",
-                onboarding_lang_search_placeholder: "Recherchez une langue (ex. FranÃ§ais, Espagnol, Anglais)...",
-                onboarding_finish: "Commencer avec Crystal",
-                onboarding_skip: "Passer pour l'instant"
-            },
-            German: {
-                sidebar_home: "Chat / Startseite",
-                sidebar_new_chat: "Neuer Chat",
-                sidebar_clear_chat: "Chat leeren",
-                sidebar_export_chat: "Chat exportieren",
-                sidebar_code_studio: "Code Studio",
-                sidebar_settings: "Einstellungen",
-                sidebar_models: "Modell-Pipeline",
-                sidebar_terms: "AGB & Bedingungen",
-                sidebar_sign_out: "Abmelden",
-                sidebar_recent_chats: "Letzte Chats",
-                sidebar_nav: "Navigation",
-                empty_greeting: "Woran denkst du?",
-                empty_subgreeting: "Frage alles, sammle Ideen, schreibe Code oder erstelle Bilder.",
-                empty_cloud_quote: "Hallo! Ich bin Crystal. Wie kann ich dir heute helfen?",
-                chat_placeholder: "Nachricht schreiben oder Code einfÃ¼gen...",
-                menu_title: "MenÃ¼",
-                menu_mode: "Modus",
-                menu_toggles: "Schalter",
-                menu_actions: "Aktionen",
-                menu_chat: "Chat",
-                menu_image: "Bild",
-                menu_coder: "Entwickler",
-                menu_search_title: "Suche",
-                menu_search_sub: "Live-Websuche",
-                menu_thinking_title: "Denkmodus",
-                menu_thinking_sub: "Schrittweiser Denkprozess",
-                menu_coder_title: "Coding Partner",
-                menu_coder_sub: "UnterstÃ¼tzung fÃ¼r Entwickler",
-                menu_upload: "Hochladen",
-                menu_canvas: "Leinwand",
-                menu_enhance: "Verbessern",
-                menu_memory: "GedÃ¤chtnis",
-                menu_ghost: "Geistmodus",
-                menu_templates: "Vorlagen",
-                settings_title: "Einstellungen",
-                settings_back: "ZurÃ¼ck",
-                settings_done: "Fertig",
-                settings_personalization: "Personalisierung",
-                settings_username: "Benutzername / Rufname",
-                settings_username_placeholder: "Deinen Namen eingeben",
-                settings_birthday: "Geburtstag",
-                settings_language: "Bevorzugte Sprache",
-                settings_rerun_onboarding: "Einrichtung erneut starten",
-                settings_custom_instructions: "Eigene KI-Anweisungen",
-                settings_custom_instructions_desc: "Lege Regeln fÃ¼r Crystals Antworten fest.",
-                settings_custom_instructions_placeholder: "Z.B. Antworte immer prÃ¤zise...",
-                settings_assistant_heading: "Assistenten-Einstellungen",
-                settings_active_assistant: "Aktiver Assistent",
-                settings_web_search: "Live-Websuche",
-                settings_web_search_desc: "Echtzeit-Informationen aus dem Web",
-                settings_deep_thinking: "Tiefes Nachdenken",
-                settings_deep_thinking_desc: "Gedankenschritte anzeigen",
-                settings_display_heading: "Darstellung & Vorlieben",
-                settings_dark_mode: "Dunkelmodus",
-                settings_dark_mode_desc: "Schickes dunkles Farbschema",
-                settings_history: "Chatverlauf speichern",
-                settings_history_desc: "GesprÃ¤che sitzungsÃ¼bergreifend behalten",
-                settings_autoscroll: "Auto-Scroll",
-                settings_autoscroll_desc: "Automatisch zu neuen Nachrichten scrollen",
-                settings_audio_heading: "Audio & Feedback",
-                settings_haptic: "Haptisches Feedback",
-                settings_haptic_desc: "Vibration bei BerÃ¼hrungen",
-                settings_permissions: "App-Berechtigungen",
-                settings_permissions_desc: "Mikrofon- & Vibrationszugriff prÃ¼fen",
-                settings_permissions_btn: "Anfordern",
-                settings_synth: "Tastatur-Sounds",
-                settings_synth_desc: "Tastaturklick-KlÃ¤nge",
-                settings_account_heading: "Konto & Verlauf",
-                settings_signout: "Konto abmelden",
-                settings_clearchat: "Gesamten Chatverlauf lÃ¶schen",
-                guest_limit_title: "Konto Erforderlich",
-                guest_limit_desc: "Diese Funktion erfordert ein registriertes Crystal AI Konto.",
-                guest_limit_signin: "Anmelden / Registrieren",
-                guest_limit_continue: "Als Gast fortfahren",
-                onboarding_title: "Crystal",
-                onboarding_desc: "Willkommen! Personalisiere dein Profil und deine Sprache, um zu starten.",
-                onboarding_name_label: "Wie soll Crystal dich nennen?",
-                onboarding_name_placeholder: "Gib deinen Namen ein (z.B. Alex)",
-                onboarding_bday_label: "Wann hast du Geburtstag?",
-                onboarding_lang_label: "WÃ¤hle deine Sprache",
-                onboarding_lang_search_placeholder: "Suche nach einer Sprache...",
-                onboarding_finish: "Mit Crystal starten",
-                onboarding_skip: "Vorerst Ã¼berspringen"
-            },
-            Japanese: {
-                sidebar_home: "ãƒãƒ£ãƒƒãƒˆ / ãƒ›ãƒ¼ãƒ ",
-                sidebar_new_chat: "æ–°ã—ã„ãƒãƒ£ãƒƒãƒˆ",
-                sidebar_clear_chat: "ãƒãƒ£ãƒƒãƒˆã‚’æ¶ˆå»",
-                sidebar_export_chat: "ãƒãƒ£ãƒƒãƒˆã‚’ã‚¨ã‚¯ã‚¹ãƒãƒ¼ãƒˆ",
-                sidebar_code_studio: "ã‚³ãƒ¼ãƒ‰ã‚¹ã‚¿ã‚¸ã‚ª",
-                sidebar_settings: "è¨­å®š",
-                sidebar_models: "ãƒ¢ãƒ‡ãƒ«ãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³",
-                sidebar_terms: "åˆ©ç”¨è¦ç´„",
-                sidebar_sign_out: "ã‚µã‚¤ãƒ³ã‚¢ã‚¦ãƒˆ",
-                sidebar_recent_chats: "æœ€è¿‘ã®ãƒãƒ£ãƒƒãƒˆ",
-                sidebar_nav: "ãƒŠãƒ“ã‚²ãƒ¼ã‚·ãƒ§ãƒ³",
-                empty_greeting: "ä½•ã‹ãŠæ‰‹ä¼ã„ã§ãã¾ã™ã‹ï¼Ÿ",
-                empty_subgreeting: "è³ªå•ã€ã‚¢ã‚¤ãƒ‡ã‚¢å‡ºã—ã€ã‚³ãƒ¼ãƒ‰ä½œæˆã€ç”»åƒç”Ÿæˆãªã©è‡ªç”±ã«å…¥åŠ›ã—ã¦ãã ã•ã„ã€‚",
-                empty_cloud_quote: "ã“ã‚“ã«ã¡ã¯ï¼Crystalã§ã™ã€‚ä»Šæ—¥ã¯ã©ã®ã‚ˆã†ãªã”ç”¨ä»¶ã§ã—ã‚‡ã†ã‹ï¼Ÿ",
-                chat_placeholder: "ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã‚’å…¥åŠ›ã€ã¾ãŸã¯ã‚³ãƒ¼ãƒ‰ã‚’è²¼ã‚Šä»˜ã‘...",
-                menu_title: "ãƒ¡ãƒ‹ãƒ¥ãƒ¼",
-                menu_mode: "ãƒ¢ãƒ¼ãƒ‰",
-                menu_toggles: "ãƒˆã‚°ãƒ«",
-                menu_actions: "ã‚¢ã‚¯ã‚·ãƒ§ãƒ³",
-                menu_chat: "ãƒãƒ£ãƒƒãƒˆ",
-                menu_image: "ç”»åƒç”Ÿæˆ",
-                menu_coder: "ã‚³ãƒ¼ãƒ€ãƒ¼",
-                menu_search_title: "ã‚¦ã‚§ãƒ–æ¤œç´¢",
-                menu_search_sub: "ãƒªã‚¢ãƒ«ã‚¿ã‚¤ãƒ æƒ…å ±å–å¾—",
-                menu_thinking_title: "æ€è€ƒãƒ¢ãƒ¼ãƒ‰",
-                menu_thinking_sub: "æ¨è«–ãƒ—ãƒ­ã‚»ã‚¹ã®è¡¨ç¤º",
-                menu_coder_title: "ã‚³ãƒ¼ãƒ‡ã‚£ãƒ³ã‚°ãƒ‘ãƒ¼ãƒˆãƒŠãƒ¼",
-                menu_coder_sub: "é–‹ç™ºã‚µãƒãƒ¼ãƒˆ",
-                menu_upload: "ã‚¢ãƒƒãƒ—ãƒ­ãƒ¼ãƒ‰",
-                menu_canvas: "ã‚­ãƒ£ãƒ³ãƒã‚¹",
-                menu_enhance: "ãƒ—ãƒ­ãƒ³ãƒ—ãƒˆæ‹¡å¼µ",
-                menu_memory: "ãƒ¡ãƒ¢ãƒª",
-                menu_ghost: "ã‚´ãƒ¼ã‚¹ãƒˆãƒ¢ãƒ¼ãƒ‰",
-                menu_templates: "ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆ",
-                settings_title: "è¨­å®š",
-                settings_back: "æˆ»ã‚‹",
-                settings_done: "å®Œäº†",
-                settings_personalization: "å€‹äººè¨­å®š",
-                settings_username: "ãƒ¦ãƒ¼ã‚¶ãƒ¼å / ãƒ‹ãƒƒã‚¯ãƒãƒ¼ãƒ ",
-                settings_username_placeholder: "ãŠåå‰ã‚’å…¥åŠ›",
-                settings_birthday: "èª•ç”Ÿæ—¥",
-                settings_language: "ä½¿ç”¨è¨€èª",
-                settings_rerun_onboarding: "åˆæœŸã‚»ãƒƒãƒˆã‚¢ãƒƒãƒ—ã‚’å†å®Ÿè¡Œ",
-                settings_custom_instructions: "ã‚«ã‚¹ã‚¿ãƒ AIæŒ‡ç¤º",
-                settings_custom_instructions_desc: "Crystalã®å¿œç­”ãƒ«ãƒ¼ãƒ«ã‚’è¨­å®šã—ã¾ã™ï¼ˆãƒˆãƒ¼ãƒ³ã€ç°¡æ½”ã•ã€ã‚³ãƒ¼ãƒ‰å½¢å¼ãªã©ï¼‰ã€‚",
-                settings_custom_instructions_placeholder: "ä¾‹ï¼šå¸¸ã«ç°¡æ½”ã«å›ç­”ã—ã€ã‚³ãƒ¼ãƒ‰ã«ã¯é©åˆ‡ãªã‚³ãƒ¡ãƒ³ãƒˆã‚’ä»˜ã‘ã¦ãã ã•ã„...",
-                settings_assistant_heading: "ã‚¢ã‚·ã‚¹ã‚¿ãƒ³ãƒˆè¨­å®š",
-                settings_active_assistant: "ç¾åœ¨ã®ã‚¢ã‚·ã‚¹ã‚¿ãƒ³ãƒˆ",
-                settings_web_search: "ãƒ©ã‚¤ãƒ–ã‚¦ã‚§ãƒ–æ¤œç´¢",
-                settings_web_search_desc: "ãƒªã‚¢ãƒ«ã‚¿ã‚¤ãƒ ãªæƒ…å ±ã‚½ãƒ¼ã‚¹ã¨æ¤œç´¢",
-                settings_deep_thinking: "ãƒ‡ã‚£ãƒ¼ãƒ—ã‚·ãƒ³ã‚­ãƒ³ã‚°",
-                settings_deep_thinking_desc: "æ®µéšçš„ãªæ€è€ƒãƒ—ãƒ­ã‚»ã‚¹ã‚’è¡¨ç¤º",
-                settings_display_heading: "è¡¨ç¤ºã¨è¨­å®š",
-                settings_dark_mode: "ãƒ€ãƒ¼ã‚¯ãƒ¢ãƒ¼ãƒ‰",
-                settings_dark_mode_desc: "ç›®ã«å„ªã—ã„ãƒ€ãƒ¼ã‚¯ãƒ†ãƒ¼ãƒ",
-                settings_history: "å±¥æ­´ã‚’ä¿å­˜",
-                settings_history_desc: "ã‚»ãƒƒã‚·ãƒ§ãƒ³ã‚’è¶Šãˆã¦ä¼šè©±ã‚’ä¿æŒ",
-                settings_autoscroll: "è‡ªå‹•ã‚¹ã‚¯ãƒ­ãƒ¼ãƒ«",
-                settings_autoscroll_desc: "æ–°ã—ã„ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã¸è‡ªå‹•ã‚¹ã‚¯ãƒ­ãƒ¼ãƒ«",
-                settings_audio_heading: "ã‚ªãƒ¼ãƒ‡ã‚£ã‚ªã¨ãƒ•ã‚£ãƒ¼ãƒ‰ãƒãƒƒã‚¯",
-                settings_haptic: "è§¦è¦šãƒ•ã‚£ãƒ¼ãƒ‰ãƒãƒƒã‚¯",
-                settings_haptic_desc: "ã‚¿ãƒƒãƒæ™‚ã®æŒ¯å‹•ãƒ•ã‚£ãƒ¼ãƒ‰ãƒãƒƒã‚¯",
-                settings_permissions: "ã‚¢ãƒ—ãƒªæ¨©é™",
-                settings_permissions_desc: "ãƒã‚¤ã‚¯ã¨ãƒã‚¤ãƒ–ãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³æ¨©é™ã®ç¢ºèª",
-                settings_permissions_btn: "è¨±å¯ã‚’ãƒªã‚¯ã‚¨ã‚¹ãƒˆ",
-                settings_synth: "ã‚¿ã‚¤ãƒ”ãƒ³ã‚°éŸ³",
-                settings_synth_desc: "ã‚¿ã‚¤ãƒ”ãƒ³ã‚°ã‚­ãƒ¼ã‚¯ãƒªãƒƒã‚¯éŸ³",
-                settings_account_heading: "ã‚¢ã‚«ã‚¦ãƒ³ãƒˆã¨å±¥æ­´",
-                settings_signout: "ãƒ­ã‚°ã‚¢ã‚¦ãƒˆ",
-                settings_clearchat: "ã™ã¹ã¦ã®ãƒãƒ£ãƒƒãƒˆå±¥æ­´ã‚’å‰Šé™¤",
-                guest_limit_title: "ã‚¢ã‚«ã‚¦ãƒ³ãƒˆãŒå¿…è¦ã§ã™",
-                guest_limit_desc: "ã“ã®æ©Ÿèƒ½ã«ã¯Crystal AIã®ç™»éŒ²ã‚¢ã‚«ã‚¦ãƒ³ãƒˆãŒå¿…è¦ã§ã™ã€‚",
-                guest_limit_signin: "ã‚µã‚¤ãƒ³ã‚¤ãƒ³ / æ–°è¦ç™»éŒ²",
-                guest_limit_continue: "ã‚²ã‚¹ãƒˆã¨ã—ã¦ç¶šè¡Œ",
-                onboarding_title: "Crystal",
-                onboarding_desc: "ã‚ˆã†ã“ãï¼ãƒ—ãƒ­ãƒ•ã‚£ãƒ¼ãƒ«ã¨è¨€èªè¨­å®šã‚’è¡Œã£ã¦å§‹ã‚ã¾ã—ã‚‡ã†ã€‚",
-                onboarding_name_label: "Crystalã‹ã‚‰ã®å‘¼ã³åã¯ä½•ã«ã—ã¾ã™ã‹ï¼Ÿ",
-                onboarding_name_placeholder: "ãƒ‹ãƒƒã‚¯ãƒãƒ¼ãƒ ã¾ãŸã¯ãŠåå‰ï¼ˆä¾‹ï¼šã‚¢ãƒ¬ãƒƒã‚¯ã‚¹ï¼‰",
-                onboarding_bday_label: "èª•ç”Ÿæ—¥ã¯ã„ã¤ã§ã™ã‹ï¼Ÿ",
-                onboarding_lang_label: "å¸Œæœ›ã®è¨€èªã‚’é¸æŠ",
-                onboarding_lang_search_placeholder: "è¨€èªã‚’æ¤œç´¢ï¼ˆä¾‹ï¼šæ—¥æœ¬èªã€è‹±èªã€éŸ“å›½èªãªã©ï¼‰...",
-                onboarding_finish: "Crystalã‚’å§‹ã‚ã‚‹",
-                onboarding_skip: "ä»Šã¯ã‚¹ã‚­ãƒƒãƒ—"
-            },
-            Dhivehi: {
-                sidebar_home: "Ş—Ş¬Ş“Ş° / Ş‰Ş¦Ş‡Ş¨ ŞŞ¦ŞŠŞ°Ş™Ş§",
-                sidebar_new_chat: "Ş‡Ş¦Ş‡Şª Ş—Ş¬Ş“Ş°",
-                sidebar_clear_chat: "Ş—Ş¬Ş“Ş° ŞŠŞ®Ş€Ş¬ŞŞ§",
-                sidebar_export_chat: "Ş—Ş¬Ş“Ş° Ş‡Ş¬Ş†Ş°ŞŞ°Ş•Ş¯Ş“Ş° Ş†ŞªŞƒŞ­",
-                sidebar_code_studio: "Ş†Ş¯Ş‘Ş° ŞŞ°Ş“Ş«Ş‘Ş¨Ş‡Ş¯",
-                sidebar_settings: "ŞŞ¬Ş“Ş¨Ş‚Ş°ŞŞ°ŞŞ°",
-                sidebar_models: "Ş‰Ş®Ş‘Ş¬ŞŞ°ŞŒŞ¦Ş‡Ş°",
-                sidebar_terms: "ŞŞ¦ŞƒŞªŞ ŞªŞŒŞ¦Ş‡Ş°",
-                sidebar_sign_out: "ŞŞ¦Ş‡Ş¨Ş‚Ş° Ş‡Ş¦Ş‡ŞªŞ“Ş°",
-                sidebar_recent_chats: "ŞŠŞ¦Ş€ŞªŞŞ¬ Ş—Ş¬Ş“Ş°ŞŒŞ¦Ş‡Ş°",
-                sidebar_nav: "Ş‰Ş¬Ş‚Ş«",
-                empty_greeting: "Ş†Ş©Ş†Ş­ Ş€Ş¨ŞŒŞ¦ŞŞ° Ş‡Ş¦ŞƒŞ¦Ş‚Ş©ØŸ",
-                empty_subgreeting: "Ş†Ş®Ş‚Ş°Ş‰Ş¬ Ş‡Ş¬Ş‡Ş°Ş—Ş¬Ş‡Ş° ŞˆŞ¬ŞŞ° Ş‡Ş¦Ş€Ş§ŞŞ§ØŒ ŞšŞ¨Ş”Ş§ŞŞª Ş€Ş¯Ş‹Ş§ØŒ Ş†Ş¯Ş‘Şª ŞŞ¨Ş”Ş­ Ş‚ŞªŞˆŞ¦ŞŒŞ¦ ŞŠŞ®Ş“Ş¯ Ş‡ŞªŞŠŞ¦Ş‡Ş°Ş‹Ş§.",
-                empty_cloud_quote: "Ş‡Ş¦Ş‡Ş°ŞŞ¦ŞŞ§Ş‰Ş° Ş¢Ş¦ŞŞ¦Ş‡Ş¨Ş†ŞªŞ‰Ş°! Ş‡Ş¦Ş€Ş¦Ş‚Ş°Ş‚Ş¦Ş†Ş© Ş†Ş°ŞƒŞ¨ŞŞ°Ş“Ş¦ŞŞ°. Ş‰Ş¨Ş‡Ş¦Ş‹Şª Ş†Ş®Ş‚Ş° Ş†Ş¦Ş‰Ş¬Ş‡Ş°ŞŞ¦Ş‡Ş¨ Ş‡Ş¬Ş€Ş©ŞŒŞ¬ŞƒŞ¨ŞˆŞ¬Ş‹Ş¬ŞˆŞ­Ş‚Ş©ØŸ",
-                chat_placeholder: "Ş‰Ş¬ŞŞ¬Ş–Ş¬Ş‡Ş° ŞŞ¨Ş”Ş­ Ş‚ŞªŞˆŞ¦ŞŒŞ¦ Ş†Ş¯Ş‘Şª Ş•Ş­ŞŞ°Ş“Ş° Ş†ŞªŞƒŞ­...",
-                menu_title: "Ş‰Ş¬Ş‚Ş«",
-                menu_mode: "Ş‰Ş¯Ş‘Ş°",
-                menu_toggles: "Ş‡Ş®Ş•Ş°ŞŞ¦Ş‚Ş°ŞŒŞ¦Ş‡Ş°",
-                menu_actions: "Ş‡Ş¦Ş‰Ş¦ŞŞªŞŒŞ¦Ş‡Ş°",
-                menu_chat: "Ş—Ş¬Ş“Ş°",
-                menu_image: "ŞŠŞ®Ş“Ş¯",
-                menu_coder: "Ş†Ş¯Ş‘Ş¦Şƒ",
-                menu_search_title: "ŞŞ§Ş—Ş°",
-                menu_search_sub: "ŞˆŞ¦ŞŞªŞŒŞªŞ‚Ş° ŞˆŞ¬Ş„Ş° ŞŞ§Ş—Ş°",
-                menu_thinking_title: "ŞˆŞ¨ŞŞ°Ş‚ŞªŞ‚Ş°",
-                menu_thinking_sub: "ŞŠŞ¨Ş”Ş¦ŞˆŞ¦Ş…ŞªŞ‚Ş° ŞŠŞ¨Ş”Ş¦ŞˆŞ¦Ş…Ş¦ŞŞ° ŞˆŞ¨ŞŞ°Ş‚Ş§ ŞŞ®ŞŒŞ°",
-                menu_coder_title: "Ş†Ş¯Ş‘Ş¨Ş‚Ş°Ş Ş•Ş§Ş“Ş°Ş‚Ş¦Şƒ",
-                menu_coder_sub: "Ş‘Ş¨ŞˆŞ¬ŞŞ®Ş•Ş¦Şƒ Ş‡Ş¬Ş€Ş©ŞŒŞ¬ŞƒŞ¨Ş†Ş¦Ş‚Ş°",
-                menu_upload: "Ş‡Ş¦Ş•Ş°ŞŞ¯Ş‘Ş°",
-                menu_canvas: "Ş†Ş¬Ş‚Ş°ŞˆŞ¦ŞŞ°",
-                menu_enhance: "Ş‡Ş¨ŞŒŞªŞƒŞ¦ŞŞ° ŞƒŞ¦Ş‚ŞŞ¦Ş…Şª Ş†ŞªŞƒŞ­",
-                menu_memory: "Ş€Ş¦Ş‚Ş‹Ş§Ş‚Ş°",
-                menu_ghost: "ŞŞ¯ŞŞ°Ş“Ş° Ş‰Ş¯Ş‘Ş°",
-                menu_templates: "Ş“Ş¬Ş‰Ş°Ş•Ş°ŞŞ­Ş“Ş°ŞŒŞ¦Ş‡Ş°",
-                settings_title: "ŞŞ¬Ş“Ş¨Ş‚Ş°ŞŞ°ŞŞ°",
-                settings_back: "ŞŠŞ¦Ş€Ş¦ŞŒŞ¦ŞŞ°",
-                settings_done: "Ş‚Ş¨Ş‰ŞªŞ‚Ş©",
-                settings_personalization: "Ş‡Ş¦Ş‰Ş¨Ş‡Ş°ŞŞ¦ Ş•Ş°ŞƒŞ®ŞŠŞ¦Ş‡Ş¨ŞŞ°",
-                settings_username: "Ş”Ş«Ş’Ş¦Şƒ Ş‚Ş¦Ş‚Ş° / ŞŞ®ŞˆŞ§Ş‚Ş¬ Ş‚Ş¦Ş‚Ş°",
-                settings_username_placeholder: "ŞŒŞ¨Ş„Ş§ŞŞ¬ Ş‚Ş¦Ş‚Ş° ŞŞ¨Ş”Ş­",
-                settings_birthday: "Ş‡ŞªŞŠŞ¦Ş‚Ş°Ş‹ŞªŞˆŞ¦ŞŞ°",
-                settings_language: "Ş„Ş¦ŞŞ°",
-                settings_rerun_onboarding: "ŞŞ¬Ş“Ş¦Ş•Ş° Ş‡Ş¦ŞŞªŞ‚Ş° ŞŠŞ¦ŞŞ§",
-                settings_custom_instructions: "ŞšŞ§Ş‡Ş°ŞŞ¦ Ş‡Ş¨ŞƒŞªŞŞ§Ş‹ŞªŞŒŞ¦Ş‡Ş°",
-                settings_custom_instructions_desc: "Ş†Ş°ŞƒŞ¨ŞŞ°Ş“Ş¦ŞŞ° Ş–Ş¦ŞˆŞ§Ş„ŞªŞ‹Ş­Ş‚Ş¬ ŞŞ®ŞŒŞªŞŞ¬ Ş¤Ş¦ŞˆŞ§Ş¢Ş¨Ş‹ŞªŞŒŞ¦Ş‡Ş° Ş†Ş¦Ş‚Ş‘Ş¦Ş‡Ş¦Ş…Ş§.",
-                settings_custom_instructions_placeholder: "Ş‰Ş¨ŞŞ§ŞŞ¦Ş†Ş¦ŞŞ°: Ş‡Ş¦Ş„Ş¦Ş‹ŞªŞˆŞ¬ŞŞ° Ş†ŞªŞƒŞªŞ†Ş®ŞŞ° Ş–Ş¦ŞˆŞ§Ş„Şª Ş‹Ş©...",
-                settings_assistant_heading: "Ş‡Ş¬ŞŞ¨ŞŞ°Ş“Ş¬Ş‚Ş°Ş“Ş° ŞŞ¬Ş“Ş¨Ş‚Ş°ŞŞ°ŞŞ°",
-                settings_active_assistant: "Ş‰Ş¨Ş€Ş§ŞƒŞªŞŞ¬ Ş‡Ş¬ŞŞ¨ŞŞ°Ş“Ş¬Ş‚Ş°Ş“Ş°",
-                settings_web_search: "ŞŞ¦Ş‡Ş¨ŞˆŞ° ŞˆŞ¬Ş„Ş° ŞŞ§Ş—Ş°",
-                settings_web_search_desc: "Ş‡Ş¨Ş‚Ş°Ş“Ş¦ŞƒŞ‚Ş¬Ş“ŞªŞ‚Ş° ŞˆŞ¦ŞŞªŞŒŞªŞ‚Ş° Ş‰Ş¦Ş¢ŞªŞŞ«Ş‰Ş§ŞŒŞª Ş€Ş¯Ş‹ŞªŞ‚Ş°",
-                settings_deep_thinking: "ŞŠŞªŞ‚Ş°Ş†Ş®ŞŞ° ŞˆŞ¨ŞŞ°Ş‚ŞªŞ‚Ş°",
-                settings_deep_thinking_desc: "ŞˆŞ¨ŞŞ°Ş‚ŞªŞ‰ŞªŞŞ¬ Ş‰Ş¦ŞƒŞªŞ™Ş¦ŞŞ§ŞŒŞ¦Ş‡Ş° Ş‹Ş¦Ş‡Ş°Ş†Ş§",
-                settings_display_heading: "Ş‹Ş¬Ş‡Ş°Ş†ŞªŞ‰Ş§Ş‡Ş¨ Ş‡Ş¨ŞšŞ°ŞŒŞ¨Ş”Ş§ŞƒŞªŞŒŞ¦Ş‡Ş°",
-                settings_dark_mode: "Ş‘Ş§Ş†Ş° Ş‰Ş¯Ş‘Ş°",
-                settings_dark_mode_desc: "ŞŞ®ŞŞ¦ŞŞ° ŞŠŞ¦ŞŞ­Ş€Ş¦ Ş‡Ş¦Ş‚Ş‹Ş¨ŞƒŞ¨ ŞŒŞ©Ş‰Ş°",
-                settings_history: "ŞŒŞ§ŞƒŞ©ŞšŞ° ŞƒŞ¦Ş‡Ş°Ş†Ş§Ş†ŞªŞƒŞ­",
-                settings_history_desc: "ŞˆŞ§Ş€Ş¦Ş†Ş¦ŞŒŞ¦Ş‡Ş° ŞƒŞ¦Ş‡Ş°Ş†Ş§Ş†Ş®ŞŞ°ŞŠŞ¦Ş‡Ş¨ Ş„Ş¦Ş€Ş¦Ş‡Ş°Ş“Ş§",
-                settings_autoscroll: "Ş‡Ş®Ş“Ş¯ ŞŞ°Ş†Ş°ŞƒŞ¯ŞŞ°",
-                settings_autoscroll_desc: "Ş‡Ş¦Ş‡Şª Ş‰Ş¬ŞŞ¬Ş–ŞªŞŒŞ¦Ş†Ş¦ŞŞ° Ş‡Ş¦Ş‰Ş¨Ş‡Ş°ŞŞ¦Ş‡Ş¦ŞŞ° ŞŞ°Ş†Ş°ŞƒŞ¯ŞŞ°ŞˆŞªŞ‚Ş°",
-                settings_audio_heading: "Ş‡Ş¦Ş‘Ş§Ş‡Ş¨ Ş‡Ş¨Ş™Ş°ŞŞ§ŞŞ°",
-                settings_haptic: "Ş€Ş¬Ş•Ş°Ş“Ş¨Ş†Ş° ŞŠŞ©Ş‘Ş°Ş„Ş¬Ş†Ş°",
-                settings_haptic_desc: "Ş‡Ş¦ŞŒŞ°ŞŞªŞ‰ŞªŞ‚Ş° ŞˆŞ¦Ş‡Ş¨Ş„Ş°ŞƒŞ­Ş“Ş°ŞˆŞªŞ‚Ş°",
-                settings_permissions: "Ş‡Ş¬Ş•Ş° Ş€ŞªŞ‡Ş°Ş‹Ş¦ŞŒŞ¦Ş‡Ş°",
-                settings_permissions_desc: "Ş‰Ş¦Ş‡Ş¨Ş†Ş°ŞƒŞ¯ŞŠŞ¯Ş‚Ş§Ş‡Ş¨ ŞˆŞ¦Ş‡Ş¨Ş„Ş°ŞƒŞ­ŞŞ¦Ş‚Ş° Ş€ŞªŞ‡Ş°Ş‹Ş¦ Ş—Ş¬Ş†Ş°Ş†ŞªŞƒŞ­",
-                settings_permissions_btn: "Ş‡Ş¬Ş‹ŞªŞ‰Ş¦ŞŞ°",
-                settings_synth: "Ş“Ş¦Ş‡Ş¨Ş•Ş¨Ş‚Ş°Ş Ş‡Ş¦Ş‘Şª",
-                settings_synth_desc: "Ş†Ş©Ş„Ş¯Ş‘Ş° Ş†Ş°ŞŞ¨Ş†Ş° Ş‡Ş¦Ş‘ŞªŞŒŞ¦Ş‡Ş°",
-                settings_account_heading: "Ş‡Ş¬Ş†Ş¦Ş‡ŞªŞ‚Ş°Ş“Ş§Ş‡Ş¨ ŞŒŞ§ŞƒŞ©ŞšŞ°",
-                settings_signout: "ŞŞ¦Ş‡Ş¨Ş‚Ş° Ş‡Ş¦Ş‡ŞªŞ“Ş°",
-                settings_clearchat: "Ş€ŞªŞƒŞ¨Ş€Ş§ Ş—Ş¬Ş“Ş° ŞŒŞ§ŞƒŞ©ŞšŞ¬Ş‡Ş° ŞŠŞ®Ş€Ş¬ŞŞ§",
-                guest_limit_title: "Ş‡Ş¬Ş†Ş¦Ş‡ŞªŞ‚Ş°Ş“Ş¬Ş‡Ş° Ş„Ş­Ş‚ŞªŞ‚Ş°ŞˆŞ­",
-                guest_limit_desc: "Ş‰Ş¨ ŞŠŞ©Ş—Ş¦Şƒ Ş„Ş­Ş‚ŞªŞ‚Ş°Ş†ŞªŞƒŞªŞ‰Ş¦ŞŞ° Ş†Ş°ŞƒŞ¨ŞŞ°Ş“Ş¦ŞŞ° Ş‡Ş¬Ş†Ş¦Ş‡ŞªŞ‚Ş°Ş“Ş¦Ş†Ş¦ŞŞ° ŞˆŞ¦Ş‚Ş°Ş‚Ş¦Ş‚Ş° Ş–Ş¬Ş€Ş­Ş‚Ş¬.",
-                guest_limit_signin: "ŞŞ¦Ş‡Ş¨Ş‚Ş° Ş‡Ş¨Ş‚Ş° / Ş‡Ş¬Ş†Ş¦Ş‡ŞªŞ‚Ş°Ş“Ş° Ş€Ş¦Ş‹Ş§",
-                guest_limit_continue: "Ş‰Ş¬Ş€Ş¬Ş‰Ş§Ş‚Ş¬Ş‡Ş°ŞŞ¬ ŞŞ®ŞŒŞªŞŞ¦Ş‡Ş¨ Ş†ŞªŞƒŞ¨Ş‡Ş¦ŞŞ° Ş‹Ş­",
-                onboarding_title: "Ş†Ş°ŞƒŞ¨ŞŞ°Ş“Ş¦ŞŞ°",
-                onboarding_desc: "Ş‰Ş¦ŞƒŞªŞ™Ş¦Ş„Ş§! ŞŠŞ¬ŞŞªŞ‰Ş¦ŞŞ°Ş“Ş¦Ş†Ş¦Ş‡Ş¨ ŞŒŞ¨Ş„Ş§ŞŞ¬ Ş•Ş°ŞƒŞ®ŞŠŞ¦Ş‡Ş¨ŞŞ§Ş‡Ş¨ Ş„Ş¦ŞŞ° Ş‡Ş¨ŞšŞ°ŞŒŞ¨Ş”Ş§ŞƒŞª Ş†ŞªŞƒŞ¦Ş‡Ş°ŞˆŞ§.",
-                onboarding_name_label: "Ş†Ş°ŞƒŞ¨ŞŞ°Ş“Ş¦ŞŞ° ŞŒŞ¨Ş„Ş§Ş‡Ş¦ŞŞ° ŞŞ®ŞˆŞ¦Ş‚Ş°ŞˆŞ© Ş†Ş®Ş‚Ş° Ş‚Ş¦Ş‰Ş¦Ş†ŞªŞ‚Ş°ØŸ",
-                onboarding_name_placeholder: "ŞŒŞ¨Ş„Ş§ŞŞ¬ Ş‚Ş¦Ş‚Ş° (Ş‰Ş¨ŞŞ§ŞŞ¦Ş†Ş¦ŞŞ°: Ş¢Ş¦ŞŞ©)",
-                onboarding_bday_label: "Ş‡ŞªŞŠŞ¦Ş‚Ş°Ş‹ŞªŞˆŞ¦Ş€Ş¦Ş†Ş© Ş†Ş®Ş„Ş§ØŸ",
-                onboarding_lang_label: "Ş„Ş­Ş‚ŞªŞ‚Ş°ŞˆŞ§ Ş„Ş¦ŞŞ° Ş‡Ş¨ŞšŞ°ŞŒŞ¨Ş”Ş§ŞƒŞª Ş†ŞªŞƒŞ­",
-                onboarding_lang_search_placeholder: "Ş„Ş¦Ş€Ş¬Ş‡Ş° Ş€Ş¯Ş‹Ş§ (Ş‰Ş¨ŞŞ§ŞŞ¦Ş†Ş¦ŞŞ°: Ş‹Ş¨ŞˆŞ¬Ş€Ş¨, English)...",
-                onboarding_finish: "Ş†Ş°ŞƒŞ¨ŞŞ°Ş“Ş¦ŞŞ° ŞŠŞ¦ŞŞ§",
-                onboarding_skip: "Ş‰Ş¨ŞˆŞ¦ŞŞªŞŒŞ¦ŞŞ° Ş‹Ş«Ş†Ş®ŞŞ°ŞŞ§"
-            }
-        };
-
-        // UI Text Element Mapping Engine
-        window.updateUIStrings = function(targetLang) {
-            const lang = targetLang || localStorage.getItem('crystal_language') || 'English';
-            const dict = UI_TRANSLATIONS[lang] || UI_TRANSLATIONS.English;
-
-            const map = {
-                'sidebar-home-text': dict.sidebar_home,
-                'sidebar-new-chat-text': dict.sidebar_new_chat,
-                'sidebar-clear-chat-text': dict.sidebar_clear_chat,
-                'sidebar-export-chat-text': dict.sidebar_export_chat,
-                'sidebar-code-studio-text': dict.sidebar_code_studio,
-                'sidebar-settings-text': dict.sidebar_settings,
-                'sidebar-models-text': dict.sidebar_models,
-                'sidebar-terms-text': dict.sidebar_terms,
-                'sidebar-sign-out-text': dict.sidebar_sign_out,
-                'sidebar-recent-chats-header': dict.sidebar_recent_chats,
-                'sidebar-nav-header': dict.sidebar_nav,
-                'empty-state-greeting': dict.empty_greeting,
-                'empty-state-subgreeting': dict.empty_subgreeting,
-                'empty-state-cloud-quote': dict.empty_cloud_quote,
-                'menu-title': dict.menu_title,
-                'menu-mode-label': dict.menu_mode,
-                'menu-toggles-label': dict.menu_toggles,
-                'menu-actions-label': dict.menu_actions,
-                'persona-btn-core': dict.menu_chat,
-                'persona-btn-image': dict.menu_image,
-                'persona-btn-copilot': dict.menu_coder,
-                'menu-search-title': dict.menu_search_title,
-                'menu-search-sub': dict.menu_search_sub,
-                'menu-thinking-title': dict.menu_thinking_title,
-                'menu-thinking-sub': dict.menu_thinking_sub,
-                'menu-coder-title': dict.menu_coder_title,
-                'menu-coder-sub': dict.menu_coder_sub,
-                'menu-act-upload': dict.menu_upload,
-                'menu-act-canvas': dict.menu_canvas,
-                'menu-act-enhance': dict.menu_enhance,
-                'menu-act-memory': dict.menu_memory,
-                'menu-act-ghost': dict.menu_ghost,
-                'menu-act-templates': dict.menu_templates,
-                'settings-header-title': dict.settings_title,
-                'settings-back-btn-text': dict.settings_back,
-                'settings-done-btn': dict.settings_done,
-                'settings-heading-personalization': dict.settings_personalization,
-                'settings-label-username': dict.settings_username,
-                'settings-label-birthday': dict.settings_birthday,
-                'settings-label-language': dict.settings_language,
-                'settings-rerun-onboarding-text': dict.settings_rerun_onboarding,
-                'settings-label-custom-instructions': dict.settings_custom_instructions,
-                'settings-desc-custom-instructions': dict.settings_custom_instructions_desc,
-                'settings-heading-assistant': dict.settings_assistant_heading,
-                'settings-label-active-assistant': dict.settings_active_assistant,
-                'settings-label-web-search': dict.settings_web_search,
-                'settings-desc-web-search': dict.settings_web_search_desc,
-                'settings-label-deep-thinking': dict.settings_deep_thinking,
-                'settings-desc-deep-thinking': dict.settings_deep_thinking_desc,
-                'settings-heading-display': dict.settings_display_heading,
-                'settings-label-dark-mode': dict.settings_dark_mode,
-                'settings-desc-dark-mode': dict.settings_dark_mode_desc,
-                'settings-label-history': dict.settings_history,
-                'settings-desc-history': dict.settings_history_desc,
-                'settings-label-autoscroll': dict.settings_autoscroll,
-                'settings-desc-autoscroll': dict.settings_autoscroll_desc,
-                'settings-heading-audio': dict.settings_audio_heading,
-                'settings-label-haptic': dict.settings_haptic,
-                'settings-desc-haptic': dict.settings_haptic_desc,
-                'settings-label-permissions': dict.settings_permissions,
-                'settings-desc-permissions': dict.settings_permissions_desc,
-                'settings-btn-permissions-text': dict.settings_permissions_btn,
-                'settings-label-synth': dict.settings_synth,
-                'settings-desc-synth': dict.settings_synth_desc,
-                'settings-heading-account': dict.settings_account_heading,
-                'settings-btn-signout-text': dict.settings_signout,
-                'settings-btn-clearchat-text': dict.settings_clearchat,
-                'guest-limit-title': dict.guest_limit_title,
-                'guest-limit-desc': dict.guest_limit_desc,
-                'guest-limit-signin-btn': dict.guest_limit_signin,
-                'guest-limit-continue-btn': dict.guest_limit_continue,
-                'onboarding-title': dict.onboarding_title,
-                'onboarding-desc': dict.onboarding_desc,
-                'onboarding-name-label': dict.onboarding_name_label,
-                'onboarding-bday-label': dict.onboarding_bday_label,
-                'onboarding-lang-label': dict.onboarding_lang_label,
-                'onboarding-finish-btn-text': dict.onboarding_finish,
-                'onboarding-skip-btn-1': dict.onboarding_skip,
-                'onboarding-skip-btn-2': dict.onboarding_skip
-            };
-
-            for (const [id, text] of Object.entries(map)) {
-                const el = document.getElementById(id);
-                if (el && text) {
-                    el.textContent = text;
-                }
-            }
-
-            // Input Placeholders
-            const chatInput = document.getElementById('chat-input');
-            if (chatInput && dict.chat_placeholder) chatInput.placeholder = dict.chat_placeholder;
-
-            const usernameInput = document.getElementById('custom-username');
-            if (usernameInput && dict.settings_username_placeholder) usernameInput.placeholder = dict.settings_username_placeholder;
-
-            const customInstInput = document.getElementById('custom-instructions');
-            if (customInstInput && dict.settings_custom_instructions_placeholder) customInstInput.placeholder = dict.settings_custom_instructions_placeholder;
-
-            const obNameInput = document.getElementById('onboarding-name');
-            if (obNameInput && dict.onboarding_name_placeholder) obNameInput.placeholder = dict.onboarding_name_placeholder;
-
-            const obLangSearchInput = document.getElementById('onboarding-lang-search');
-            if (obLangSearchInput && dict.onboarding_lang_search_placeholder) obLangSearchInput.placeholder = dict.onboarding_lang_search_placeholder;
-        };
-
-        window.onSettingsLanguageChange = function(val) {
-            applyAppLanguage(val, true);
-        };
-
-        // Populate language settings on page load and apply initial UI translation & Google Translate state
-        setTimeout(() => {
-            populateSettingsLanguageDropdown();
-            const savedLang = localStorage.getItem('crystal_language') || 'English';
-            applyAppLanguage(savedLang, false);
-        }, 50);
-
-        // Check if welcome onboarding should auto-launch for first-time visitors
-        setTimeout(() => {
-            const done = localStorage.getItem('crystal_onboarding_completed');
-            if (done !== 'true') {
-                showWelcomeOnboarding();
-            }
-        }, 800);
-
-        // Theme and controls buttons loaders
-        function toggleDarkMode() {
-            isDarkMode = !isDarkMode;
-            triggerHaptic();
-            localStorage.setItem('crystal_dark_mode', isDarkMode);
-
-            const dk = document.getElementById('dark-knob');
-            const dt = document.getElementById('dark-toggle');
-            if (isDarkMode) {
-                document.documentElement.classList.add('dark-mode');
-                if (dk) dk.style.transform = 'translateX(24px)';
-                if (dt) dt.className = 'w-12 h-6 bg-indigo-500 rounded-full relative transition-colors duration-300';
-            } else {
-                document.documentElement.classList.remove('dark-mode');
-                if (dk) dk.style.transform = 'translateX(0)';
-                if (dt) dt.className = 'w-12 h-6 bg-gray-300 rounded-full relative transition-colors duration-300';
-            }
-            updateSystemBars();
-        }
-
-        function toggleOption(opt) {
-            triggerHaptic();
-            if (opt === 'history') {
-                settingSaveHistory = !settingSaveHistory;
-                localStorage.setItem('crystal_save_history', settingSaveHistory);
-                const hk = document.getElementById('history-knob');
-                const ht = document.getElementById('history-toggle');
-                if (hk) hk.style.transform = settingSaveHistory ? 'translateX(24px)' : 'translateX(0)';
-                if (ht) ht.className = settingSaveHistory ? 'w-12 h-6 bg-indigo-500 rounded-full relative transition-colors duration-300' : 'w-12 h-6 bg-gray-300 rounded-full relative transition-colors duration-300';
-            } else if (opt === 'haptic') {
-                settingHaptic = !settingHaptic;
-                localStorage.setItem('crystal_haptic', settingHaptic);
-                const hpk = document.getElementById('haptic-knob');
-                const hpt = document.getElementById('haptic-toggle');
-                if (hpk) hpk.style.transform = settingHaptic ? 'translateX(24px)' : 'translateX(0)';
-                if (hpt) hpt.className = settingHaptic ? 'w-12 h-6 bg-indigo-500 rounded-full relative transition-colors duration-300' : 'w-12 h-6 bg-gray-300 rounded-full relative transition-colors duration-300';
-            } else if (opt === 'typing-synth') {
-                enableHapticSound = !enableHapticSound;
-                localStorage.setItem('crystal_typing_synth', enableHapticSound);
-                const tk = document.getElementById('typing-synth-knob');
-                const tt = document.getElementById('typing-synth-toggle');
-                if (tk) tk.style.transform = enableHapticSound ? 'translateX(24px)' : 'translateX(0)';
-                if (tt) tt.className = enableHapticSound ? 'w-12 h-6 bg-indigo-500 rounded-full relative transition-colors duration-300' : 'w-12 h-6 bg-gray-300 rounded-full relative transition-colors duration-300';
-                if (!enableHapticSound && droneGain && audioCtx) {
-                    droneGain.gain.setValueAtTime(0, audioCtx.currentTime);
-                }
-            } else if (opt === 'scroll') {
-                settingAutoScroll = !settingAutoScroll;
-                localStorage.setItem('crystal_scroll', settingAutoScroll);
-                const sk = document.getElementById('scroll-knob');
-                const st = document.getElementById('scroll-toggle');
-                if (sk) sk.style.transform = settingAutoScroll ? 'translateX(24px)' : 'translateX(0)';
-                if (st) st.className = settingAutoScroll ? 'w-12 h-6 bg-indigo-500 rounded-full relative transition-colors duration-300' : 'w-12 h-6 bg-gray-300 rounded-full relative transition-colors duration-300';
-            } else if (opt === 'ultra-coder') {
-                isUltraCoder = !isUltraCoder;
-                localStorage.setItem('crystal_ultra_coder', isUltraCoder);
-                updateUltraCoderUI();
-            } else if (opt === 'deep-thinking') {
-                showThinking = !showThinking;
-                localStorage.setItem('crystal_show_thinking', showThinking);
-                updateDeepThinkingUI();
-            } else if (opt === 'web-search') {
-                enableWebSearch = !enableWebSearch;
-                localStorage.setItem('crystal_enable_web_search', enableWebSearch);
-                updateWebSearchUI();
-            }
-        }
-
-        function updateUltraCoderUI() {
-            const isSel = isUltraCoder;
-            const pill = document.getElementById('ultra-coder-pill');
-            const pillDot = document.getElementById('ultra-coder-pill-dot');
-            if (pill && pillDot) {
-                if (isSel) {
-                    pill.classList.remove('text-gray-400');
-                    pill.classList.add('text-emerald-400', 'border-emerald-500/30', 'bg-emerald-500/10');
-                    pillDot.classList.remove('bg-gray-500');
-                    pillDot.classList.add('bg-emerald-400', 'shadow-[0_0_8px_currentColor]');
-                } else {
-                    pill.classList.add('text-gray-400');
-                    pill.classList.remove('text-emerald-400', 'border-emerald-500/30', 'bg-emerald-500/10');
-                    pillDot.classList.add('bg-gray-500');
-                    pillDot.classList.remove('bg-emerald-400', 'shadow-[0_0_8px_currentColor]');
-                }
-            }
-            const toggle = document.getElementById('ultra-coder-toggle');
-            const knob = document.getElementById('ultra-coder-knob');
-            if (toggle && knob) {
-                toggle.className = isSel ? 'w-12 h-6 bg-emerald-500 rounded-full relative transition-colors duration-300' : 'w-12 h-6 bg-gray-300 rounded-full relative transition-colors duration-300';
-                knob.style.transform = isSel ? 'translateX(24px)' : 'translateX(0)';
-            }
-            
-            // Menu elements
-            const menuToggle = document.getElementById('menu-ultra-coder-toggle');
-            const menuKnob = document.getElementById('menu-ultra-coder-knob');
-            const menuBadge = document.getElementById('menu-ultra-coder-badge');
-            if (menuToggle && menuKnob) {
-                menuToggle.className = isSel ? 'w-12 h-6 bg-emerald-500 rounded-full relative transition-colors duration-300' : 'w-12 h-6 bg-gray-600/40 rounded-full relative transition-colors duration-300';
-                menuKnob.style.transform = isSel ? 'translateX(24px)' : 'translateX(0)';
-            }
-            if (menuBadge) {
-                if (isSel) {
-                    menuBadge.classList.remove('hidden');
-                } else {
-                    menuBadge.classList.add('hidden');
-                }
-            }
-        }
-
-        function updateDeepThinkingUI() {
-            const isSel = showThinking;
-            const pill = document.getElementById('deep-thinking-pill');
-            const pillDot = document.getElementById('deep-thinking-pill-dot');
-            const pillLabel = document.getElementById('deep-thinking-pill-label');
-            if (pill && pillDot) {
-                if (isSel) {
-                    pill.classList.remove('text-gray-400');
-                    pill.classList.add('text-indigo-400', 'border-indigo-500/30', 'bg-indigo-500/10');
-                    pillDot.classList.remove('bg-gray-500');
-                    pillDot.classList.add('bg-indigo-400', 'shadow-[0_0_8px_currentColor]');
-                    if (pillLabel) pillLabel.innerText = "Thinking ON";
-                } else {
-                    pill.classList.add('text-gray-400');
-                    pill.classList.remove('text-indigo-400', 'border-indigo-500/30', 'bg-indigo-500/10');
-                    pillDot.classList.add('bg-gray-500');
-                    pillDot.classList.remove('bg-indigo-400', 'shadow-[0_0_8px_currentColor]');
-                    if (pillLabel) pillLabel.innerText = "Thinking OFF";
-                }
-            }
-            const toggle = document.getElementById('deep-thinking-toggle');
-            const knob = document.getElementById('deep-thinking-knob');
-            if (toggle && knob) {
-                toggle.className = isSel ? 'w-11 h-6 bg-[var(--m3-primary)] rounded-full relative transition-colors duration-300' : 'w-11 h-6 bg-[var(--m3-outline-variant)] rounded-full relative transition-colors duration-300';
-                knob.style.transform = isSel ? 'translateX(20px)' : 'translateX(0)';
-            }
-
-            // Menu elements
-            const menuToggle = document.getElementById('menu-deep-thinking-toggle');
-            const menuKnob = document.getElementById('menu-deep-thinking-knob');
-            if (menuToggle && menuKnob) {
-                menuToggle.className = isSel ? 'w-11 h-6 bg-[var(--m3-primary)] rounded-full relative transition-colors duration-300 flex-shrink-0' : 'w-11 h-6 bg-[var(--m3-outline-variant)] rounded-full relative transition-colors duration-300 flex-shrink-0';
-                menuKnob.style.transform = isSel ? 'translateX(20px)' : 'translateX(0)';
-            }
-        }
-
-        window.toggleUltraCoder = function() {
-            toggleOption('ultra-coder');
-        };
-
-        window.toggleDeepThinking = function() {
-            toggleOption('deep-thinking');
-        };
-
-        function updateWebSearchUI() {
-            const isSel = enableWebSearch;
-            const pill = document.getElementById('live-search-pill');
-            const pillLabel = document.getElementById('live-search-pill-label');
-            const spinner = document.getElementById('live-search-spinner');
-            
-            if (pill && pillLabel) {
-                if (isSel) {
-                    pill.className = "glass-panel border border-blue-500/30 bg-blue-500/10 py-1.5 px-3 rounded-full flex items-center gap-2 text-xs font-bold text-blue-400 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer shadow-xs";
-                    pillLabel.innerText = "Search ON";
-                    if (spinner) spinner.classList.remove('hidden');
-                } else {
-                    pill.className = "glass-panel border border-[var(--border-color)] bg-[var(--sidebar-bg)]/40 py-1.5 px-3 rounded-full flex items-center gap-2 text-xs font-bold text-gray-400 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer shadow-xs hover:text-[var(--text-color)]";
-                    pillLabel.innerText = "Search OFF";
-                    if (spinner) spinner.classList.add('hidden');
-                }
-            }
-            
-            const menuToggle = document.getElementById('menu-web-search-toggle');
-            const menuKnob = document.getElementById('menu-web-search-knob');
-            if (menuToggle && menuKnob) {
-                menuToggle.className = isSel ? 'w-11 h-6 bg-[var(--m3-primary)] rounded-full relative transition-colors duration-300 flex-shrink-0' : 'w-11 h-6 bg-[var(--m3-outline-variant)] rounded-full relative transition-colors duration-300 flex-shrink-0';
-                menuKnob.style.transform = isSel ? 'translateX(20px)' : 'translateX(0)';
-            }
-
-            const toggle = document.getElementById('web-search-toggle');
-            const knob = document.getElementById('web-search-knob');
-            if (toggle && knob) {
-                toggle.className = isSel ? 'w-11 h-6 bg-[var(--m3-primary)] rounded-full relative transition-colors duration-300' : 'w-11 h-6 bg-[var(--m3-outline-variant)] rounded-full relative transition-colors duration-300';
-                knob.style.transform = isSel ? 'translateX(20px)' : 'translateX(0)';
-            }
-        }
-
-        window.toggleWebSearch = function() {
-            toggleOption('web-search');
-        };
-
-        // Splash screen dismissal management
-        let authResolved = false;
-        let splashDismissed = false;
-
-        function checkDismissSplash() {
-            if (authResolved && !splashDismissed) {
-                splashDismissed = true;
-                const splash = document.getElementById('splash-screen');
-                if (splash) {
-                    splash.classList.add('opacity-0', 'pointer-events-none', 'scale-105');
-                    setTimeout(() => {
-                        splash.remove();
-                    }, 800);
-                }
-            }
-        }
-
-        window.openLightbox = function(src, alt = 'Image Preview') {
-            triggerHaptic();
-            const modal = document.getElementById('lightbox-modal');
-            const img = document.getElementById('lightbox-img');
-            const caption = document.getElementById('lightbox-caption');
-            const downloadLink = document.getElementById('lightbox-download');
-
-            img.src = src;
-            caption.textContent = alt.toUpperCase() || 'IMAGE PREVIEW';
-            downloadLink.href = src;
-            
-            // Set dynamic filename based on timestamp
-            downloadLink.download = `crystal_${Date.now()}.png`;
-
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            
-            // Animate transition
-            setTimeout(() => {
-                modal.classList.remove('opacity-0');
-                modal.classList.add('opacity-100');
-                img.style.transform = "scale(1)";
-            }, 10);
-        };
-
-        window.closeLightbox = function() {
-            triggerHaptic();
-            const modal = document.getElementById('lightbox-modal');
-            const img = document.getElementById('lightbox-img');
-
-            modal.classList.remove('opacity-100');
-            modal.classList.add('opacity-0');
-            img.style.transform = "scale(0.95)";
-
-            setTimeout(() => {
-                modal.classList.remove('flex');
-                modal.classList.add('hidden');
-            }, 300);
-        };
-
-        // Document launch initializing
-        document.addEventListener('DOMContentLoaded', () => {
-            // Capacitor Back Button Interceptor to prevent the app from closing/exiting on Android back presses
-            if (typeof window.Capacitor !== 'undefined' && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
-                window.Capacitor.Plugins.App.addListener('backButton', () => {
-                    const settingsModal = document.getElementById('settings-modal');
-                    const ageModal = document.getElementById('age-modal');
-                    const lightboxModal = document.getElementById('lightbox-modal');
-                    const sidebarOpen = document.body.classList.contains('sidebar-open');
-                    
-                    if (settingsModal && !settingsModal.classList.contains('hidden')) {
-                        toggleSettings();
-                    } else if (ageModal && !ageModal.classList.contains('hidden')) {
-                        closeAgeModal();
-                    } else if (lightboxModal && !lightboxModal.classList.contains('hidden')) {
-                        closeLightbox();
-                    } else if (sidebarOpen) {
-                        toggleSidebar();
-                    } else {
-                        // Let the app close/exit if they are at the very root and press back
-                        window.Capacitor.Plugins.App.exitApp();
-                    }
-                });
-            }
-
-            loadLocalSettings();
-            updateOnlineOfflineUI();
-            updateProfileUI();
-            updateClock();
-            fetchUserRegion();
-            setMode('core');
-            
-            // Initialize Neural Timeline & Focus listeners
-            initTimelineEvents();
-            init3DCrystal();
-            
-            const msgInput = document.getElementById('message');
-            if (msgInput) {
-                msgInput.addEventListener('focus', () => {
-                    if (msgInput.value.trim().length > 0) {
-                        document.body.classList.add('zen-focus-active');
-                    }
-                });
-                msgInput.addEventListener('input', () => {
-                    playTypeHapticClick();
-                    if (msgInput.value.trim().length > 0) {
-                        document.body.classList.add('zen-focus-active');
-                    } else {
-                        document.body.classList.remove('zen-focus-active');
-                    }
-                });
-                msgInput.addEventListener('blur', () => {
-                    document.body.classList.remove('zen-focus-active');
-                });
-            }
-
-            const instInput = document.getElementById('custom-instructions');
-            if (instInput) {
-                instInput.addEventListener('input', () => {
-                    sysInstructions = instInput.value;
-                    localStorage.setItem('crystal_instructions', sysInstructions);
-                });
-                instInput.addEventListener('blur', () => {
-                    sysInstructions = instInput.value;
-                    localStorage.setItem('crystal_instructions', sysInstructions);
-                });
-            }
-
-            // Render Memory Bank UI on startup
-            if (typeof window.renderMemoryBankUI === 'function') window.renderMemoryBankUI();
-
-            // Force splash screen dismissal after a pleasant delay to let the animation play fully
-            setTimeout(() => {
-                authResolved = true;
-                checkDismissSplash();
-            }, 1500);
-
-            // Safety failsafe
-            setTimeout(() => {
-                authResolved = true;
-                checkDismissSplash();
-            }, 3000);
-
-            // Check for incoming App Links / Email verification deep links on startup
-            handleAppDeepLinks();
-            window.addEventListener('popstate', () => handleAppDeepLinks());
-            window.addEventListener('hashchange', () => handleAppDeepLinks());
-
-            // Handle native Android/Capacitor appUrlOpen events
-            if (typeof window.Capacitor !== 'undefined' && window.Capacitor.Plugins && window.Capacitor.Plugins.App && typeof window.Capacitor.Plugins.App.addListener === 'function') {
-                try {
-                    window.Capacitor.Plugins.App.addListener('appUrlOpen', (data) => {
-                        if (data && data.url) {
-                            try {
-                                const parsedUrl = new URL(data.url);
-                                handleAppDeepLinks(parsedUrl.search);
-                            } catch (e) {
-                                console.warn("Capacitor appUrlOpen parse notice:", e);
-                            }
-                        }
-                    });
-                } catch (e) {}
-            }
-
-            if (auth) {
-                // Safely handle any pending redirect results without crashing on storage partition mismatch
-                if (typeof auth.getRedirectResult === 'function') {
-                    auth.getRedirectResult().catch((redirectErr) => {
-                        console.warn("Handled redirect initial-state partition notice:", redirectErr.code || redirectErr.message);
-                    });
-                }
-
-                auth.onAuthStateChanged(async (u) => {
-                    if (u) {
-                        isLocalGuest = false;
-                        localStorage.removeItem('crystal_local_guest');
-                        document.getElementById('login-screen').classList.add('hidden');
-                        
-                        // Check if user is a guest (anonymous or guest fallback account)
-                        const isGuestUser = u.isAnonymous || (u.email && u.email.startsWith('guest_') && u.email.endsWith('@crystal-ai.app'));
-
-                        if (!isGuestUser) {
-                            try {
-                                await u.reload();
-                            } catch (reloadErr) {}
-
-                            const isVerifiedFirebase = u.emailVerified === true;
-                            const isVerifiedSession = sessionStorage.getItem('crystal_session_token_verified_' + u.uid) === 'true';
-                            const isAccountVerified = isVerifiedFirebase || isVerifiedSession;
-
-                            // Enforce verification for all non-guest accounts
-                            if (!isAccountVerified) {
-                                showEmailVerificationScreen(u.email);
-                                authResolved = true;
-                                checkDismissSplash();
-                                return;
-                            }
-                        }
-                        
-                        closeEmailVerificationScreen();
-                        
-                        // Load user profile / custom username from Firestore if it exists
-                        if (db) {
-                            try {
-                                const userDoc = await db.collection('users').doc(u.uid).get();
-                                if (userDoc.exists) {
-                                    const userData = userDoc.data();
-                                    if (userData.username) {
-                                        localStorage.setItem('crystal_username', userData.username);
-                                    }
-                                    if (userData.instructions) {
-                                        localStorage.setItem('crystal_instructions', userData.instructions);
-                                    }
-                                    if (userData.birthday) {
-                                        localStorage.setItem('crystal_birthday', userData.birthday);
-                                    }
-                                    // Reload local settings onto elements
-                                    loadLocalSettings();
-                                }
-                            } catch (err) {
-                                console.warn("Firestore user profile get skipped/failed:", err);
-                            }
-                        }
-                        
-                        loadSidebar();
-                    } else {
-                        closeEmailVerificationScreen();
-                        // Only show login-screen if we are NOT in local guest mode
-                        if (!isLocalGuest) {
-                            document.getElementById('login-screen').classList.remove('hidden');
-                        } else {
-                            document.getElementById('login-screen').classList.add('hidden');
-                            loadSidebar();
-                        }
-                    }
-                    updateProfileUI();
-                    updateSystemBars();
-                    
-                    // Dismiss splash screen on auth resolution
-                    authResolved = true;
-                    checkDismissSplash();
-                });
-            } else {
-                // If firebase auth failed to load, fallback to local offline mode
-                isLocalGuest = true;
-                localStorage.setItem('crystal_local_guest', 'true');
-                document.getElementById('login-screen').classList.add('hidden');
-                loadSidebar();
-                authResolved = true;
-                checkDismissSplash();
-            }
-        });
-
-        // ==========================================================================
-        // CREATIVE FEATURES ENGINE (MAGIC ENHANCER, WORKBENCH, TTS, MIND MAP, EXPORT)
-        // ==========================================================================
-
-        // 1. Magic Wand AI Prompt Enhancer
-        window.enhanceUserPrompt = async function() {
-            triggerHaptic();
-            const input = document.getElementById('message');
-            const wandBtn = document.getElementById('magic-wand-btn');
-            let text = input.value.trim();
-            
-            if (!text) {
-                if (typeof showToast === 'function') {
-                    showToast(" Type a brief idea or prompt first, then tap Magic Wand!");
-                }
-                input.focus();
-                return;
-            }
-
-            const originalWandHtml = wandBtn ? wandBtn.innerHTML : '';
-            if (wandBtn) {
-                wandBtn.disabled = true;
-                wandBtn.classList.add('animate-spin', 'opacity-50');
-                wandBtn.title = "Enhancing prompt with AI...";
-            }
-
-            if (typeof showToast === 'function') {
-                showToast("AI is enhancing your prompt...");
-            }
-
-            try {
-                const res = await window.fetchCrystalApi('/api/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        message: text,
-                        action: 'enhance_prompt',
-                        persona: 'Prompt Enhancer',
-                        is_enhance_prompt: true
-                    })
-                });
-
-                if (res.ok) {
-                    const data = await res.json();
-                    let enhancedText = (data.reply || '').trim();
-                    if (enhancedText) {
-                        enhancedText = enhancedText.replace(/^["'`]+|["'`]+$/g, '').trim();
-                        input.value = enhancedText;
-                        autoExpandTextarea(input);
-                        input.focus();
-                        if (typeof showToast === 'function') {
-                            showToast("Prompt Enhanced with AI Magic!");
-                        }
-                        return;
-                    }
-                }
-            } catch (err) {
-                console.warn("AI enhancement API error, falling back to smart template:", err);
-            } finally {
-                if (wandBtn) {
-                    wandBtn.disabled = false;
-                    wandBtn.classList.remove('animate-spin', 'opacity-50');
-                    wandBtn.innerHTML = originalWandHtml;
-                    wandBtn.title = "Enhance Prompt with AI Magic";
-                }
-            }
-
-            // Fallback smart template if offline
-            const enhancedFallback = `[ROLE]: You are an elite AI Architect and subject matter expert.\n[OBJECTIVE]: ${text}\n[REQUIREMENTS]: Provide a comprehensive, modular breakdown with key insights, step-by-step logic, and best practices.\n[CONSTRAINTS]: Ensure zero boilerplate, high accuracy, and crystal-clear structure.`;
-            input.value = enhancedFallback;
-            autoExpandTextarea(input);
-            input.focus();
-            if (typeof showToast === 'function') {
-                showToast("Prompt Enhanced (Smart Template Fallback)");
-            }
-        };
-
-        // IN-CHAT SAVE MEMORY ENGINE
-        window.savedMemories = (function() {
-            try {
-                return JSON.parse(localStorage.getItem('crystal_saved_memories') || '[]');
-            } catch(e) {
-                return [];
-            }
-        })();
-
-        window.saveMemoryFromInput = async function() {
-            triggerHaptic();
-            if (window.isCurrentGuest && window.isCurrentGuest()) {
-                window.promptGuestFeature('Neural Memory Bank', 'Sign in or create an account to permanently save custom AI memory notes and preferences.');
-                return;
-            }
-            const input = document.getElementById('message');
-            const brainBtn = document.getElementById('save-memory-btn');
-            let text = input ? input.value.trim() : '';
-
-            if (!text) {
-                if (typeof showToast === 'function') {
-                    showToast("Type a message or mood (e.g. 'angry mode') first to save memory!");
-                }
-                if (input) input.focus();
-                return;
-            }
-
-            if (brainBtn) {
-                brainBtn.disabled = true;
-                brainBtn.classList.add('animate-pulse', 'opacity-50');
-            }
-
-            if (typeof showToast === 'function') {
-                showToast("Summarizing into AI memory...");
-            }
-
-            try {
-                const res = await window.fetchCrystalApi('/api/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        message: text,
-                        action: 'summarize_memory',
-                        is_summarize_memory: true
-                    })
-                });
-
-                if (res.ok) {
-                    const data = await res.json();
-                    const tag = (data.memory_tag || data.reply || '').trim();
-                    if (tag) {
-                        window.addSavedMemoryTag(tag);
-                        return;
-                    }
-                }
-            } catch (err) {
-                console.warn("AI memory summarization error, fallback to client keyword:", err);
-            } finally {
-                if (brainBtn) {
-                    brainBtn.disabled = false;
-                    brainBtn.classList.remove('animate-pulse', 'opacity-50');
-                }
-            }
-
-            let fallbackTag = text.replace(/mode/i, 'Mode').trim();
-            if (fallbackTag.length > 25) fallbackTag = fallbackTag.substring(0, 25) + '...';
-            window.addSavedMemoryTag(fallbackTag);
-        };
-
-        window.saveMemoryFromBubble = async function(btn) {
-            triggerHaptic();
-            if (window.isCurrentGuest && window.isCurrentGuest()) {
-                window.promptGuestFeature('Neural Memory Bank', 'Sign in or create an account to permanently save custom AI memory notes and preferences.');
-                return;
-            }
-            const bubbleWrap = btn.closest('.flex-col');
-            if (!bubbleWrap) return;
-            const bubble = bubbleWrap.querySelector('.bubble');
-            if (!bubble) return;
-            const text = bubble.innerText.trim();
-            if (!text) return;
-
-            btn.disabled = true;
-            const origHtml = btn.innerHTML;
-            btn.innerHTML = `<span class="animate-spin"><i class="fa-solid fa-spinner"></i></span> Summarizing...`;
-
-            try {
-                const res = await window.fetchCrystalApi('/api/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        message: text,
-                        action: 'summarize_memory',
-                        is_summarize_memory: true
-                    })
-                });
-
-                if (res.ok) {
-                    const data = await res.json();
-                    const tag = (data.memory_tag || data.reply || '').trim();
-                    if (tag) {
-                        window.addSavedMemoryTag(tag);
-                        btn.innerHTML = `<i class="fa-solid fa-check text-emerald-400"></i> Saved`;
-                        setTimeout(() => { btn.disabled = false; btn.innerHTML = origHtml; }, 2000);
-                        return;
-                    }
-                }
-            } catch (e) {
-                console.warn("Memory bubble summarization error:", e);
-            }
-
-            let fallbackTag = text.length > 25 ? text.substring(0, 25) + '...' : text;
-            window.addSavedMemoryTag(fallbackTag);
-            btn.disabled = false;
-            btn.innerHTML = origHtml;
-        };
-
-        window.addSavedMemoryTag = function(tag) {
-            if (!tag) return;
-            const clean = tag.replace(/^["'`]+|["'`]+$/g, '').trim();
-            if (!clean) return;
-
-            if (!window.savedMemories) window.savedMemories = [];
-            if (!window.savedMemories.includes(clean)) {
-                window.savedMemories.push(clean);
-                localStorage.setItem('crystal_saved_memories', JSON.stringify(window.savedMemories));
-                if (typeof showToast === 'function') {
-                    showToast(`Memory Saved: "${clean}"`);
-                }
-            } else {
-                if (typeof showToast === 'function') {
-                    showToast(`Memory "${clean}" is already saved.`);
-                }
-            }
-            window.renderMemoryBankUI();
-        };
-
-        window.removeMemoryTag = function(idx) {
-            triggerHaptic();
-            if (!window.savedMemories) return;
-            window.savedMemories.splice(idx, 1);
-            localStorage.setItem('crystal_saved_memories', JSON.stringify(window.savedMemories));
-            window.renderMemoryBankUI();
-            if (typeof showToast === 'function') showToast("Memory tag removed.");
-        };
-
-        window.clearAllMemories = function() {
-            triggerHaptic();
-            window.savedMemories = [];
-            localStorage.setItem('crystal_saved_memories', JSON.stringify([]));
-            window.renderMemoryBankUI();
-            if (typeof showToast === 'function') showToast("All saved memories cleared.");
-        };
-
-        window.renderMemoryBankUI = function() {
-            const bar = document.getElementById('memory-bank-bar');
-            const container = document.getElementById('memory-tags-container');
-            if (!bar || !container) return;
-
-            const memories = window.savedMemories || [];
-            if (memories.length === 0) {
-                bar.classList.add('hidden');
-                container.innerHTML = '';
-                return;
-            }
-
-            bar.classList.remove('hidden');
-            container.innerHTML = memories.map((m, idx) => `
-                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 text-[11px] font-bold shadow-sm animate-[fadeIn_0.2s_ease-out]">
-                    <i class="fa-solid fa-brain text-[10px] text-indigo-400"></i>
-                    <span>${escapeHtml(m)}</span>
-                    <button onclick="window.removeMemoryTag(${idx})" class="hover:text-rose-400 text-indigo-300/70 ml-1 font-bold focus:outline-none" title="Remove memory tag">&times;</button>
-                </span>
-            `).join('');
-        };
-
-        // 2. Prompt Workbench Drawer
-        window.togglePromptWorkbench = function(show) {
-            triggerHaptic();
-            const overlay = document.getElementById('workbench-overlay');
-            const drawer = document.getElementById('workbench-drawer');
-            if (!overlay || !drawer) return;
-            
-            const isHidden = overlay.classList.contains('hidden');
-            const shouldOpen = show !== undefined ? show : isHidden;
-            
-            if (shouldOpen) {
-                overlay.classList.remove('hidden');
-                drawer.classList.remove('translate-y-full');
-                setTimeout(() => overlay.classList.remove('opacity-0'), 10);
-            } else {
-                overlay.classList.add('opacity-0');
-                drawer.classList.add('translate-y-full');
-                setTimeout(() => overlay.classList.add('hidden'), 300);
-            }
-        };
-
-        window.useWorkbenchPrompt = function(promptText) {
-            triggerHaptic();
-            const input = document.getElementById('message');
-            input.value = promptText;
-            autoExpandTextarea(input);
-            input.focus();
-            togglePromptWorkbench(false);
-            if (typeof showToast === 'function') {
-                showToast("Prompt Loaded into Input!");
-            }
-        };
-
-        // 3. Multi-Language Speech Synthesizer ("Read Aloud") Engine
-        let currentSpeakingBtn = null;
-        let activeTtsAudio = null;
-
-        // Ensure voices are warmed up
-        if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-            window.speechSynthesis.onvoiceschanged = () => {
-                window.cachedSpeechVoices = window.speechSynthesis.getVoices();
-            };
-            window.cachedSpeechVoices = window.speechSynthesis.getVoices();
-        }
-
-        window.speakBubbleText = function(btn) {
-            triggerHaptic();
-            const bubbleWrap = btn.closest('.flex-col');
-            if (!bubbleWrap) return;
-            const bubble = bubbleWrap.querySelector('.bubble');
-            if (!bubble) return;
-
-            // If already playing audio or speech, toggle stop
-            if (activeTtsAudio) {
-                try {
-                    activeTtsAudio.pause();
-                    activeTtsAudio = null;
-                } catch (e) {}
-            }
-
-            if ('speechSynthesis' in window && window.speechSynthesis.speaking) {
-                window.speechSynthesis.cancel();
-                if (currentSpeakingBtn) {
-                    currentSpeakingBtn.innerHTML = `
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-                        Read Aloud
-                    `;
-                }
-                if (currentSpeakingBtn === btn) {
-                    currentSpeakingBtn = null;
-                    return;
-                }
-            }
-
-            // Extract readable text (strip code blocks, urls, and markdown tokens)
-            let rawText = bubble.innerText || bubble.textContent || '';
-            rawText = rawText
-                .replace(/```[\s\S]*?```/g, ' [code block skipped] ')
-                .replace(/`[^`]+`/g, '')
-                .replace(/https?:\/\/[^\s]+/g, '')
-                .replace(/([#*_~>|])/g, '')
-                .replace(/\s+/g, ' ')
-                .trim();
-
-            if (!rawText) {
-                if (typeof showToast === 'function') showToast("No spoken content found in bubble.");
-                return;
-            }
-
-            const cleanText = rawText.substring(0, 3000);
-            const userLang = localStorage.getItem('crystal_language') || 'English';
-
-            // Language code mappings for SpeechSynthesis
-            const langCodeMap = {
-                English: 'en-US',
-                Telugu: 'te-IN',
-                Hindi: 'hi-IN',
-                Spanish: 'es-ES',
-                French: 'fr-FR',
-                German: 'de-DE',
-                Japanese: 'ja-JP',
-                Chinese: 'zh-CN',
-                Arabic: 'ar-SA',
-                Portuguese: 'pt-BR',
-                Russian: 'ru-RU',
-                Korean: 'ko-KR',
-                Italian: 'it-IT'
-            };
-            const targetLangCode = langCodeMap[userLang] || 'en-US';
-
-            // UI active visual state
-            btn.innerHTML = `
-                <span class="flex items-center gap-1 text-indigo-400 font-bold">
-                    <span class="inline-block w-1 h-3 bg-indigo-500 animate-[bounce_0.6s_infinite]"></span>
-                    <span class="inline-block w-1 h-4 bg-indigo-400 animate-[bounce_0.6s_infinite_0.15s]"></span>
-                    <span class="inline-block w-1 h-2 bg-indigo-300 animate-[bounce_0.6s_infinite_0.3s]"></span>
-                    Stop
-                </span>
-            `;
-            currentSpeakingBtn = btn;
-
-            const resetBtn = () => {
-                if (currentSpeakingBtn === btn) {
-                    btn.innerHTML = `
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-                        Read Aloud
-                    `;
-                    currentSpeakingBtn = null;
-                }
-            };
-
-            // 1. Native Web Speech Synthesis Engine
-            if ('speechSynthesis' in window) {
-                try {
-                    window.speechSynthesis.cancel();
-                    if (window.speechSynthesis.resume) {
-                        window.speechSynthesis.resume();
-                    }
-
-                    const utterance = new SpeechSynthesisUtterance(cleanText);
-                    utterance.lang = targetLangCode;
-                    utterance.rate = 1.0;
-                    utterance.pitch = 1.0;
-
-                    const voices = window.speechSynthesis.getVoices() || window.cachedSpeechVoices || [];
-                    if (voices.length > 0) {
-                        const matchedVoice = voices.find(v => v.lang.startsWith(targetLangCode.split('-')[0])) ||
-                                             voices.find(v => v.lang.startsWith('en'));
-                        if (matchedVoice) utterance.voice = matchedVoice;
-                    }
-
-                    utterance.onend = resetBtn;
-                    utterance.onerror = (err) => {
-                        console.warn("SpeechSynthesis error, falling back to audio stream:", err);
-                        fallbackAudioTts(cleanText, targetLangCode, resetBtn);
-                    };
-
-                    window.speechSynthesis.speak(utterance);
-                    return;
-                } catch (speechErr) {
-                    console.warn("SpeechSynthesis execution caught:", speechErr);
-                }
-            }
-
-            // 2. Fallback Audio Stream Engine
-            fallbackAudioTts(cleanText, targetLangCode, resetBtn);
-        };
-
-        function fallbackAudioTts(text, langCode, onComplete) {
-            try {
-                const shortText = encodeURIComponent(text.substring(0, 200));
-                const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${shortText}&tl=${langCode.split('-')[0]}&client=tw-ob`;
-                activeTtsAudio = new Audio(ttsUrl);
-                activeTtsAudio.onended = () => {
-                    activeTtsAudio = null;
-                    if (onComplete) onComplete();
-                };
-                activeTtsAudio.onerror = () => {
-                    activeTtsAudio = null;
-                    if (onComplete) onComplete();
-                    if (typeof showToast === 'function') showToast("Audio playback complete.");
-                };
-                activeTtsAudio.play().catch(e => {
-                    if (onComplete) onComplete();
-                });
-            } catch (e) {
-                if (onComplete) onComplete();
-            }
-        }
-
-        window.copyBubbleText = function(btn) {
-            triggerHaptic();
-            const bubbleWrap = btn.closest('.flex-col');
-            if (!bubbleWrap) return;
-            const bubble = bubbleWrap.querySelector('.bubble');
-            if (!bubble) return;
-            
-            const text = bubble.innerText;
-            navigator.clipboard.writeText(text).then(() => {
-                const orig = btn.innerHTML;
-                btn.innerHTML = "Copied!";
-                setTimeout(() => btn.innerHTML = orig, 1500);
-            }).catch(() => {});
-        };
-
-        window.downloadBubbleMarkdown = function(btn) {
-            triggerHaptic();
-            const bubbleWrap = btn.closest('.flex-col');
-            if (!bubbleWrap) return;
-            const bubble = bubbleWrap.querySelector('.bubble');
-            if (!bubble) return;
-            
-            const text = bubble.innerText;
-            const blob = new Blob([text], { type: 'text/markdown;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `crystal_response_${Date.now()}.md`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        };
-
-        // 4. Interactive Mind Map Generator
-        let activeMindMapNodes = [];
-
-        function cleanMarkdownText(str) {
-            if (!str) return '';
-            return str
-                .replace(/^[`#*_\-\d.\s:=]+/, '')
-                .replace(/[*_~`]/g, '')
-                .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-                .trim();
-        }
-
-        window.generateMindMapFromBubble = function(btn) {
-            triggerHaptic();
-            if (window.isCurrentGuest && window.isCurrentGuest()) {
-                window.promptGuestFeature('Mind Map Engine', 'Sign in or create an account to generate visual concept tree diagrams.');
-                return;
-            }
-            const bubbleWrap = btn.closest('.flex-col');
-            if (!bubbleWrap) return;
-            const bubble = bubbleWrap.querySelector('.bubble');
-            if (!bubble) return;
-            
-            const text = bubble.innerText;
-            renderMindMap(text);
-        };
-
-        window.renderMindMap = function(text) {
-            if (!text || typeof text !== 'string') return;
-            
-            const rawLines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-            const nodes = [];
-            let centralConcept = "";
-
-            function pushItem(nodeTitle, itemText) {
-                const cleanTitle = cleanMarkdownText(nodeTitle);
-                const cleanItem = cleanMarkdownText(itemText);
-                if (!cleanItem) return;
-
-                let existingNode = nodes.find(n => n.title.toLowerCase() === cleanTitle.toLowerCase());
-                if (!existingNode) {
-                    existingNode = { title: cleanTitle || "Key Takeaway", items: [] };
-                    nodes.push(existingNode);
-                }
-                if (!existingNode.items.includes(cleanItem)) {
-                    existingNode.items.push(cleanItem);
-                }
-            }
-
-            let currentHeader = "";
-
-            rawLines.forEach(line => {
-                const isHeading = line.startsWith('#') || line.startsWith('**') || line.startsWith('===') || line.endsWith(':');
-                const isBullet = line.startsWith('-') || line.startsWith('*') || line.startsWith('+') || /^\d+[\.\)]/.test(line);
-
-                if (isHeading) {
-                    const hText = cleanMarkdownText(line);
-                    if (hText.length > 2) {
-                        currentHeader = hText;
-                        if (!centralConcept) centralConcept = hText;
-                        if (!nodes.some(n => n.title.toLowerCase() === hText.toLowerCase())) {
-                            nodes.push({ title: hText, items: [] });
-                        }
-                    }
-                } else if (isBullet) {
-                    const itemText = cleanMarkdownText(line);
-                    if (itemText.length > 1) {
-                        const targetHeader = currentHeader || "Core Concepts";
-                        pushItem(targetHeader, itemText);
-                    }
-                } else if (line.includes(':')) {
-                    const parts = line.split(':');
-                    const k = cleanMarkdownText(parts[0]);
-                    const v = cleanMarkdownText(parts.slice(1).join(':'));
-                    if (k.length > 2 && v.length > 1) {
-                        pushItem(k, v);
-                    }
-                } else {
-                    if (line.length > 15) {
-                        const targetHeader = currentHeader || "Key Insights";
-                        pushItem(targetHeader, line.substring(0, 120));
-                    }
-                }
-            });
-
-            if (nodes.length === 0 || (nodes.length === 1 && nodes[0].items.length === 0)) {
-                const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
-                centralConcept = cleanMarkdownText(sentences[0] || "Crystal Concept") || "Crystal AI Mind Map";
-                const overviewNode = { title: "Overview", items: [] };
-                sentences.slice(0, 8).forEach(s => {
-                    const cleanS = cleanMarkdownText(s);
-                    if (cleanS.length > 5) overviewNode.items.push(cleanS);
-                });
-                nodes.push(overviewNode);
-            }
-
-            if (!centralConcept) {
-                centralConcept = nodes[0]?.title || "Crystal AI Concept Map";
-            }
-
-            activeMindMapNodes = nodes;
-
-            const searchInput = document.getElementById('mindmap-search-input');
-            if (searchInput) searchInput.value = "";
-
-            renderMindMapGrid(centralConcept, nodes);
-
-            const overlay = document.getElementById('mindmap-overlay');
-            const modal = document.getElementById('mindmap-modal');
-            if (overlay && modal) {
-                overlay.classList.remove('hidden');
-                modal.classList.remove('hidden');
-                setTimeout(() => {
-                    overlay.classList.remove('opacity-0');
-                    modal.classList.remove('scale-95', 'opacity-0');
-                }, 10);
-            }
-        };
-
-        function renderMindMapGrid(centralTitle, nodeList) {
-            const container = document.getElementById('mindmap-canvas-container');
-            if (!container) return;
-
-            let html = `
-                <div class="flex flex-col items-center gap-6 p-2 sm:p-6 w-full max-w-5xl mx-auto select-none">
-                    <!-- Central Core Hub -->
-                    <div class="relative group">
-                        <div class="absolute -inset-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-3xl blur opacity-75 group-hover:opacity-100 transition duration-500 animate-pulse"></div>
-                        <div class="relative bg-[var(--sidebar-bg)] py-3.5 px-7 rounded-2xl text-center font-black text-sm sm:text-base tracking-wide text-white uppercase border border-white/20 shadow-2xl flex items-center gap-3">
-                            <span class="text-xl"></span>
-                            <span>${centralTitle.substring(0, 50)}</span>
-                            <span class="px-2 py-0.5 text-[10px] bg-indigo-500/20 text-indigo-300 rounded-full border border-indigo-500/30 font-extrabold">${nodeList.length} Branches</span>
-                        </div>
-                    </div>
-                    <div class="w-0.5 h-8 bg-gradient-to-b from-indigo-500 via-purple-500 to-transparent"></div>
-
-                    <!-- Branches Grid -->
-                    <div id="mindmap-nodes-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
-            `;
-
-            if (nodeList.length === 0) {
-                html += `
-                    <div class="col-span-full py-12 text-center text-xs opacity-50 font-semibold">
-                        No matching mind map nodes found.
-                    </div>
-                `;
-            } else {
-                nodeList.forEach((node, idx) => {
-                    const colors = [
-                        'from-indigo-500/20 border-indigo-500/40 text-indigo-400',
-                        'from-purple-500/20 border-purple-500/40 text-purple-400',
-                        'from-cyan-500/20 border-cyan-500/40 text-cyan-400',
-                        'from-emerald-500/20 border-emerald-500/40 text-emerald-400',
-                        'from-pink-500/20 border-pink-500/40 text-pink-400',
-                        'from-amber-500/20 border-amber-500/40 text-amber-400'
-                    ];
-                    const themeClass = colors[idx % colors.length];
-
-                    html += `
-                        <div class="mindmap-node-card glass-panel p-4 rounded-2xl border border-[var(--border-color)] bg-gradient-to-br ${themeClass.split(' ')[0]} to-transparent shadow-lg flex flex-col gap-2.5 hover:border-indigo-500/80 transition-all hover:scale-[1.01]">
-                            <div class="flex items-center justify-between gap-2 pb-2 border-b border-[var(--border-color)]">
-                                <div class="flex items-center gap-2 font-black text-xs uppercase tracking-wider ${themeClass.split(' ')[2]} truncate">
-                                    <span class="w-2.5 h-2.5 rounded-full bg-current flex-shrink-0 animate-pulse"></span>
-                                    <span class="truncate">${node.title.substring(0, 40)}</span>
-                                </div>
-                                <button onclick="copyMindMapBranch('${node.title.replace(/'/g, "\\'")}')" title="Copy this branch" class="text-[10px] px-2 py-0.5 rounded-lg bg-[var(--sidebar-hover)] border border-[var(--border-color)] hover:border-indigo-500 hover:text-indigo-400 transition-all opacity-80 hover:opacity-100 flex-shrink-0">
-                                    Copy
-                                </button>
-                            </div>
-                            <ul class="flex flex-col gap-2 text-xs text-[var(--text-color)] opacity-90 leading-relaxed font-medium">
-                                ${node.items.length > 0 
-                                    ? node.items.map(item => `
-                                        <li class="flex items-start gap-2 bg-[var(--input-bg)]/40 p-2 rounded-xl border border-[var(--border-color)]/50">
-                                            <span class="${themeClass.split(' ')[2]} font-bold">â€¢</span>
-                                            <span class="select-text break-words">${item}</span>
-                                        </li>
-                                    `).join('')
-                                    : `<li class="text-[11px] opacity-50 italic">Key concept header</li>`
-                                }
-                            </ul>
-                        </div>
-                    `;
-                });
-            }
-
-            html += `</div></div>`;
-            container.innerHTML = html;
-        }
-
-        window.filterMindMapNodes = function(query) {
-            if (!activeMindMapNodes || activeMindMapNodes.length === 0) return;
-            const q = (query || "").toLowerCase().trim();
-            if (!q) {
-                renderMindMapGrid(activeMindMapNodes[0]?.title || "Concept Tree", activeMindMapNodes);
-                return;
-            }
-
-            const filtered = activeMindMapNodes.filter(n => {
-                if (n.title.toLowerCase().includes(q)) return true;
-                return n.items.some(it => it.toLowerCase().includes(q));
-            });
-
-            renderMindMapGrid(`Filtered: "${q}"`, filtered);
-        };
-
-        window.copyMindMapBranch = function(branchTitle) {
-            triggerHaptic();
-            const node = (activeMindMapNodes || []).find(n => n.title === branchTitle);
-            if (!node) return;
-
-            const text = ` ${node.title}\n` + node.items.map(i => `â€¢ ${i}`).join('\n');
-            navigator.clipboard.writeText(text).then(() => {
-                if (typeof showToast === 'function') showToast(`Branch "${node.title.substring(0, 20)}" copied!`);
-            }).catch(() => {});
-        };
-
-        window.closeMindMap = function() {
-            triggerHaptic();
-            const overlay = document.getElementById('mindmap-overlay');
-            const modal = document.getElementById('mindmap-modal');
-            if (overlay && modal) {
-                overlay.classList.add('opacity-0');
-                modal.classList.add('scale-95', 'opacity-0');
-                setTimeout(() => {
-                    overlay.classList.add('hidden');
-                    modal.classList.add('hidden');
-                }, 300);
-            }
-        };
-
-        // Perspective Prism Engine removed per user request
-
-        // CrystalStudy Engine Stubs
-        window.openStudyMode = function() {};
-        window.closeStudyMode = function() {};
-
-        // 5. Chat Export Modal
-        window.openExportModal = function() {
-            triggerHaptic();
-            if (window.isCurrentGuest && window.isCurrentGuest()) {
-                window.promptGuestFeature('Export Conversations', 'Sign in or create an account to export, download, and backup chat transcripts.');
-                return;
-            }
-            const overlay = document.getElementById('export-overlay');
-            const modal = document.getElementById('export-modal');
-            if (overlay && modal) {
-                overlay.classList.remove('hidden');
-                modal.classList.remove('hidden');
-                setTimeout(() => {
-                    overlay.classList.remove('opacity-0');
-                    modal.classList.remove('scale-95', 'opacity-0');
-                }, 10);
-            }
-        };
-
-        window.closeExportModal = function() {
-            triggerHaptic();
-            const overlay = document.getElementById('export-overlay');
-            const modal = document.getElementById('export-modal');
-            if (overlay && modal) {
-                overlay.classList.add('opacity-0');
-                modal.classList.add('scale-95', 'opacity-0');
-                setTimeout(() => {
-                    overlay.classList.add('hidden');
-                    modal.classList.add('hidden');
-                }, 300);
-            }
-        };
-
-        window.exportChatHistory = function(format) {
-            triggerHaptic();
-            if (!chatHistory || chatHistory.length === 0) {
-                if (typeof showToast === 'function') showToast("No chat history to export.");
-                closeExportModal();
-                return;
-            }
-
-            let content = "";
-            let mimeType = "text/plain";
-            let ext = "txt";
-
-            if (format === 'markdown') {
-                ext = "md";
-                mimeType = "text/markdown";
-                content = `# Crystal AI Conversation Transcript\n*Exported on ${new Date().toLocaleString()}*\n\n---\n\n`;
-                chatHistory.forEach(msg => {
-                    const role = msg.role === 'user' ? 'User' : 'Crystal AI';
-                    content += `### ${role}\n${msg.content}\n\n`;
-                });
-            } else if (format === 'json') {
-                ext = "json";
-                mimeType = "application/json";
-                content = safeJsonStringify({ exportDate: new Date().toISOString(), messages: chatHistory }, null, 2);
-            } else {
-                content = `Crystal AI Conversation Transcript\nExported on ${new Date().toLocaleString()}\n\n`;
-                chatHistory.forEach(msg => {
-                    const role = msg.role === 'user' ? 'User' : 'Crystal AI';
-                    content += `[${role}]: ${msg.content}\n\n`;
-                });
-            }
-
-            const blob = new Blob([content], { type: `${mimeType};charset=utf-8` });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `crystal_chat_export_${Date.now()}.${ext}`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            
-            closeExportModal();
-            if (typeof showToast === 'function') showToast(`Exported chat as .${ext}`);
-        };
-
-        // ========================================================
-        // 6. CRYSTAL MODEL TIERS MANAGER
-        // ========================================================
-
-        window.selectCrystalTier = function(tier = 'crystal_core', showToastNotification = false) {
-            localStorage.setItem('selected_crystal_tier', 'crystal_core');
-            if (typeof triggerHaptic === 'function') triggerHaptic();
-
-            const badgeEl = document.getElementById('active-tier-badge');
-            const settingsTag = document.getElementById('settings-tier-tag');
-
-            if (badgeEl) {
-                badgeEl.textContent = 'Crystal Core âš¡';
-                badgeEl.className = 'text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20';
-            }
-            if (settingsTag) {
-                settingsTag.textContent = 'Crystal Core âš¡';
-                settingsTag.className = 'text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20';
-            }
-
-            if (showToastNotification && typeof showToast === 'function') showToast("Active Model: Crystal Core (Default)");
-        };
-
-        let currentGroqTab = 'working';
-        let groqModelsData = { working_models: [], decommissioned_models: [] };
-
-        window.toggleGroqModelsModal = function() {
-            if (typeof triggerHaptic === 'function') triggerHaptic();
-            if (window.isCurrentGuest && window.isCurrentGuest()) {
-                window.promptGuestFeature('Model Pipeline', 'Sign in or create an account to access custom AI model selection.');
-                return;
-            }
-            const modal = document.getElementById('groq-models-modal');
-            if (!modal) return;
-            if (modal.classList.contains('hidden')) {
-                modal.classList.remove('hidden');
-                setTimeout(() => modal.classList.remove('opacity-0', 'scale-95'), 10);
-                fetchGroqModelsLive(false);
-            } else {
-                modal.classList.add('opacity-0', 'scale-95');
-                setTimeout(() => modal.classList.add('hidden'), 200);
-            }
-        };
-
-        window.switchGroqTab = function(tab) {
-            if (typeof triggerHaptic === 'function') triggerHaptic();
-            currentGroqTab = tab;
-            const workingBtn = document.getElementById('groq-tab-working');
-            const decomBtn = document.getElementById('groq-tab-decom');
-            if (tab === 'working') {
-                if (workingBtn) workingBtn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 transition cursor-pointer';
-                if (decomBtn) decomBtn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-400 hover:text-slate-200 transition cursor-pointer';
-            } else {
-                if (workingBtn) workingBtn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-400 hover:text-slate-200 transition cursor-pointer';
-                if (decomBtn) decomBtn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 transition cursor-pointer';
-            }
-            renderGroqModelsList();
-        };
-
-        window.fetchGroqModelsLive = async function(forceRefresh = false) {
-            const listEl = document.getElementById('groq-models-list');
-            if (listEl && forceRefresh) {
-                listEl.innerHTML = `<div class="text-center py-8 text-indigo-400 font-mono text-xs flex items-center justify-center gap-2"><span class="animate-spin"></span> Syncing latest Crystal models pipeline...</div>`;
-            }
-            try {
-                const url = forceRefresh ? window.getApiEndpoint('/api/models?refresh=true') : window.getApiEndpoint('/api/models');
-                const res = await fetch(url, { method: forceRefresh ? 'POST' : 'GET' });
-                const contentType = res.headers.get('content-type') || '';
-                if (!res.ok || !contentType.includes('application/json')) {
-                    throw new Error(`Server returned ${res.status} (${contentType.split(';')[0] || 'unknown'})`);
-                }
-                const data = await res.json();
-                if (data && data.success) {
-                    groqModelsData = data;
-                    
-                    const workingCount = document.getElementById('groq-working-count');
-                    const decomCount = document.getElementById('groq-decom-count');
-                    const tabWorkingNum = document.getElementById('groq-tab-working-num');
-                    const tabDecomNum = document.getElementById('groq-tab-decom-num');
-                    const lastSync = document.getElementById('groq-last-sync');
-
-                    const totalActive = (data.crystal_models_count || data.working_models_count || 0);
-                    if (workingCount) workingCount.textContent = totalActive;
-                    if (decomCount) decomCount.textContent = data.decommissioned_models_count || 0;
-                    if (tabWorkingNum) tabWorkingNum.textContent = totalActive;
-                    if (tabDecomNum) tabDecomNum.textContent = data.decommissioned_models_count || 0;
-                    if (lastSync) lastSync.textContent = `Synced: ${new Date(data.last_sync || Date.now()).toLocaleTimeString()}`;
-
-                    renderGroqModelsList();
-                }
-            } catch (e) {
-                console.warn("Crystal models sync note:", e.message);
-                if (listEl && (!groqModelsData.working_models || groqModelsData.working_models.length === 0)) {
-                    listEl.innerHTML = `<div class="p-4 rounded-xl bg-slate-800/80 border border-slate-700/50 text-slate-300 text-xs text-center font-mono">Crystal models pipeline active with standard tier fallback.</div>`;
-                }
-            }
-        };
-
-        window.renderGroqModelsList = function() {
-            const listEl = document.getElementById('groq-models-list');
-            if (!listEl) return;
-
-            if (currentGroqTab === 'working') {
-                let html = '';
-
-                // Categorized Models Catalog Section (Exact 1:1 inventory matching provider)
-                if (groqModelsData.crystal_image_models || groqModelsData.crystal_vision_models || groqModelsData.crystal_agent_models || groqModelsData.crystal_text_models) {
-                    const renderCategory = (title, icon, items) => {
-                        if (!items || items.length === 0) return '';
-                        let catHtml = `
-                            <div class="pt-2 pb-1">
-                                <div class="flex items-center gap-1.5 text-xs font-bold text-slate-300 mb-2">
-                                    <span>${icon}</span>
-                                    <span>${title}</span>
-                                </div>
-                                <div class="space-y-2">
-                        `;
-                        items.forEach(m => {
-                            const badgeColor = m.tag === 'Free Proxy' ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' :
-                                               m.tag === 'Edge Image' ? 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20' :
-                                               m.tag === 'Vision' ? 'bg-purple-500/10 text-purple-300 border-purple-500/20' :
-                                               m.tag === 'Web Search' ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20' :
-                                               'bg-blue-500/10 text-blue-300 border-blue-500/20';
-
-                            catHtml += `
-                                <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800/80 transition flex items-center justify-between gap-2">
-                                    <div class="flex flex-col gap-0.5 min-w-0">
-                                        <div class="flex items-center gap-2 flex-wrap">
-                                            <span class="font-mono font-bold text-xs text-white">${m.id}</span>
-                                        </div>
-                                        <div class="text-[11px] text-slate-400 line-clamp-1">
-                                            ${m.description || m.name}
-                                        </div>
-                                    </div>
-                                    <span class="text-[9px] font-bold px-2 py-0.5 rounded-md ${badgeColor} border flex-shrink-0 whitespace-nowrap">${m.tag || 'Active'}</span>
-                                </div>
-                            `;
-                        });
-                        catHtml += `</div></div>`;
-                        return catHtml;
-                    };
-
-                    html += renderCategory('Image Generation Models', 'ğŸ¨', groqModelsData.crystal_image_models);
-                    html += renderCategory('Vision & Multimodal Models', 'ğŸ‘ï¸', groqModelsData.crystal_vision_models);
-                    html += renderCategory('Web Search & Agent Models', 'ğŸŒ', groqModelsData.crystal_agent_models);
-                    html += renderCategory('Text & Reasoning Models', 'ğŸ“„', groqModelsData.crystal_text_models);
-                } else {
-                    const list = groqModelsData.working_models || [];
-                    if (list.length === 0) {
-                        listEl.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs font-mono">No active models found.</div>`;
-                        return;
-                    }
-                    list.forEach(m => {
-                        html += `
-                            <div class="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 transition flex items-center justify-between">
-                                <div class="flex flex-col gap-1">
-                                    <div class="flex items-center gap-2">
-                                        <span class="font-mono font-bold text-xs text-emerald-300">${m.id}</span>
-                                        <span class="text-[9px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Active</span>
-                                    </div>
-                                    <div class="text-[11px] text-slate-400 flex items-center gap-3">
-                                        ${m.context_window ? `<span>Context: <strong class="text-indigo-300 font-mono">${(m.context_window/1024).toFixed(0)}k tokens</strong></span>` : ''}
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    });
-                }
-                listEl.innerHTML = html;
-            } else {
-                const list = groqModelsData.decommissioned_models || [];
-                if (list.length === 0) {
-                    listEl.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs font-mono">No decommissioned models found.</div>`;
-                    return;
-                }
-                let html = '';
-                list.forEach(m => {
-                    html += `
-                        <div class="p-3.5 rounded-2xl bg-slate-900/50 border border-rose-500/20 opacity-85 flex items-center justify-between">
-                            <div class="flex flex-col gap-1">
-                                <div class="flex items-center gap-2">
-                                    <span class="font-mono font-bold text-xs text-rose-300 line-through">${m.id}</span>
-                                    <span class="text-[9px] font-bold px-2 py-0.5 rounded-md bg-rose-500/10 text-rose-400 border border-rose-500/20">Decommissioned</span>
-                                </div>
-                                <div class="text-[11px] text-slate-400">
-                                    Status: <span class="text-rose-300/90 font-medium">Decommissioned</span>
-                                </div>
-                            </div>
-                            <span class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-rose-950 text-rose-400 border border-rose-800">Filtered Out</span>
-                        </div>
-                    `;
-                });
-                listEl.innerHTML = html;
-            }
-        };
-
-        // Global toggleSidebar function with liquid glass drawer control & haptics
-        window.toggleSidebar = function() {
-            triggerHaptic();
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebar-overlay');
-            if (!sidebar || !overlay) return;
-
-            const isOpen = !sidebar.classList.contains('-translate-x-full');
-            if (isOpen) {
-                sidebar.classList.add('-translate-x-full');
-                overlay.classList.add('opacity-0', 'pointer-events-none');
-                document.body.classList.remove('sidebar-open');
-            } else {
-                sidebar.classList.remove('-translate-x-full');
-                overlay.classList.remove('opacity-0', 'pointer-events-none');
-                document.body.classList.add('sidebar-open');
-                if (typeof loadSidebar === 'function') loadSidebar();
-            }
-        };
-
-        // Mobile Touch Swipe-to-Open Gesture for the Three-Dash Sidebar Drawer
-        (function setupSidebarSwipeGesture() {
-            let touchStartX = 0;
-            let touchStartY = 0;
-
-            document.addEventListener('touchstart', (e) => {
-                if (!e.touches || e.touches.length === 0) return;
-                touchStartX = e.touches[0].clientX;
-                touchStartY = e.touches[0].clientY;
-            }, { passive: true });
-
-            document.addEventListener('touchend', (e) => {
-                if (!e.changedTouches || e.changedTouches.length === 0) return;
-                const touchEndX = e.changedTouches[0].clientX;
-                const touchEndY = e.changedTouches[0].clientY;
-
-                const deltaX = touchEndX - touchStartX;
-                const deltaY = touchEndY - touchStartY;
-
-                // Trigger swipe if horizontal movement is significant (>= 45px) & vertical tilt is minimal (< 80px)
-                if (Math.abs(deltaX) >= 45 && Math.abs(deltaY) < 80) {
-                    const sidebar = document.getElementById('sidebar');
-                    const isOpen = sidebar && !sidebar.classList.contains('-translate-x-full');
-
-                    // Swipe Right to Open Drawer (when touch started near left edge or across screen)
-                    if (deltaX >= 45 && !isOpen && touchStartX < 160) {
-                        window.toggleSidebar();
-                    }
-                    // Swipe Left to Close Drawer when open
-                    else if (deltaX <= -45 && isOpen) {
-                        window.toggleSidebar();
-                    }
-                }
-            }, { passive: true });
-        })();
-
-        // Initialize Crystal model tier on startup
-        document.addEventListener('DOMContentLoaded', () => {
-            const savedTier = localStorage.getItem('selected_crystal_tier') || 'crystal_core';
-            selectCrystalTier(savedTier);
-            setTimeout(() => {
-                fetchGroqModelsLive(false);
-            }, 500);
-        });
-    </script>
-</body>
-</html>
+                sidebar_nav: "xœì½k{Åµ(üıüŠ²Â‹¤ _À	qb8²,Œß%ÂæØİšii÷tİ=’eâóXrâÆìàpBÈ&ÎF`gsKˆyí?q>ùñ³…ù”÷'¼k­ªê®î®®î‘D.ïÉ<`ÍtW­ZµjÕºÖe¿5ãL[‘ã{}Cÿe>v»Í›l;r¼é¬ïÙ–õ‡Ì÷ØœßXÛñšOÖ»“JÕáğ³¼¹¨?‡Ød`9^ùA›9MÛ
+‡ØlàD6køM{ˆùk¶¿¶5m‡õÂ6®ßm{¡ëG6´ñ´íºş&6Ößf#Á\Yn=íÏ²†å±1Ö²İâÍ"¿iÍéğn@÷u\«a·|·i rb®c3‹µí0L³
+DëubmÛë‹œÈEŒöÁ¢2m EàO!zÚµCÄƒ+*h5p±à0ÿVT»¥FàOQ¢9”Ã¿…p|NŸü[T(´­ ÑŠ‰1N?K
+×@Ñ½ÎŒÍfíI6ø]¯	<SH"`¨ğ>neB<(­À[:Üç{ğ›µAİ›€Nc…ƒVyÅ½çux+ãşT4k6kÚ3¶ëwì€…İNÇ
+G¡Ûq}«	UŸ¡/…XŞŒ…ã>B_ŠŠÙ^Ëòˆû(ÿVÈ”vÛæˆsñKQ±é–"íÁ¿ÌÈÂ0Q]˜ÊÄÄò»¦phG()B…[øSÙI«qŠî‚?¦bMßCˆ»á©Œ
+°‚å:§H Bƒé'¦ÊİĞ<«í<#¾²Íì``OÙA`7Ù~xP¥~FşŒynÄ¥­k$ˆD-nHñÕTÜµ¼é.Ÿí	¦{ÅCSÅÀºŞ1ß›ô­ Éü!»ÏØ³¶Ûğ¡ïâwF²Û1AktA´¡Fº±$¡§lxŒ)/z„s¬i‡ÎMŒ¿fA)›QŞİ 6ØaÇ÷š!°ëÓõ!Ğ(£†ï5œĞö@±NL¥—a4çÚƒ:=`Ä*=È£ÔÜ°;kÍ… $ÃY¢YwnQm[©6éú!›u¢k¸6(6 6L´È
+æôú(ÆÃ
+CºêEÇZ¶Õ”ZY<cU¦j™;$Ôˆê©:Ès!å¥„$|¡VĞÔ“£	BÛ­EN;£#ØÃÌê­AÄ4™‹„0qfyÓ´íN¬PJÀofP"úŠ1Ÿ!OĞ©MÎÕğ/p•T0XC8¾·(°´r8iÀ	Oæ”áÚÍŸ@?ùtµ½²ÎYÁ	ihì†ïE¢:_!îkÛ'>NsaÒ„–mB--;”Aãômö4V¡šle/<Á‰0_I õÂŸN*Ó•Hd‡ª¸.ò*ü¨Ó¯jubĞ/Ì³gmÀI˜ƒ¡d7§a¹®±sV·éøêÄÃß0OÙvs²D}µ¬´€ö-}é¡ìÀÎ\×(Ìf0¿99Á’ün£˜8^dÜ,Q’m‡»á5ßi²aƒÉ›Š $z?´gj.Ák< y§0‘Gağİ+ŸŒ</taÈL•Â9/jq[§)šq|XZ+K`fdbvÂùì ¬Æ	TòHziXãô^B¹””æO€¦QèL{~eó^š ëAT7ê(—ä+ù»m×g8¾dêN#e¹NÛ‰b³MâŠtw@Q–T“ôƒÉÏ¦Àåë‚ğª@96Õ,{P°Që*ÚZ©ÎÆ¡ÃÀ½Š×hyò-ÎÙ®‡:S§UDl2óÀxáĞŠÉ§Ö1¤ìr÷€eVÈö0_b:%^ï›¹° —°²6±ÄBµ¹•Ø	ü)âDT3Â’fi¤È4CĞT jRG¥9²H]kÒv…÷ÏÂ–ßu“@Á‡ëÜé,œŒÑƒò†ãìÁ<!ƒ†ş’hŸ4ÃWÁÏF9Li	— †$ŠŒ´|?´Y%S8C(é>rÛãÉXğ¾MØnwº;ÄÆ;–ç„­!öüı¾OìÏ§0jõFÒú”ƒ ĞƒQç£ÊíÃJp:ˆ)ü!›ØógûRåO§«sÄw°óÂÄiÚ“Vp¬å“toå{+·ï­¼uïƒË0™î­|zïƒK÷VnÀO$•AÁÊÅ½•+÷>xéŞÊ"Ô€™
+Ğ DYCA‚ ¨[÷V>¿·róŞÊ
+úÆ½ÎÓï…{+Wá¸}}öè?»·òú½æ±€ôÊç½FóşX¡ò‘¿„•ô'„8´#à Ì. IÉN  ö9%ş‹µÕËÿuæe$ÇóHhºÎV¹Ì‘Ü–ï}pşÁÁÏ%ó ÁÔos˜K„Ï{„Ò;ôñUwoåc!şùR$QzãZÆ÷6ï ùé½•	B	Ûv¼(YØyªr«Ç¤ø¯
+á<kFöğ6Aùœ:O+ O.âJD?mŸ£ö.Kğûb³Ïù€VÂRµkb€Vnsò\E´$ƒe›ã‘gå!–áÑêgR€QÕóØ 5õ¡Ëg3/{‹è0Ïùû,Ò%Å¡oÄ ª€	ßrº\¡F ©…MŒZ:·wEbñy2·ˆ«ëğòu{ö&/}ƒøà
+ÿñ3Î`„4È4ÑçeIGÑ§Šáe²@cÈ}DĞ–Ÿ%NÁ·âÉ¥‚,…SÃñS.„ˆ9z–G®©×ç›…’v"´<‰d©oZI1R×&ôW¨ÂÍÂ©§†¸KÔE*ÔcÎÂ.Ë¸wBlBªb‡k¡ «çC/å ï;çİ	¶s(;…Š@Î¿-»mêD.f/F4G—îCjúß	2`uE#Àâ©sñfµ ¼BıD™Ì÷%gñ9ı!ı¼¡×»¹=u÷œ”÷Ë±ypƒ¦çeše‹¾‹#ö4÷T}XBÉ8†/EÖ’‚½iv$Q}9[WHÕq+„z€2£ã8ØO’šü7jr™ğøHÌ¢~2@m^Rì”ËÕxHIPµs4šËÂLûà¼´ZŠTm6i°V['“PSk‰y…Ëş
+B}AÊ©Eš®Ÿ¯7şŠs„ƒ:ã…LHêˆ&ZÅœ„d§«²G+\,‘‘mÈF_¦6n	ş!}—”XCú"6_”v„’FŞ¸¦7-*f88ŠéÁ^RUwÅÔ‡"‹n“l§àÍX¦|Üc6$-‚^çş‹äÍD8,Icå÷Tü÷1µb|Vˆ,ïç•xïøØÜAO)ôhAµöÖ˜c1˜U»	ß,ÇóBöë6–L:7¥FKÙ‰çbù’3‡ª#ÙT5­(>"³J˜õ7ÈÍ¼–¸.¤ÊÖ›Ô¹·r‘fd%âTİ!© œĞeAäa˜—LZƒBÃÎËrîòÒî¼‘bÕ¬z^
+ŒS&zLì•q¿ÀUpJcëA¬!§Dêï“¹şVìÌ®CDk’PÄ·%İŞ½’Vp!*•sU=XaFûÎÑŠ x¾pËÿÿQfé‘¿Ì‰Êc,çe_¯ÆºxAzÆeÎfÄ¤³3NÊ–ë9GFÓâ#ÂæCÑ­‹ËÙó#Åø˜,Ë¥Xk,HµPhè²iR,È)"Û!bªšŒ¥$TònÔÌmi\©`gãÙ—¤‰+FCşm2ŠbmùD]&’õiZ‚¯4á‘¾/Íá•³(±'ÀÇ’¤·¸|'V¹ŸH•w[y¢–¤…‚bªGÛ!•ŒçK-‰ğnáÈÜ*!]>I˜Wæ]û[q!ÖS7SÚ´*èuhõÜétæ‘úÄ‰Ùß¥¾*Eğ{’Ó…L­”œ”ÁeEn\7ø„ÆoQç/Öç…$³4ÖšK‰*¡à$—ŸdÃ+j«nç¿O¥Àİ)H€Ê~,g`İ(\Ò¡fto$ªB§.¤™ä]ú7Û;#9—åtú%À½°U>ÓJm½/Ç–‹£·«Jg™ƒM"^iƒ-Í³R©/¤32P*MKt:#'ZbéÛüHÁµJj3Ÿ·EÂò8Lç‡™a)¦jyÜ9œj°—p·.ã+MàÅØÖd=(„Eª{‹¤VE—4Îô:C\ÄÒ$yÔ–(T¬‹4º7ib¨h^•´ˆ“²œÿ¹)ZÌİ§bÜëñŒÒíX*Æ³MƒÄ'q…Ë¹%½Ü¯œÔ.€¸9‹}I¾z\‰?¿-ã"DıõõéƒÖäÈcQ)owËEvÀìqkFèFÚSÇ^½+œJ­˜­™ÛŒKÉ¶±ğ¾"Ì÷$ğS%ER”È7;ê<­tãˆİrSKÌuuZ’3…›b‚š·
+Qæe úQ*­!éLéó±cTJÂ˜€ğÃq2®\hæË½,/P15E¸—Ÿqîµ	¡¢u•R1“ü,V°2ÚQiJ¯ZÈg	³MÆ^n–3ä^$CÿV”ŠU	7ŒÏÅfÜëÒı:ÃåOÌì¼È†µ†ÔòK%XŸ-ı[ÌËˆkB…¢Jæ\ù¹qm­ø¨²´bñ{o_¸·ø
+ğÅOï½}éŞâŠ‹*—î-‚ª”*/¤ˆ›¼·øÉ½ÅÛ÷ß½·øü¸roqåŞÛçï-êuÁ²	`ó9A¸|oñ&Á]¬
+4³`*!®‚î­{o/Àojà&¼«¸ZkŸÇÚX ¼NÀ>©´BbñÆ½·/R›àÓ..SÎÓ—[ò»6\’]!È¹p^¹·ø! ß>’¤Z,¥º"BŒ¶@Îİ[¼hùìZ`1¬‹Fæí3•¸G¬~€ ¦R^§ïé‰_ú€˜.ó6wğ±…Q~ƒ!%õÏó Ø,T^çï-şª¾Ïû³L¼òkNUJá7¨ß+1Ïÿ†ã°çSùîUú%Åb”ß Ç‹Ô„õïmØ…{o/V]Ü€µnHîF Ã9îo“i…“3€ÆìSêÜ<´ÄGÿÍTµsÄŸb\S¤†¶®Á¢ÃœW°ez+ V]è€• ±@1±j.Ó+Ñ“Õ«,_À'ö+]¾€E±Í
+kP¨\DF^¼UaÉBjHnÆC^¶pÁ0»Ò«ÒœUºdAÒÖP6»^Çª¼Ym±B"å>¤)„ğK†^¯÷«¯K@JJõÎ$s¿êŠäTŞâÎN|,²ƒÂ$Wş²P¨ê– $Ôz"–ø+rò-•JŒéU)%o1Ù¸Ø½É§\ù²ƒÅŸ
+Ucäædµöàaù!5¤ÓqÙu ¼ÓO9q³Â¬|¡˜–|Æá°–®,XüßT6‘e³U]S€ó•7wYÒ†t{¡JÏ-(èÁÈ."d].).×%Ä¹Ç˜××,Ã›@Q!)Í Ô¥h,s‰&Ü•ÄÊ ÙÁÇ÷›ËŠ ?CsZ)±–‚i—ÒM)ÒâÍR{P·4 (²ÿ²ÔbŸX^ºå |ŸpûX?kN={O2ıåŒØˆYì§Üày—Åâ· n™&YYŞ	›7(j•²¼…V^kŞ¿ØôàFôâ¢TUBt\ãÏÃ‚~¤_(w35úà^"‹' o‘(‚±¾=ëÌÇhY¶·(Šh„öG$Ã™A½1ÖKÒ;‰üR'IH»¤éZ€^mrö¥ ·EßfR*-Kéöï\M^3YIæÔ}Jë\ak‘~ºü¼àDífôÛ•ê©ø"£ØP1eİ¥æ“¤çf?ï8J›©6Ş¤ÂKÄ‘·ÕWq½ª5S’>Gq€ò½Æ¥d-~À2&Ï5abW‘šôxb2ÅÂø#îB&i\9’Höyì$ThTM“ã¬¼­¢_¬è	rôgbö1”ü6‰u£ºRRãJ´â<uìsÉ¹ŸH6Fy³\AeáXYïÔÕ…d¿G(¾Á¬ÛÔìôh‘sÎ¼bÊrY²È]âb#¶ Ê	¢K59äDEGGçå˜rà89^Q,~.ıdßbËøPº×·ôÑ ZNô¡ÊÖ@.ïM¢A ç5NÌÂ‹‚yÓîAµä·ˆA,Kå'¤È»4fWi</”È¹Lª[t~9z	¯u—ù\\ú™Töâ«œø?%Óifó¢â»É­ËcézºYš!‚ú7d‘+ÊDÀØ"}áDâÎSŸß`Ê¤¹)ÍëÏ«D‰ë¤Ç¼ùw*‹ÓÖ8æq°/±-²,÷‰|ùvõœõâ;r¾ q¤8·H?ì1)-‚0îQn“Ó189c¹]FaG+S4•—Fz½ŸŠ8ê…ğ§’ş
+G›sNÓáÑá#ÉXWx„ëBÅì3±±dæVÄ;q@ë|îz…óóBâ©½}–3oŠŠ"—ÅI½]àá<â\Aî+’ÈtÕ5Š‹?É°è­_}>Yj3Ë´,4P”:ÆNñ~›3¼èG¢nÄQÃ7cK¬Lıé²ÉKµTr¢Çn“e·(f÷)¸4™§Q\,é¿}F™à±(¤¾•ˆÍÄ­d„%–|…/LûyqùË‘—‰±Á|~âtˆàbüƒ;‰7+FĞwTœ3N-®Xnõ”;Kíjâ¼Ù÷;ô”ø-=pI8/ó*%ŒnÈñ
+·ò‹%lªáNiI÷)ï¦Œ`W$¤njà$b¦‡-vW„ŒzıL/¹]cl!íMº
+„’©]Äùı8’¢¿–¡ƒÏDS*Wìë¯Ì¥366³1Ïi8~µ$îş®=ã³‚3ü´éÛ]~XAY•tšv”~•×JçaGù7Ö´ÙÈß7iSŸ”¼ëˆïM9ÓİÀj8w~¯=&›mèNÚÁ÷-l
+5r}íÑ0™ÜêÄë`ÿy~Èæ´ÙDª{úC”ò™Ô›È8n‡%Hf2¨HÁ²<56ÆÓ¦û­{º¹Lé~>ê±ºw®3P¨w®†¬c{¡å5ıªÑƒ=V¢Å]Ë}¡ëĞùc¡5Ä¦mÏ,yF'(¾À™´Yƒ,óéÀæ´ï\Å‚•ÏéüÏ«Oû®µ‰ûsÉAÿù9ğKÛg®İô™5×mâQ¬åW=ªsT`×õ0ZÏÛ€`è(ñ­v^ç?”ä×t<Iáñ&A·µc;ùpMçvêø&}pgáäÔ%wİùCøŒU)óÊ>‰ÌKÇ³Ù›qfŠI–MúÄÁkãL)¯ÃÛÃA)X§|¯¤jö$ÏvÇºó”,Í(mÖ±@¡`ÄjšF;ÎÔw'âcCe~n/ôãT!2INnŸı¼R©4÷F'z:…#(nDÌ§,a»°°šd;VFä@ç+ëY.ç3i´á( ‘V!¶£k½¥Í”ó=KÑQ2fûıö$åÊºa×
+@ÛmfÃ½X(?àäph±¨Ë¼,ØŠÉ®‘.†l¬W€š×hè¶%:rÌxkútĞZ±è”Je4l<]OŸ¡'|r¨je5Í\eÈJí¶ÁˆÄÃÄ¦3ù<Å/xÈ'úğg¼8Æj ò=_õ‰]AeLMbA¨uŸòù|}l :cÔ…Sˆ6ï)Ú¶	:Ï“Ù®Yq™ö|ğ±±.Æ×hxô˜¶‰ë1:åÓÈ%©$M¬-è€Oÿ?¬\[Ş˜GTi¨Z$B’ùx ¦‘Ã²iEŸ ÇûS]ÏÌğÚ¤Ë>ä™€¥ø;Ì)<ìúÓ[¢å 
+[Ÿ`‘ÆÇz:f¾W'$°„n`n7›*™°ë|ªİ;©„C’”ÈN NœX2á3Iÿ g¸ì ƒ=Å¤Âtí°Ğ×æ/vÛHÎSrğŒO0G#§a$F>u1ğÃ<©®Õ&¶‰~‚0&Cæ¡ÛU‚™î”Ï9šõ$t*%âÒìé;WñY…jñQšx†¦ ¨…G–6€ÒòhÏ®ÖJ(Hğã<}“Ã°(U‘EG{:ˆŞ‰d†£ˆ{ú¼óû)¾½ÅìÇ}ÀÈ‰Ì’Ñùq$@„ÚÄ°;ä)D µ*áÇ}Ô$ÑOõdàeÑŸ%Ç%gcï#].Ù«Íœ$È^îwêÂç£Zõ ŞJ\¦Vu!r.¡
+f‚\š`ø(r.HY>Ät˜'ˆ4pËĞ½$€ü@Ï ”»ªƒ‡Çê<
+b‘ÀÊÒºt}@Á
+\«ò§1a¡š‰ã<ÆûT=-ó$yŞé˜7\§U ë<Òó?¯î6c#£©çz’i`Êqqn¹aÈP8e½lı‘^vÓÁĞ;mr´®½Çgó,Ìr´†Ù€ı|ï§x†İ;W=äØa6ë¶—P*0ÿ´õ+Øº•"¦»ºaCˆ‘ >†èEúîğÇ´{çzˆçy‚{ßzˆuˆñDÍØÓá€g€GÊ¬ø‚ÆÈ$?h´z`r¸³ÖÑ
+*MdÒïÎØV·§ØäèÔĞ9`®½–ød¥Šéåx¡,8=<®}g)Ò»÷¹ØäA§c»è~ÀäÆàä¥]‘‰NRD’Í½çÎuïÎõÀ2WT‚“»ï\ÆÁÈ‹şo}hr· W­ì@¨ ìáÚ ;gØ]ß¡°¤}ª6ãwCV94éCv£s¼Ï!Èg§ˆºNóÎuîC»üªşğNëé&¡]¾÷<"¼‰}lÒ®&qÊ~ßëÀÓÚó6£ŞX@4 ±R³¿Õu´ıÓ-ï\XSÔR\2„pİ¤+Í‹†tŒ÷ıM/êV½ièİhÙğ j*\—–fÓIRˆv.`yÈ;&²Eõˆ%¹şÀŸS.ÍXàßÈêP@Q|­ÁÄKˆlÏrx(¡@ åÂ—ò¾Ôºs®$êÈG.'î\w±|î=’Ì	,äòøåp€:~P1	aŞ¹Şö¡«b˜6Å0ïü‡öªŠ\Ó$¢³ÌU	_²#_KØlør}øk‰`â£°—+ŠöûmÖìï‚ƒõ`äAÑw°ßÖÂEÏe4:ğ% ”°å°ç9 Ğ¨.nIç±ãí0m@7‚pï9ré"×Í`%±Ë2ºC–\Y+Ã€Úh­!Kèƒ¨ñğ¢àÎJe!(:9É-‡øDqèÒ÷Ö¦<Év %@aÊSx=*5B¢myÎ¥À–—­!.©L„èöWº9Hœ”7¡"šª›L„½ˆMî.öåÑI>ö2:	â‡ìºİstêà*?…æŸù~]prxjÊÁ^9­@¤³R2„#944DgZO‘ô'W°·€dëÎRoI!'’4Ít	c¨Wu1g4‰"Ò&cï¡Iò(Âô½CÕÃ‘8…]¢:EBı,ò±H$`ˆ !ãq¿êd|óPïQÈ‡Y¹*RBX”Ñ…CeDÌÇù¼ˆø8xI¿dH«àÑGî–p9Ñ1^!§=ß:SŸÆ%Â„nbv¤Ü‚Ô[äq·bPée>ğˆÁšYÙ¥ÈãSÕ1ßş“;R÷§¨¢ßpÁó27®	;úàâØñõAe#šÄÇm&½ÊFdnU<wA˜9m#İ¨l:j#cºDH7>š°ã`‚¹4´ªâèÎuæ¡KãÑº«Ü"d{"yçzõ‚ĞÎ$¡¸"Èï Ás¬{-BeÔ¨Ë^èöS„Qk®3À(Â‹`?mRí•Ørã7ÑÔ ß.7¶:(ø%ƒ`8õk”²$wÓw¢´À=f`hqkº8(en¢¿’íÊì“½ÿG×gó½fo}‚Y^[ô‘z¼Dì°0¡+7Z×vŒíÄƒBÅãw É!
+@Â¤u‡Ø°7íÂ£ŞÂ|l™5c7z
+<‹Ì8‹¸ıhT¢¾6E÷€<µ¼êÑGºĞ(´}jR€´q:õ~¤†\³®•CT‡?rJ*¦C#dÑ¯jqÇQ$*ğg×Ó¯éÊEi%¤[“È
+1Çá=»@5ì²q`ËšQÂÃ“mx´‡Pã^;:ñXíFGŸõa.ÀœõNÀ,njo#Óa™kÁô‡9Zí6È10±Ñ­j´—Òaè„ÌŒHTìrprV¾•Üâ·’7ZlÒñ’@â³ÍNXÇÀÚÆkÙ]\ğh»S¶W1|¸ß4¡~ãëq\	kÛñ¦î|#ZqåãgåÄnaÀ/	!¢®Ş\ÈÆOà7ÃbÅêAD“²"hY§qÂ­~cy·j¯³­Gšjä"‡»aÛF¢¦Ã†ã8ÚQ4k;(v±6(íSú;17äŞògpå@İù,:¢7¬œŠq¸ği¿Ñr-½È,v^»º<\øC;˜´QíÃ…{ìæE˜Ö†L_d$ÌC¡„ènÁ"Û\¸°T‚g†ÿ³Üù¬Ò}æOÙ ~ŒWV<†FÇŒµ•xá. @t*¾ÖüPwªì&ò‚XángQxº‡òiÚ,¡J0ÜcOvÁˆ,#ÖJ¸p—=ã§ºÓ UÇ;¥Ÿ™¦p!ŒIWä}èÈgqoæâ…£®‘g?«{8KùÁ(ÜkO£s4m»Ÿ“B©„`şE³˜…ç`Ğ®3ø?ë»ê1Dæ´Ñ£ëwO­-öÇCv˜`ôj•g….ôw,†W9øW&¥!¿Q`ƒS`‡Ö”ØPÙê¢ƒŞÆ`b/Q¿	Ç†ña¨¾Ñh1“@óÙfaÅ«¼ğĞ+!¦æFq+ã F Ê5§lF¦îïn‘Ü,õ"‚1` €1¢§¬`’n7¯u‹Ã}h ¸VwŠ…›ÂŸF¬3±¾=vˆœŒqàĞ!åŞùlÒÀ8tÀüj²I›Œ3onÈíâ2Lİg§º¤	HaØÁw^¼•º_G!\ÃãqäHç€;Z¬”NïÌuâNj‚ËŠ­—ºñ2]çEÑkÈÌq€T@àLM¡ìúlª:LïÆùŞ,á®ø
+q„TÔjãtÕwå@Ÿ¬w¯¯ıÀ½³èiSâ† ß|\ÿ
+İæ³¢Z€W²®œ.¾“Çj#gª³Ğ½ó²ˆ.ÂÇ[8q¡ÛºËÖ5a¾İÚì)Äk¶ ¡1!‚iƒkß•0µV9À7ìqz ¥C,í™ØM¼†—öGSVK_y½w€;®{‚b7ÊrÁÖZ6‘y<¯‹×Ï£Õ%m !Öm£ –LO7€;˜Á‹áeH}WĞƒŞc5òö8“3Åd§Èèèõêoô£[9ÿ,±{‰Û={g±åÚiR­5hG~#ó ö	L¯zPnŸ“ÄM‹MÎ|Dî‡¸È@ÊTœCBÔ‘“WˆÉ­_=ûï«gÏ®½ scõì¯WÏ~¶zö·ÕBs~¹²:ÿúêüOT0U£tjÕ…}ğÑ…û?ûcåx]¦öêÂÒêÂÍÕ…OWÏş†z`D#À[]ø=Õ¸ˆµ>_]ødua¹Z(ï«¥÷ïßĞ÷•á­ıİêÙó«gß]=ûóÕ…ÅÕ³¯¯½N_~_!wÿÂõ/_[úêÚ+_şÇOª…òV>äĞW~·ºpÍLLPïÁ›g¾úüç«ó7**î­}iõì/Vn!1>^=û¾o¹@ßº²:iuş¥/}ñÙo›æßY¿¼:{uşWğê/ŸéÎÍÕÿ¾úıòı+¯¬™§^/"Å~wÿüIñ¡è/şôæƒ¯Â“/_ûãı³¯|ùÚ[øs~yuşúWç—¿|íƒÕùwïÿôíû/ıš¸ûÚêü+«ó¿]¿‚¸Ñ; ®Î5~ Vç¯®ÎßüËgóböS÷~€¾øãK^ŞAÃHî…«óç×`¸¿øãGTòõÕ…óô¼€šâêÙ«8j¤± ~şWÑ Rõ-l3aûıê{é‹?şïÕùŸW,øK«gß %ñEâ{l¥<ÆHy¦Hy‘†÷¦‰ËÔXc	§b*G”Å%ÏÈ‰>âT\ ”ù`ñÍ/ÿãw•â«g—±¿ :P8SÿöÁÙŸŞÿí÷_ùåıÛ¯WL>8ó›¯Îœ-txòÁÏ–¾z÷—$®ŞG~9ã««K_.î©O(%‘`&ş;‰£”€$¡IbRNYşù——¾üÕP¦¤{:NI$;+7ö8X®.¼O|¿
+-[Jè¿§/\ºzÿ3İÑ]é&Í@N§cRÌÕ…ÿ ùû)ÑªlÜ”XæêÙs©÷Š•a6ªY¬Ì2áÌ€´w/d¢™÷o¼üÅÎõÍ¼æÒøC9.J$sõì5¢ÓGğïıW/“s‰äßÍÕ³—‹í™’¸&h$€vÿâåX|Vj~µ|ÈëÆá”˜æúµûÒ™¯–ÿ­Çhæı¿yğæ[$è¹!$™P>wùş·¾ºúrïqÍÕ…w…-tö·Ãc^>¯ŸíUÂš±Ê»qÿó7¿|ÿ5²€>#aö¯|IÅ¢¦ÿËgˆÑ?CŞİ¼rõÁŸ^C¥«hîûúİıÏ^áªú/Ÿ]Ô+ãÂ¡_Ü¥úÆıO>5-|÷ş¯ÿ1MÛ¤Çoşyşúıç±}|~•fšŸ\ufL…5ÄSI±},‰ÀËg‚&œúå+·ï¿¹D&E^åÀª´OY®³1Ö¼òâqıµºğ'!Şæ—ÊAgÃ­R£|FÜş1©–÷¹‚é9ğúàÆ‡~ãg_¾ñÄM¨IEá§)<C–×¾• ~åæ‰®b‰_…ıò×7ƒ²,ı²Ú9‚f0I,öşo?xÿ?±?ÿÍı÷ÿwQX!‹¤i†Äûè¥Õy°l¯}ñÙ_]ÿ€}ğ²ùâE56ùıKWh$nJm®3YÅQM[ÆóŸ¬z:.ŞbbáÀ÷ù¥Õ³W$o^D[‚TQ¥píWï\ûêÚk¬ŸÁç¤æüjdÀƒ—ob{…™ãÒ$†9±ü`éúŸ¥3M1\à;œü@`$Î«B®pãDr
+ø~ù»?|µl¼è2Ñıj	Ìá›@ys“¢Ÿ–H;à•’é5.=şü–Ö#×Æx3UIñÙ¶Ì	\,ò%ı.yì¤Zæ—øT¬û%™µbtùuÁ_r³?%í•òùc)pÿâKşUÙI¢‰ÅŸéÂË÷?ÿéW×æ¹Û[-$Œ¾3pîõ·¾:û'®y“È/²È¯şøç—o™ÒÛÚà°,ÁÁ€yÑj¦zŒƒÜZ6§ÈÁ—½¡·ÀÖ(–¡ ÒoşòÙ¼tDâ)ş.é4(…‘…:ìåÕùœî¿siuÇdhAKªÂ5 Ò¤0Ñ°ûùg«ó¿SF‰b9ïÆ&]aÌÂEÎ›ïIÔBå`-rã$Ó{¢üÂ§`ödMuúQ0OÄS¡æûŸ¼üàÍ_£oLTzÿyş“/éÔm¥ps†[FqoÕo¾‡¯ÎÌuéşåÏoıâş¯ÿ„ß¥aÜÃRQ1š0É9_h=»|Tú‹?¾DA¤OIè¡ÁdIïnÚªrâİ×ï¾w÷wW`Ş½x÷Úİów—Øİƒ//İ]¹û«»ïT‹LC5¬ºÌ$¸ªQé¸yhïÆİ3ğã²±ÍtT:©}¾œŒ_…ÿ¯Ü½É»»|÷ì]İeYúĞ4T¸y÷çXÁüâî»ğc	@kw><µ›¥»Pûg™*Áj ûh	»¾r÷e"¤©ŒRßı=]ü-ü_^M‰Vb4Ğˆ(“CW2j™ 5×5®eèç{ñ WÀ‚¯¡ÇïAã:»/¯†A¹ÿ¿Ï ¹%ja^b}ş_¸{ıÿTW˜48id@–? /À—W%ì3wßAVü?/³»o@»¯ÑÏeDâæİKü9çxv™
+ †@P°äı‹»7÷%N¬ZuÕ«˜-@°Ü~G?øğ!ÃÃMãkÔ¹ø4c4ÎB1ÎÌXm¥“|‰Š_BÌAğË5”óÄºB …Î õ_†¿	t	ş¿p÷ıBºkÂãçÆ/%¥õ‹éyàs¤“I\!Nnà*5FÅh–—‡ÈÙ€Ì
+Í´#g"æDá‹DsÓÜTÃæÉ™
+™K¾*—rÂ,©,’¿H”İlÈCÄ4j?£Î-sBæø	—F0¹H9Ôä<ºÀAU•‰®&?•X¤
+Y‘4ğ¤o Ò%·
+Æ¸q"
+‘œù	º]ÕP:U¾@²Y	jå§Õ9Î]¥1vb*dÇËf#ì ù=Â©¡WF™;‰•—iÆ	Úqû3Nc“JMGİ…4qgêš½ü›ÉŒ/›ŸJè*¼‡"Påı2-”ÂWUÙ™¼Ğ~×¤:ªœ‡– SdÓ(²d‰dóe”WH°ßJe	{ÅØ=Ìwïş+gÃÎvhøáœ¸@Cõ^ü|!| ÇÈ€w¸Q áKi_1œ«ËR—ËæÕE÷¡ıÒâšÈ¾`š_\^ND
+±Ö(5ÇõÁpx‡íßpĞp ĞZû<¼d¶Ø*úuÊ‚½Fãø€‰”ô{Rà	KmQ”øTU°`Bıœ~â\×š)=„ú‰c_%«é‡i²ƒSö'ÜúHì-.T–É™ÏôƒAÑëkí“”}5&—ƒ¿àú©§)¯‰÷SßĞ@<+ÉZĞXåèlÒ]¨¨J9 iÙ[œE€o±’Îhm´Q~?.ƒ\¸­½œØ¸EÊ¸0G 3…ê$ãX®ÙÍ™‚€‹’Ø…ßó+aÇ<|IÌçÌ³5Ÿ< «–×\&2ów	¦ğ
+Iµ×ÄhW˜µjz&Ô;8UMJ­8»@FÃe©‰_"Áö>ê>P½¢LT_sâ¢z’m€ÒØ™ëØ9®àÑLsAş¦é1ÅãHÃ$fÊŠÑô?#
+üÂ<R©¼YãäP½J Qşİ,Ó}ùÜDªHÜ>®çTßRQ¸ô{^†”†¡ó¥|M_°Ÿ«,ö+’Aï”É¡8iAQ’+D¼%Î[/ÁXoe)R=uAÈ¼L½\Æ‰çI“cO¹MU¡§é‰DR¦%à®ïµ*ÓG“Ï©˜ö/Áÿ’†Yt#í¥a¢8'fx	‹çóÔ™KD£R{Oæ9Hü"^W÷½vµ£6áA±ŸÈ Ô9(1æTŠæÓ"\Æã>\Ub*¢¡Z¤§X’.BÃt–+T–ôDDÌÀÔeF4½°~B¶Ñ²ğtÌ I’ Hàsíun@«P¤	sQŠ
+­}–GH‘:”øÍ·‚ĞO$+®òÂûìp,I?ß4Í´ÄÊè©¤\Hf!Ÿ‹¼/JY™BÌŸÃÏKZBk23:ÚUJÓ¤,ğC6áp½­ÇãS\0»â®äªw}õª¤fÆİäÚì‚Şj.ÊìèyD"Ó;g×³^W‚v"Èt©6gNıè=¶ãÇ¯÷²­@ëÍq{AôZ/C<•úÉLŞwªP	ëg†„¹"‡ˆşRè’ˆöœ¹»4ÄF½i×	[=$¢çˆb4Ÿ'"¼+?zïÆvÊÏtê(şuú»ÿ-ş¾y3{fŒMØ'#6*NãÚgu:ĞöËñì¸ä¬ã5ıÙz·ƒ§¾<36á–‰í¤ÌÑ5ˆ¬`Úğ—ÁLB
+DKÑ‘,P>)Æ~ücæúË[üú:<‹ìö@ƒçÏb¿ËöR÷W½é4"€şÌØ±‰CÃûÇ÷OŒØ?~!ÅÊ™uK¡E«mu T>©Ö/ò5ÌªÕ" Zÿj¸®¦Ûò×óìÙ*Dm]™h3Ô'Z!É¹`ğÜZ1%÷fÂ˜O©éQIRn(ÒTĞ‚/õyrM[›¿2Ô¥›¶*½1aj¸v‘k‘€3ÔçI6°†æšd¡¨y8?Y3 à¦% j¸…Ò®ÉŒ™¬™NÉ•TV2néúÊ‹”«Q,BÉi@`p¸F6„¬•d‡ŠŠ#/ÔH³¤êàãÂxzHSK¼)ª(²CšŠâ¦¢ˆ×À‰¤{V0Õ:”4JU¢'¥-u×ÒaR£¨k\sjˆ¯¦˜J*èªÂãÂ‘Ñ"İ §’L¥ ²m«©¦¢ÊDMÓJÉ\5Ûhœ620P'ƒRõø#S%J7FL•DR(UK<3Uã ôl¢G¦J”JÕ¡'¦*q(=pò©N4J•ÂåbzèÒ™!SmLÑ,IÉx5AdªÙ ¬«ˆ/ÊFVÍä‡rp2ïM IÕd.'I¾(!³7yjˆå b{.B¾0 |N-1†õC“Íú”#Å³55Ë‘ƒªÉ„Ç<ÕµÂ%7·
+Ä¹ŠÔ\¦¤œ<ÿa‚™I”ƒœµ'…ÔÏKÒ¥T¬¥”f#Ì>Äê ?7ÕÜD)^=Àª<¢"e‘‡–NeTè¨œ «'JfÊ;X£"ÙE2!G</Å¤¤~E,’A·ãW¥¸T‚R}
+£¤¤$*—‚ıyêĞãrâšjW$­J×i*ù®—ŠpJ±B½­”×+ŠLü¿¼—³Ï¡§¥=3Ô­Î,<À¯‘Ì©ÀaDP_Oñ²FÙ×C‰_kàPÈ¹F!ç´m–‹í—TF²éêS­Êãèª–²—€Ñò" ò½ŒjÁ¨ÈÆÈÍUÕîgbäæŠhì¥½SmäÚ£¿…@’Ğ°}…@’h°ªæLõ\ÜÕãªc« ¾¬X}[Aõt(6tœò6À#‡æÃ~eş;0ù¼aV
+ÚVg0ZÅ¯j»l'kú.Fq1”*º»æÆšNsğ»¹zÎ€Z?L-ê ãÇvëøÏ`ÇğğN*œv:İÅt7ofc^§±ƒIÔ=Ô^Qfğ‚Å]é'¹ã`©şL§°C	èEv­ò`ÒL]yŒMêŠk#ÄÒk*G–;±û¥Á8Kbm\…7˜F@×c}mŸ8ªx]OÕ^¥\İXd æúV²Àl0‹“±£%À´}ö'÷WÅŒøÔõU…$ûiÈÊªMëºe¨[ĞL©Œ“âí¥?$„…ƒ¥íV¬¦syµÁ<R%=- ” ¥ŠN‘‘ò½qÁ{Ea¤_l555c¹Yñfu:îÜp§#+a¼0±kê›vĞït1îÄd¸"^ëÀ|¼„`Y^“Ãg z"Çr1É–ºüäÇ‡ÙßŸvm6!ÚŒ‚âqc wÂiÛ`Š²OdïD²=ßø ‰70¨K‘…ÖŒİÜË³pwËQ0†?Ä¦,7Lrˆmß2˜¦æHËnœ@&›µ]¼¢WÉs²°åwİ&İ4
+ÃØ"-9å!šPxÆ	@?¬J2‘%ô=»´÷
+CâE(®ÙMİÜ `›vîdıÈ6ı:
+ı˜}–wï@5;:§U2=¾%K§‰Ì\â)4*Á¿Ùd7ŠğÊä6U“J†g<I±u¼ç` ‹šÊW@ŒMÉ¯4^`uLOÛvÚÈ""a˜%a"èRÔJ®æ	“¨¢0Ä	ÏŸÌ€¨l”sT™ÓB7€
+fš±‹¡Ê/t½áZa¸×	£ºÕ”P_l¬æ‰Aèd. «“À“‘ñ˜şÿ2°í±ÎÉÁş `œ5E»¨4°êlmë6Öª}‹MNƒn:Ó~mû–-,ÀóTífmªëº,°QŞÌØ\öĞ}¹à¸¸>ŞR'îó«=ºeK¦ÕÓ`ò…öÚØmÆŞ(šlY+A¦pOİ r¤~ñõãÀåv{—„ê´PŒŞÌDä—Åøœ•mœc¤€;Àá(cdL+f¸Ì¯šÃyš§¦y£D—a6˜Éy€šÑåó²eœÔ¤v^+0Œs[ÂĞOoI¾ğYKÇg’=©™lG5lÁÈ¶Ò©oa#ç-"÷µ±=—iä±Br>V˜?è•ïDCCi°ÅŒÒ1sÕ.c¶™Û8Œfë ·uì&è³.NC!ÿèx-ÿÌfÑ\‡‚*3Õ1›íY“®Í;Kˆ#ÃåöÊt¼Y”ÖËÁ+dÈÈ}joJx02²`
+™#àÃHÇ†yÊ­‡#àÄ(ÍˆÚşQ˜Qö+ÏKäõ`ïï±Pf$:Y5‹×§ñ`¶Zn×&e`ËP ŞèŒ1>×ŒæéÒÙ"²Q¡Œ'ğÁœ<ìÙ(àåÁ2vhœ!`ÉÜsC€0ÏŠfEhÎ
+Ö3+B˜¡V<§øG™:¦ëº ‚¯pÒr>ƒ%F|çÙ¤şî•ß¨-¾nŠ¼É’fœÅúä¸È3c9o[Ót2¿È‘Ÿh)¿{@P7^€óHUØ¥İ€¢,T­SÊÊ‰b%ú¬=ÉÃs‰
+õÚ/^]Y–kÑda÷âš¾,İ€kC?N8N)’bVäå:kÊ¤¨¬_Ã²ú¸¾ÙíeVP­ék3„¨R;İ(˜ı+RGXWã¦c*‡ËŠÇ`ÚkGS—bTúXn“ê±şIº`$~
+²ló£üÅtêáVcKĞC¢R¤m7£™®L˜*<Ã–Õôgk‡·ÛrìñÎÉcB  <ªƒ^1R§G²¦†ä¯@YIœŞÉªŒÉº)kˆ´“˜4zÕi¤×ÿšUáèL2x960±„n²ñ)åÏOFá+Ãö÷§ññƒÔ˜Jqgz6Ò£›Mï³½.L3]f×ıN”ò­®ÊXø%L‘X‰Æ¢»¬ætoNb«)v“¸êX.)ù·b»oìylÃ8Oöõkä>I`¯5)Ô¸¶F0¶œfÓözÖ$:$¥ğz6”²f¤ÑT*6r«™J)³z}ÆR”Î\JÀíÅ•C=äK‘ş‘,0á6¦Í„Ä—L¬åÙ_İüJ#Ù³ ê`2ÀuÇóì€¶¯îd}±v`ßßƒ÷uÎ†˜pƒÑyê)İğl€)˜Óë1Ó¾6sp«T£‡g¬` Vk?ZëNÛ
+æ®K?k ûİÈu<»Ë‹ÖÚÀú,Å-Õtõ×hVç‘Êöa5fÙPƒnÃ‡M¹öÉZØ
+ µ¯Ÿ2Í­ß¬ÈXËÈ8'¤¢–ñò±\Ò^Mê§c¡úµc©6T¬z+™¥¾Œ±—
+ª-=cä¯š±çâş1±Ë×lê•ÚfYPzËLä:¤eª‚Å³°Œ&ŸĞkë2úÄî›Æ5¼IÔeÜ"j“n×fÎ¸øçÖ-¬3WÛZßÎ:'k¦gÎ"æDv;¬áy lÚêÔ¶ÑíÚÉMù^T›ôİ&B0AÓ«“Ó0-0‚aÃríÚá­õ-Û2¾İO<ûÎv†@èµïP3ÂN8j4¹ì¸Æ¡f­}&	*FhPìÆ9X½Œ†xâI0u‰$”'0LNEßw£†HÚ›8D¢.ØÓwÑ©µ Ö†«0„kthñ³>½ŸdC6Fé+ğş©ñÿ5şš‰ŠÌRæETà‘ºøù\¤¬05ñYÑSªzû\•ñT‹…À¶=ÖtBÜdj¹¬myÖ4ñF\Úµ#\áŞ:d‡¾;cã*&Z7ÿİT‰ îæ€ÔBy«¯+êEIG~å7ğ\ªMà¼M™&´ùï¸æ½p±'‚iÁ•¨q2.Ø BEÆ›Õ-~Çj8Ñ\ÂBÖìtkïÙå •¹uËö¢ˆFÉ^Â4)€¯ëÏ½¨Ìµ~Çöö:Ó­hÒ?©²l4†˜å¢rîÃSØÁÀqìÙ\Òß¸ÔXh?¿i•Xæƒ•ÔKE§=]	”ÓhX4á*e6ø³n‘Ø:§4Y¡?»Sp­¥1&dV³
+2›$aD@Ğ<ÓéØÁˆâÜH3¶oxÏ(;xhô‡c£ÏfD–Šl½ØSºÆ²‘qÍ9Ïj;6å¸6nc“ÎP\|<FV»SÜü—ë8zq7HÕºçÏ®w¼éãjĞàW¶Ë³¥iš¢5`tÂ sÃè±HU'©&i¢‰ĞÌI-¾²ÆV}˜•ø#§¿úHĞlÌØÊ ¶n1‡
+®Úºùş2«+ñ‹¨ÆAÈ•6’Kı;Ûq6Šyt¬[ˆ²~J <º¥ˆ€ów23±÷Ml#tN9Şt\.hh¶jƒ»5Ğ¿ûÀ>!Šöâ±&(=]/qE4õ¶Ëjœ`»hcC­Ù°;ø<òY' Ê¢–»şØTà·r( ³Ù>éàÚF”7Ã^3ğ&Ãã±°X
+éh-Y¼sÛŸ’|´OéĞšœ³Ù†I¶Lı Ûv¼Ğô®>Üéè,Sy¤`B<ÄÓ¡€lò#l±s_Ù,‹OĞĞÎ²4PĞã¥ğ LPrf–Â3KL§yøã %*ÈI¿9§Ì Ü¯hâ+ÑŠ)‚\NHQ˜Võ‰¶A9ïŠŒGüpë^î¡-´İ’¥•ñ¨ òÇš›'?, Th==ˆBêÉúğª¦ÊØW ./\¶
+ˆ¨½v"yW9ˆ
+<cV ¯x‰;˜—Ôh·,	 ’E…ĞB[¿…¨çùÜÂÕÔO²¹hmÇñ ı}ìSSø'¿–:øhî½qıÆ‰ì«);j´	íà=M–Dú5Ì)Ú+ÜO'–˜fcR!Ùl¿¾½ËP›"Æìaöˆƒä¨ eQRZ9*`‰Gw‹T³/uÖM8]zŞ˜Á¡U°ÎJT×†åÄ;†Â>–è|}·€yâ´ë`¨OG-öÛbšAEb•‹S¶W#$ÄÑ}ERµœMKzÊOZ1÷O§› ½Î­Ğ×ÉsßßQÊÄNQ+Òü«QÒí%Äß\KD—p6ğh˜–6¯Ÿ÷²6vçÂ1¥}Œ$Æ‰åôƒeŞİêÑP¶
+4-ëY…¡şûìX~½Æ!ÛÃ\Ú>:<ï€4DİNÒNA@Õym¬uiG‹t‚û‹KdO@ç)œ”ÌEf­)L—Y Äl+´ÀÍiÚ ÎĞïq¥åAI¡ cìëÕ›Ìz¢§š n>t°=}Dˆèä¸
+³7„¯;üÀ³ÕáÇ{ÁS\¯á·ÑeëŠa*d›ÙhGÎ™rœØ¸äÌ|_À:-°ó\Ààš
+‚”ÅGğI~¶uü¹Ï8¬ªÀZ@‰:T.K•§©óxâD8Ğ›¯ŒŞg—ü,Äş[øÓtDœ¾™"7:7a5‰-z1WİWOÈƒ„Ó×*	×Óé!PŒ6ôÂßz7(\½Q¨úë[¬ ´›€Ì!ÏeÏÚ;·£—ÎêGÃ51ÄzX´…Nıœf0{-6 ]×®CÚwíú¬x}Z¶£ö™çƒagïèbº]Ê)
+ßêßèÔdªÆ“e>K×Y!İ9AVãsºD'LvÓ	ìF_Â®…ÀtQ$k0™E@+ä:iQ šäk#jyÍLEÄí¢C¢‰CÔB…}e0‰"ïÑ (aõôØrAÓLú-bŠü6¥‡ÉH+MÕqy¦0ÔgÂ«*2}µé.­Ş©ûŞ0üGLøámÍ+œól [â_uM\î„äoïÁsYóÉÕì'e%qã9s*8F§¼Ùûø)°ù Äâ”gõE1òc
+’Ä‡©áqĞq°gQ˜ïÍµ}ğÈa^óg@—b´âèàA#á*A"!Æ€ŒİºÇ@'ºu›´7ÈTñµNÚ:|æÔ ?7÷p¼òf¡xûßyk–S±ÓŸÓ’ê‡NgPĞÙÑmÍZN¨6ÆhŠ<Wù‰…/NñEg«IÇ’}c7Ÿ‚I„i:"'QD¾!1¡·¾L Çm:ÊšÎ o…§Û‰÷Ç"ÿ„í›õõ³G •®Ó‡°à‘v½á@“­ôt½õ´ˆyÒŞ^T>¯ñCj_»¼&û©Æ1I÷q¾íö13Ì¹¨9	²Òuí†X¯ÁÆ#Óxg‘"e,¦¢-Àpd‘©&Ÿ ]10ød]P6ÇAUº·”£j9ÊO±ÆKÄú\L3¸J\7ÌeWÒkİôé”Ÿ#©‡œiSˆ!„¹£Şù•)Ÿı\¯	ò±Æ…­±a)nÊõ©Ê â½ÑD€p4ÆIÇH¹\Ù*yÙO¹7¨ûvÔ¼µ!ñcÎo‘hêÓª\Õvx$<XùŠOfæYRäD´")uâÏb³{R*§zqH¾6ù”—MUå‚zb;3­GÑHÎ• y/¯äĞy`÷Ë·²Qb1×5·q}Éøô­}m}’·Cm\â‹¨”¾Ä­ld?(’I«£!õ´çÈ×ïG+îQIò¯w,3JµG_?L)16+NO8İÜŒ¡D»I> ;k©ªkØH¬õ&×*õaÌxîéU¦zlü¤jJ7ï?0î³`
+®åñ¬Û2¯%qFË†«w²|kLeÊ­Š>,~*/!Z1£†Ÿ’¬xº˜şô^õ£}ˆë²¸±“I%€Ù‡öF’|·›[§(?•m¬jvU.S4®˜®ŸÂ£Ó¹IL¨ò©M9¼U2‰ĞdkŸ/@Ğ3v&°¢ïŠYˆ«Á”!y‚zÈ†3b	ómT$şuz0½´oç†}T¨#‡F‡'Æ~8Ê‚¿Ïg£û÷Œíeû†÷ŒÀ¯§‡÷ŒbÏ8ôƒ]£ûGbãClßØşİlßğÁ!6ú/šüšUÁn­³}Ö´Ó`Ïâ:á1·İ‰À£¢‹Gƒ¸¬HˆI1à#J‚5KñÁõ,‹uÖ¸j„×ÔwEÆEêmìcÒ-Q0”\ä»êœÜbÃªR&Eö(Qh:¼Å·Âªç¸ü@ÃµÌb“cƒ×Ò´-Œv8éé†!Ì‹z,²:ÊHnê+İá@8RoiE‚nêüCír†Øñ,›~:jcäIÊ“òß¼øôÄ¾½¸c(]Bb‰rÚ£DÓ	qst±832ˆgmÚrŒ"N®^Ş®]A.ĞÕ_¸x™OLDÂc‚&K½^Ï.'Ï§DÖÀÊøÃŒtBfÇÌù]9üØº9ı¯wNù†ŒQ1·iUšXí5Üqú7[g3^Â4ÓsjÛZ~Æóàñ‰şüÍ\øá·ÿ†;Ø‹¬_,…®!W÷C5¼¸DØƒ›Ÿì´.¨ÙÁ¾?~`<% „357Pl8	y±ƒ¦µ"~ø=à€‡kÇ8e:‚qÛ/ö8-(uœğXşâŞ‚TÖºĞJÂº¢Hˆˆ}7Ü­çãŒÊE¶ÊAiSì2æÓÀÆtpÛèwXTÑR!˜¬ëLKêOjĞjØ›t¸¯ÿøÑG~Ìÿ<´yz¨Â#ãĞÅuğ†›Ñ“˜üXœk€À”6S(?Uª¬QÈ"ÒŒ×”ÂˆK­à—ŸbÿÏ	Ô,œËX»fç7íì¢b8hWÅğÁ1tiı€¾(â¤ñ¶­ õ2¿`\ïûzÇÕÉ¹‚^1d0òÊEºz½éV¢wæ´¨¹fF;ÙÒrK±C…ÓR?q…–ô?ÒôGr
+GDc ÈWŞÉ>t`ïèÑì9¿ËW†{à9 	-øÚàËÃÃ.İ®È€†¸şË>	R6ªñØõıÑ4¦ÌC/¢,?OşgÆîİ?1/ ß3`‘„WD6XC¡3c¡¿Ôu­ l'Û:»ë8mNØxXˆ«ìÃ!şg§69WÃ¿dÀ=œ€Ó$úS 5DÄ&4;r`ÿøÄ¡á1Şê¨v¡S§ìÀå.\@db- Œ™†.Ôã°dZ•.ce<Ò•ëÇ3FVhI’¦ËVVµ~Û$+ˆÆ‰c&$ÇHÌófJü-í‘í¯<=<ÁÆ‡ÁÚ7ºïÀ¡ç„÷”õCè‚3Zlè!3`p?tÂ<nPĞ²šsª”Ú;ÖŠËØçÎa²P¿âG´yøh±ƒšZ2©t•/«|*À¹«´§‹$#î„#ü\9@HVŸ¥_h·­ˆ¢Ü¨¡rOÙrö@¿ØŠ ,;E¹8îL{®¦,‘PY9ÚİfmËƒF1êİ–‰mÉó#o±§dÊqvê¤¬ŞyQm„ï9XWâ|bOjÿ*Ş'¸Ly/TøLm÷SxŸ‚8nmß‡™3¤Ö»7CÂïãÎ(ém8Şİªn(­B§èë÷H˜]å»rg2.YàMvº`*˜Õı†ûƒãİ6YÚ}
+´jÇSãŸîàÆ¹ƒ¡ ²Í%şœÙ¹Ë–ş{uïÄ‘;Ötì×q|á#Ğg½»zPÑä¸$‹´Çcu=7aMS½b7å¯êŒ½"Ç/Q<é4\ı0gı  Wæ˜Ä~t¢ÉàhäSÖ!© ¢44Ìl–´“eŠÄ<QÊEGù¿Ù6ö‘"Ğ2ö^‘l0Û¶}0\-ŸŞxM}„õƒœËÙLe>â!mbíêNN’k•±±&ó#÷O3«ª™5ID}6°:@ØIbZ?Ä.÷×é8²†¯=ï{SRoPÛ–
+!ÇÅë/tí`nÜÆõ5~ ÍğW†FLLÎá+dva—I€©÷“eÆGTÁôI5Rğİ05ˆpü{!x…ŒDÂÎ>50Ñ÷Ä÷ù|Êªtš¿ğ“áõfşÇêO0ÅÎ€	—=uæŸ–Ä?-‰K"?9´3€’È,{İŸŒ<^ÜF~C_v‚sCFÎïïâN½m[´‡’ÉÏÆ˜Då‘P$BœjŒ"İ¶£jö‚¢òÁÃ¥GEêñéµ.-í8¥g<&&k!‡‚z(”†‘¹>ÀçÅúCƒD€bkJ~P¤@éP]ğl°(¤–SB 
+6ÜnÓ8&]¯Ó[¢N¯kV2ñ¸¡¬×öT·|#Â$ÇÅ´!®ØÁúz‘:uºïx¹­]´ThCK0¢ıH.…Mnú5ëpÔÍCıvï¸J~Öp×D;gœfîòÖRÃº€—u3LË{!Ú66=Ä¶f#r_;ëU"be6PâCbÀQs‚7SQ!íñv¶»®2ó×U®(FÖGÜÃGÿj¤šğ)Â$:$¥ƒr’êM(&ªğ`,ãÁù2|ĞàŸÜ¡ùB‰ğÃ¦ÌGğHÀ!a-® ÷Š %0ß6Å¥
+T‹<®;r-' $F‘Õ¤}€¢=u°©¾´0F9¥İ³«ğS!¢œnÙ¼¼WßpÜÉ¶Õh1’x`+Ïá“rß:€ª¦?¸^r¿ÿÌÕ¶Æ@ŸtÓ×oŞ¶…©— á	àéö•²‰²‡·níœ<ª‰/Î°ÛLú”‡§Àıóm©oÙVhã¡ÔGûĞê$½áM,Ùàl0s[·ÁõÉQ}èE;lX¶öàiá¿êkLò#}0WœÆ‰}zÍ4ğĞ‹0<§û$ÆÊ¡ıŠkÒİüí-¬íÂ $£ÆyN7wÜÇ(g¿³ï5(c-0ûx˜ˆıî÷6sóĞuìø`ıyßñú‡`o«Ë…ÏúÁ‰IÏ°ÜX³ù¥ü”8^8)«o²q‹;‘zxV‹étvÙ\M.8D˜ğ®ˆ—ÕÊ5‰Ê6^Lo7h0pÂ§iÚ£«À¡ÏúÓu¨Øu›â¸FÚÚ€ÇƒÄ§ƒ€oDwÄm¢3 cx:©™Ç²|{§‰î*5yÌ{m™×UÎ¹ÃÅ(gÈfNáÅO¡eœh>‘VÛ%~­ÜÆô'¥‹²ÇÉRWLÆB7´ãÙ/©çúê–Ò}ËªÓQ6z	ŠVâ›şu-Vá‡ğòÔ)-¥È¥¨§<ZgûºnäÔöZŞtÓáãÛ9>çE-;tNl án5Ù0î[îd£`µ*¦04"îñƒºŞÅ×xÀ}ßMãÄMDáp·éøq!±iÆÇJ´ÄjÖ
+ÚĞ;åh¦Ü±DºÃˆúCêˆìGØÉ^<KUiÚ¥+Ô}cÁO^Â`KÑáVÒë°-»É	øCŞEÀky‘ÜÖ­'°nĞùÿC,«U×œúÌ†¤Jğ-L2„€‡°áR‹˜Ô'ğ¼Ø%Œüü	siÖîí<ªtİzÇê†…W=L¡l±ŞN82Ì%­—å³PÌvSh,S¥‹ê´‡#y)RŞÏ•L‡ÄcÎßg¦¹fÔÚÙ·u[kÙ¸d’Ç[-vù'wöma[Ø¶Çà¿>¼ôÀİÙÇ]pØı`éª—–Ê§50ï;¾;7Çùáı `loİÊ¶³o±ï°môÿVüÿÀã­ßÁ·÷m†JxŠÍ}û¶n¯oŒ=^ì[Öv¨‡Øl…ÿ¿]ßòm,·º ÷ğ“HjmMÌ_¿tI'ÑwÒ´®>&…Ü‰Ÿ¢èÙRŞÑ“.`e8W1Î³˜Mé0:FjO'‡X7pC¾Vµm|­,J¦³L¨˜À’šĞ'CÑ ÏÔ8(”F>!¾åº–Á?~øHxdüè7Ÿ„¯g‡äåé£¬?ŸS şÑñ£!tCÁVuÂ'wÙ|dóá	>R^eàğ7¾yì=ñã£ƒåe„ [ØÏ‹dA¦5/ôS¡ı>i[ŠUà Maà Å˜<İ¢½Ê[Á(ÎœÜtçÑ|¦+9…M«Òc‹\a‰U¸`c¹NØÊ®Ä£A¤¡FìÒ¶::2 †OK[:Ø
+^?ºttî¢YÚ<T{f\“Ø°İît¯Ç²kcû5Æ ¼o9ú÷ã`\‹&ÂÚ¨®‰§pe˜
+jOÒØCK= @Ó®íÕø¾…w.†6yŞª}ÿ ¦ÈHË%Nµj#:D‡kÒi`Ú=¨k
+ôƒ¨‹;ŒJ'ªíÒáz¨†!tk‡Ñ”ø¢œğk?Ğşà œ¨66Ño2e; Û+y/÷Ã’%£ñqÎ³Ù3cÂÔ µvñp
+<=/B,Õº©¸_AÀ/K¢MEQ7M0‘KÍÙ^*÷h:R˜„ö&A$4ìc[êß
+9ŞPhí{Â]+ië1–ºâÜÜüÚº=\g‹Û”­Ğâ£eg­YÂB˜ËpšNİKhãèL’ˆ)ò¡Öft”ó`BØZ~šOVÛé¬àÉÊŒ­u¶Ÿ4ü¬=™$„Ù¸~Jœ5ë[İçTÄ“[Íg>+_ì¡n/àf1ÚùÆÏ÷Í¨ôgäëØ$):ŠD–¬»ÜüHë„²J.°Ü	#º¥¬dÇ‰(¢NE=›©µ@ÅT÷ĞäÜä“·Sñ¶‘åCWÙn|@P@ Ú˜Aa5C4TÏM“òîÑ@­ğğ–£ƒˆa‹ÚO…ûéšâÅT”vTú1¨ÑŒè˜ú¾'ŞL@8ô0&zw@y\a…rßîñDáëí¨åQÅ¶Õ.?KJ®«¢èÉD&óh(3C†â>Íãv7EKbÊ -ôŠe<‡ƒ->’«„ˆ'íF—_æjuAÿ!Å½{ãÛêÉŞZ‘§‘Ğ	ûuÒ^¥w|%m&-aíİ!æ{#~»>~N›Öû‚kDñ~ô´94†€ÿ£ÍB?ğÿô){4Ç£ŸØ~œñ›7ÇIšú´ïÓõË~;yx*<éØ;Ÿ™xªöøÃ/ì|èÅŸÓG.üvµ’çôÃ|CÇÎh¶æOj~>x*†¾pu'¥ƒ“$ ŒÁp}C…q \ê %ßµ§RUAPJœ¿‚²FO‹r;Ó<jğÚ˜E9N|»m>Ş¼Âë7,À­Ût'qÃïÌı_› Pè\|}¸2]Ï³fœio¸ ÁĞ™ô­ YŸÀ1Ä¢$ÅëxĞRá­-É¦ó†üd]±¾¿ãØÍMšãrùgİ’åø&µæéø¢ñé!8H^?Ì¹hŸÿ““”Ö*q’@Ìõ'…ÖØ_cİ£CìEº¾…‚‚'£Í2ÚşİF!ˆvv£©Úãı9"<ÒŒÏÚ[çÛºĞ±x¯	¶¦­b©é^K¬ è·²$±äe×ĞPöîvj°<@Ë‡væšêvv»DúZ4«ƒŒ´·9`å0hèn¬KàëGô 8=ãŸPˆ“¾ï%“Õ¬Î¯Ø¼}0†|÷à­6(âÂIVA™ı`UÈ®ys‹,69Hˆ€	¤İ@ÏÅá¹L	Er’Aİ'püß<v¤v¤Y?îØyô‘ÍeiˆÃß<ö¿­®8<pøGG}dğÈÑ#ğuğè#Gx–ã¡­¦FLìœ˜™æt•4Lí·ü{Şi3·Ö«l³”]•aa˜‘x‘3tÅ¶YÓ±¦«ıé¦ÊµÊV±²šó×ÊF¥–*ŸÚ¦£É¦Åû61n"ŒRúIKf¸Ó_¹?5»ó&rÿ“p?à©¸ØE¥ìŠ3XŸr\Bò©’ÑŒ§Hõ-­/,wD0}ï;Q¸ÿ†Rko×¦QÖ¡(Õ¨føÄéSy)Ã*ôñ¨¶«­# _ø°)®]°@EÒÂ‡ÛÏÓ:D26òÆâ ­zäïõgí`ÄÂu$äy$ıK¿,BHm¨(ÒAæE¾x‡JKà¹¾ØslÂ:a[³Ö\‹pŒ²Î•Áïm£JaQuåB
+÷:5—ÙÌE„®Ò+Q;ÙÒE5{Œ’(ëã¦Í½:ö•«>å£Ø·t8²Á&wBæğÌ2”MÅ
+¿Á³È¹çßüfÁ`åMryÒ‚}„À.p™íH×~­¨ı‚çğç›t¤ùÈá#õ#ƒG7×#ùX²hpLóà–ğó“R ×UEøTQÙáiŒ#gÆ·e>•‘Ïù”LÌË¸*@ød	ı¶]&xwÒ“¿ì€Fe*Æ³»ÅvÊ46„[«±®\ÿ.ùÊ<ªR ®e`eİdl·–çx€2àô€£˜Á»Äà…ŸW~bı¤BTTTQ`Ş@2šO±ˆÃIk&^ÆÆó–«píLOªœĞš aÊÃTu¦¸j=¤ıŠ[å–…)ìæ	e2¢<Sq cŠŸb3½Ò·8vFÔK0Ø¾<„ªrLœâØ;ñáT£Ò[·i£ÒÎZ4K¶¸<P7µÑı|¹Ç[qxè)0‡P¢©­pÅ†XˆKC¼FbbRÒ
+œ»Õ7=yô‘ÃôïæiÒ<ü QPYIªq[e3€ Ÿ¾Üı—3¸o0õ¾’f\’-A¸ kõ/ÊŒŸ'1-` Œ‚°8’«X ãúŞf¯–02ğ±Ú“œ	4^!8ŒEw¨ğÊÏ’Ë)F«dXòÚ“âÙÌØÉ‚ùáË´¯…pí²~cnéõm€ŞQ¯ñ+æ5Ş¥nP…ïZÉ›ª+¸'pšiÒqä³s¹ò6‰¹q[ÛoÒ½Œ¥P¨ ®ãTf£6}°jT¸ÉÜŒŒqÇ–	§°a¹ví;ÛÕƒÍôçšéö•iã±O\È&Â?F&Adô»¸«íÀcÜ°¼«lvÙækt+Zü”(Í¢Â¦3“ZS(£BùÅ…ßbÚ6¶wà×YÚÇÚÖÉÚlmûIøv²†Û½`Ì1òÃw³,ÊÛT«±N2F†ŞÓİIV«”Vl—¯ˆšün§ |¶’5IıØD0dm+®ù›ÀÙÁÓ "¿Ğåê"ÇÇªuºAXB™ã ïrõ£¸‡ÚíLr×··s¬j|/°|¼ëc*šß×ÜìtTNj-%Á‡ë
+ëj}Š	]9<cµZÈ¯É©MNÅİŞò½ßß1ŞÓêP1¤|e¨kÉsÂ6-}¥«‡pc .bÃ%y|_@mOäfİNÇX$½GœŞâVr±Ô/S}Ô0tÔUuÙ&µ|Ò5¯»LÕ|â¡Õ™¶â¶o1o×â€›è‘¨[€¨ê^ôÒ]ô’ø4Y
+·Ô?*ÖéÚ¸ƒ/Ö}èE)F„1qšíÂ¥.-;,ÃŞÀG¦W
+{ÍRG[µÇ³Se²ÂT!n‡ªÄ<],d§
+R³pš;û¤`$E¨9Íx>ş`øJ¯¦y»¹#ù¹¹ÓÊÏG‰b¬/·6Wk¬+£Q|IÚGŠÖÎªTDj8’œ9ğ€†m©	Ê?dÉÁœœKB»íVtãg¿Ï—§aDI†;DH˜¶rÔ{áLª®Ğ•‹I$l"Zr’…ÑÜÆEÀ¯.ìS†õpºŸN‘,#7œ§ÇA&ì«€TJâQ9ËË ŒIpô 
+0yà\úT‚T¦+ïµĞhjŸå£¸Çø 
+0«=	õÓĞ’g‚ğ´à
+–¡
+o¿Á‰ƒ>qËa`,öÿˆb^-XFh•øQg¦*eÀ@®à‹îƒ™
+rCUªi±.Ô±uDnğhNxYEÜ%6b|áYFŠJ}êN³´…†"ÏváG~.<®š5¼èš—äÆñá­õ-[‹cÑQ%¯ËŸï†‘35W›´£Y¼[‘bIÜWÁ±™4’¥¤ñrxƒYKdfb£¤Ì˜b²oC²`âƒAV-BMµfùHĞ¿i¥?]¡)>pa+ÀY¥±şÊmmË	ÖÜf1ë”ÑóXE£‡€›ÍĞ¸Xö¨\_&œ"®ÔúSÅ+úqu@ß‘#ı}ƒ§ûã#oF >Ls'ÄS«¡z_Ê —jˆI2Ã¼È›ÁÄé8ñ*LÎ‚ùÃ”S}”]I™)%µóã²¼jù§F¼"[!*RÑ)@=å÷º®ŞıãSKÎ'>œz\{	ÚÉŞ~gø™”@ª¡srÒnòiÙ¶›N·]¡ë‚WRáÍ'Ø–â{‡ÕÏ“L©Œ©s‡rÇºÓ³
+	á:9Cy5A‹„É(æDê6|§¬UÎq›·We†;uÆ›d˜²ßï¿Îü®¡¢mJxó´Æ.IªáÙö!Ê$Pe¡ßìÖ•ı('WU*¿ƒW†P=¡L±ŸÜüÙè{Sr­?#š+çó%ßßÛÜu×ä—é0Çvcƒ†Cåÿf7jOšk¥¯Í-ˆáËL2QÛxU­îÑ.‹ÑD{ücM8ãA/.zWS{îLç[‹¹}AµR6j—G-ó2Øvß¦+ëÙÏÉLkÿ54k}¼âİÚÜt’·|a0^0¨¿ºF¼ô„Ğ¤¤·a{Nd š]@\B?ş”è(zûÂé¾ãCqßKÍ©õô„¯"ê}Å±Ç³JàâóË€øŞY¥Uãy´¾Çp¦XÁvœ©–Ñé#ŞqöHNƒ‘úeÓ±4<’´¯{Yz,‹Áè+67·¹	æ_±==¸ÇEç´^Q³<ïë9fğï:ES~ˆ]6B5*çBÖœ®)9jµ³â*§«’·y3;haÇæË³N(7ÌÉñ::<¼€kvSµEjs<ê6çdEø1fYÑïØ•ÚÇÅ‡Ê‹JZe\Cq…íu6Ò²"6z²ãƒ½¹‰¥k¿ß'øïïöj?ÑĞŸÀ*!%<Â*Ë¡mª7ÄäNqÏ&8ğİÃË@¸óÕœN´¾eÑDGf’@ ùg®Ö€Ó×«U§àFÌ™ÿ?0Í?µGü-Ï)œä(ƒŸøxæ²Â*S~Ğ¶z;]•'æp`V*?K³Hk8²‹äcK4Sí¶×ì¼Xã=š´[œÆ—Ódß¶!è‚PxM»Ù:.8¤š‚Ü.î‹NFÙE9t/ ï¿Ü§=ÍU€i75ëÊr¸HHú5h¢WÇ¿ÁÒKŸbn¡ÔEG¼orj‚©/À0¶gîwà>+N¡qnşæïˆW«ÕğÆïW¹D&ÒÚátY-ği³”¬ó¯t†+˜<ıìIÖÿ}ÙÁú“¾hºW{¡…o|ãĞ.ÊC/"lñútòù}Íñ²Zuéº-Ãøáû’ÌŞŞeÄĞš²¿…Æ“ë»ÄôÀAÚÁRÃ56~@Õ¼Ì+Ü¡ÊÜá¾¿Úå˜’¡ª°Sunúûç¢Ã‚…è‚öµğÎ‘Îí@•í³Ç¡5Á0§Ó›gÿƒlÅA<Æù4³ö¡ñôŠ¿ç=´øIÓ«Dçô…ˆ§é=+d’(Åyw®ñ£Âøxj‡ŸŞËöØ=º—MŒgû†÷ï=´!­emƒsnÂ¡•ƒÉ.Eş;>ù²á¸ó4&Ô~?r¦„ dâ‚³¬äÕß·Ã›µ›Ç$hl
+­ÀTSÅ£˜²r#™³t“ÜjNÃt2™Ê<€WCÔjT¼àF;Â]h!¿UªøvQŒÃ‹¬é~İº}–şz•:Üvg"/i±ã½qU#5eM²q÷[mÃı<‹ñøš•¶ïùÊı!ºd¨Ì9+Ë ¶æ–Ä¯DÛ¶¥?+}³İWh©=P?y½2¨µ5¤àIà¿-òÄĞÎ3pÌz:±F,à7mwKQi`·=euİh°è>)e?äÀaÂBµH—œàVäï¦ÊMCj$ÜÍ¯ò|‘‰‚ÇÚô÷R±¦İğÛm'Q¼i+~¥sœø)î{bÈ¥~öÚ%DÊ×½ûÃ:Û­¸›¾‚¹¨^•L ¸ …N­+bU5ÀÑ­ñÁ*l]«tè]ÆÑÎ_X££âD›Š@$!€8¡»?tpÂŒ{aZi/)´Óµ†ÖĞ«Ì=0ÛzR„³èŸæÊ¢“_Ï4ËIhI§_…áçš9 Ô¤xÒêj?U!Qa­‚èîTDaQ”%A}PéFZù€ry”è*ÊE®¦?*Z”Mfµfj]fş^µì*Îd§ >ôƒ}vWÙyI«Á˜jkGœ_sô¸¼¹Œÿ|,½Š?Ü¶¥:¦ÆÛK7šö_O¾bÓ-q*‹Ğƒ<Äåz`´öàyU&¢.4¦\5RW)„s^#mØ‡ì©À[E…8&Z4[ñªêÂÒº	- €zW[ÖÍj^2s«·²ŒT]cÃõ¸şÌt²/ã±+\úª.Dí{"µvJ.ğ;¯ïÄœ¸,Ùˆ#­=Ş{ÖæF½^×.éI­éĞMÌHÒ“É	KÑpÇõšÄ@ı›­³™cğdÀïÄU# 4wT¨S|¬E@‹‡øñÄU%ÀMÛZ~sG¿şƒÆ'(Ä´gt"ÆYX„{D4/£çË¸èäã~ñº†PÜQ0©7a]ÿD|‹© ª 4Ÿµ–bR£xhæÀñq;˜¡¤3[vƒ©¸93<ÍzQmQ,äû.­'”»Ş	#İ§Ëo`NHÓä¶=':¶‡H]D…aNáßzØ%¶¨{9÷+éã†£ó#d4—ÉQ¸F&¶ùL’ÉÕ RÑ*0Áˆx–c°¿ÛîÅ²©yİœU’½Ñ¨
+˜ã\
+$O„¦&¬¡DÏ…82xú „ƒº“óK]€øì?Æı`Xz™ö(“—:s?Š@£7˜âLAÁ¦ZÂ	ƒ
+Wd ®ZOWA¹¸g¦e-8+ì0¨òÆÆb-¹c0æ“üãø—ê)IjË# ZH"ÑIBı8)‘İ@'?e¶ˆüdÏ0›>¡;£N	cÏl:Ë¼.²9²0±06¥e]†©‘ÆåÇsà§ÌNQ÷ñ›cû·ö¤EşêÛğj{Êú}TÃr¿ºûmœ¾'
+Lyc8-¼¯ÆkâF(Š7ËsÂõ6ŠfMÖ¦)L¤4*7q0k6•KTb¸Ì¥T6Û÷g/Â®7ƒq™öçX¼ËøÈrıi6ÎEl`ô$ŞÊ¶uÇVæx3Ğ>fãÀŸÁÍLù…ñˆq†3¥°[tÚ.f`YlÆA±R^€yQy1d9QÊ|ŠçA\}1‰Óá½8ê¥äÂP*ˆiÎÉ):A5;~ n.:/Aı¤&kÄw¾mİ=m[å>ó”ß˜™ÖíIt9J[£Å¶x$fO{6dE¾Py£·)t À¼dÙÔ£‚KwğÃG;Ît›?J†‰. Â¬w=ÂôÎğ§ğüÕƒrß¸‡OnßİšÙ¾›Ûß»m80•ˆ«|”¶G%6†³U¶]œ¿H™ÄÅº0ø!É Ùº²zkz'´ÒzjõúZ§Ûè¸‰$ÛZRËDŞÖ€¶5évÓ}¥J+qJ™yLÈã¾cùIkşGµšÿ;Ğìwôšÿñì~_CÌ"µ]·ª)<'¡`Ö­íxµÙÊ»µ0u{{±™ÙÀ2ö¢…º,O“0LEtt	njk×æ6µUwºn«ûÔ21Kº¬Šµ;•”ŠúÁ~4m¾˜YÔa»îYmÛ¼}m}ê¥hî`%»]˜Çmcä$Õ§åHï§¦1äj|â¤Ê¦p¬#u˜A™ñTÅ‚a÷ú†‹¨©/Wtƒ’Ü)˜¶°úIÅÈCì‘K¸ù†9®ÿ÷­Ÿ-Áß
+–dA7‹Úäš…=ÌöuİÈá)MµÙŸÏÿå“WŠ[N§=6¨h~­×TË/¿ZÜ¬jëöØ*ªú0Ş&úÚîj›¿øIq›ªá¬q¯LÇi&5¥¬éö7·Ê7ò³¶°;—wÛ/UñL÷ûÒ	øòÃk*N—‚iRè‹W5ËÏÁOFŸ+âl[V¥8óoéMŸ¯ÅóHiñªj¦‚ŞîÅ
+èIS+vßÚõõZµP‰-š_M”6IûàJ¨'¬åZÍ®XÛ‘lêÉN™Q<ˆ†úqî*ğç;€ÈQàƒÀSR¼e–?ôâ@vÛc\|Ê9i7¶>!n›Ú\™O;É¢şjvMU·´Â©æ"¢Igä1×ÈÑVNé›š
+mà¸Hô$ÿ¿ÙŸÆ·PxïcY¸N×¯*j¡·ã¥JÔÁöÂE Û¶$ÇÍl_·BX¿2Ø8EĞ›ˆK„i×îtkMê`=ª –­ê¼P†¯ï‰İ)şjÅ âŒSšz‡†D’ü‹Hòóµu®J‘üH*«…ã¡ÄSQçj[3‡GQ¾³½Â8>ô“GZ°İh§qVØü‚Ÿj
+A›bÙ¼™íqıIğ²ø:İq~:Vr–1%w\ç…®#Î¸cÍÀš…>£>@<ÌZ´20·>p}kÃJñÒ|^D¿d°ÂÆ\y.XÁÎ\~Ëš@×‚ˆrÆÓ<œğ@ÇÆuŠ²¦vál-¾‰¶v’–¤ëÚæ ´ëés ii)Tü”n7T¬!«Ù˜f
+éÜf¨ôŞ Í&nIßN~Áo¡±’ï›·ÆîiW¯³‡|´¡{rÅr[ÜÅO‹Ìb[åáêÖôŞçO:®Í&ün£ÅÆg'Hçí±C\««¨ğ€L6Ñ
+l»¶Û
+¡ À`7MçŞ@<óCàë(EP°ÜüE)ÂÆÇñ,´vÏ¬0HxH•ˆI´ÅQ@Âbài Ÿ*Ò)k0T˜á/<¢fuÔ¥³‚a‚Æ?*'…ŸtâÚx£¿æù_LuÓ×y.3„¸²­|>Ş:v)@R)l¯Y–åMÛÍ	•égÉ"ù@Q¯ÉI“d¤PºúsÆêÏiâ“ré–YÿBKe$5uÀŠÚ¥zÏ)õKÕÓ5ói‚ë#"Ó#A[˜‹GqK fHg€há4íÑ–ø9ğÄNöØöÎÉAĞ‡ t@‘¡J+ ¶\èé²ï±ÇÁâĞgå÷YQ«nM†¼³ƒŒ âb“ô›ç‚1'Ë×®/Ópb&:½ë2m@h’*ìŞ¿ƒ»c¨).ØÀ,0:*F“l)Ï\{*b6f@A¤Y0¹`  Õ<ı)€|½±OLĞMÎÿ  ÿÿ‚x´)×Û(šáÀÄÖ°Áu)9ö¸§}@Ş úÙ´éæi°ŸAV½ğòPïØØ*èBüƒ»m@—×SˆÁ¥5Q6k}ì™—Y’™˜“Y•Šº˜²TTÓ€Â¿´ ®Oèâï]Œæ¬)SÁE!–’šË€Ådÿ+ÊÖtü[X!ëQv±¢Æ†[¸Ušè*	yBô–$ĞÕ(!a;à‰<;.}PÓDƒÚÿv\    ÿÿ Ş÷)
