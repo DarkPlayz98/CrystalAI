@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Background Gradient -->
+    <radialGradient id="bg" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#070913" />
+      <stop offset="100%" stop-color="#000000" />
+    </radialGradient>
+
+    <!-- Top Rhombus Face Gradient (Bright Sky Cyan) -->
+    <linearGradient id="topFace" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00b4d8" />
+      <stop offset="40%" stop-color="#0096c7" />
+      <stop offset="100%" stop-color="#48cae4" />
+    </linearGradient>
+
+    <!-- Left Lower Triangle Gradient (Deep Blue to Royal Blue) -->
+    <linearGradient id="leftFace" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0077b6" />
+      <stop offset="60%" stop-color="#023e8a" />
+      <stop offset="100%" stop-color="#1e1b4b" />
+    </linearGradient>
+
+    <!-- Right Lower Triangle Gradient (Vibrant Purple to Violet Magenta) -->
+    <linearGradient id="rightFace" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a855f7" />
+      <stop offset="45%" stop-color="#7e22ce" />
+      <stop offset="100%" stop-color="#3b0764" />
+    </linearGradient>
+
+    <!-- Subtle Ambient Glow -->
+    <filter id="crystalGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" fill="url(#bg)" rx="112" />
+
+  <!-- Crystal Group -->
+  <g filter="url(#crystalGlow)" id="crystal-mesh">
+    <!-- Top Rhombus/Diamond Face (Looking down at an angle) -->
+    <!-- Center: (256, 110) [Top], (132, 184) [Left], (256, 258) [Center Apex], (380, 184) [Right] -->
+    <polygon points="256,110 380,184 256,258 132,184" fill="url(#topFace)" />
+    
+    <!-- Top Face Rim Highlight -->
+    <polygon points="256,110 380,184 256,258 256,110" fill="#ffffff" opacity="0.12" />
+
+    <!-- Left Face: From (132, 184) to (256, 258) down to bottom tip (256, 386) -->
+    <polygon points="132,184 256,258 256,386" fill="url(#leftFace)" />
+
+    <!-- Right Face: From (380, 184) to (256, 258) down to bottom tip (256, 386) -->
+    <polygon points="380,184 256,258 256,386" fill="url(#rightFace)" />
+
+    <!-- Center Spine Ridge (Crisp White/Cyan highlight) -->
+    <line x1="256" y1="258" x2="256" y2="386" stroke="#93c5fd" stroke-width="2" stroke-linecap="round" opacity="0.7" />
+    
+    <!-- Top Edge Highlight -->
+    <line x1="132" y1="184" x2="256" y2="110" stroke="#bae6fd" stroke-width="2" stroke-linecap="round" opacity="0.8" />
+    <line x1="256" y1="110" x2="380" y2="184" stroke="#e0e7ff" stroke-width="2" stroke-linecap="round" opacity="0.85" />
+    <line x1="132" y1="184" x2="256" y2="258" stroke="#7dd3fc" stroke-width="2.5" stroke-linecap="round" opacity="0.9" />
+    <line x1="380" y1="184" x2="256" y2="258" stroke="#d8b4fe" stroke-width="2.5" stroke-linecap="round" opacity="0.9" />
+    <line x1="132" y1="184" x2="256" y2="386" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" opacity="0.6" />
+    <line x1="380" y1="184" x2="256" y2="386" stroke="#c084fc" stroke-width="1.5" stroke-linecap="round" opacity="0.6" />
+
+    <!-- Apex Specular Spark Points -->
+    <circle cx="256" cy="258" r="3" fill="#ffffff" />
+    <circle cx="256" cy="110" r="2.5" fill="#ffffff" opacity="0.8" />
+    <circle cx="256" cy="386" r="2" fill="#c084fc" />
+  </g>
+</svg>

@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite';
-import { handleChatRoute, handleModelsRoute } from './api.js';
+import { handleChatRoute, handleModelsRoute, handleSendVerificationEmailRoute } from './api.js';
 
 function expressApiPlugin() {
   return {
@@ -33,6 +33,8 @@ function expressApiPlugin() {
               await handleModelsRoute(req, res);
             } else if (url.startsWith('/api/chat')) {
               await handleChatRoute(req, res);
+            } else if (url.startsWith('/api/auth/send-verification') || url.startsWith('/api/send-email')) {
+              await handleSendVerificationEmailRoute(req, res);
             } else {
               next();
             }
@@ -80,6 +82,7 @@ export default defineConfig({
   plugins: [expressApiPlugin()],
   server: {
     port: 3000,
-    host: '0.0.0.0'
+    host: '0.0.0.0',
+    strictPort: true
   }
 });
