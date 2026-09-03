@@ -170,7 +170,7 @@
         body { top: 0px !important; position: static !important; }
         .goog-tooltip, .goog-tooltip:hover { display: none !important; }
         .goog-text-highlight { background-color: transparent !important; border: none !important; box-shadow: none !important; }
-        #google_translate_element { display: none !important; }
+        #google_translate_element { position: fixed !important; left: -9999px !important; top: -9999px !important; width: 1px !important; height: 1px !important; opacity: 0 !important; pointer-events: none !important; overflow: hidden !important; }
         .goog-te-gadget { display: none !important; }
         .skiptranslate:not(.allowed-translate) { font-family: inherit !important; }
         #goog-gt-tt { display: none !important; }
@@ -607,6 +607,29 @@
         .bubble-user {
             background: var(--bubble-user) !important;
             color: var(--bubble-user-text) !important;
+            user-select: text;
+            touch-action: manipulation;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .bubble-user:active {
+            transform: scale(0.985);
+        }
+
+        .bubble-user.holding-prompt,
+        .bubble-bot.holding-prompt {
+            box-shadow: 0 0 0 2px var(--md-sys-color-primary, #6366f1), 0 8px 24px rgba(99, 102, 241, 0.25) !important;
+            transform: scale(1.008);
+        }
+
+        /* Floating Bubble Context Menu (shown when holding prompt or response bubble) */
+        #prompt-context-menu {
+            position: fixed;
+            z-index: 9999;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            transform-origin: top right;
+            animation: springIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
 
         .bubble-bot {
@@ -906,6 +929,71 @@
         }
         .animate-shake {
             animation: shake 0.4s ease-in-out;
+        }
+
+        /* Dynamic Microphone Recording Minimal Glow & Audio Waveform */
+        @keyframes micPulseRing {
+            0% {
+                box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4), 0 0 12px rgba(99, 102, 241, 0.25);
+            }
+            50% {
+                box-shadow: 0 0 0 7px rgba(99, 102, 241, 0.1), 0 0 18px rgba(99, 102, 241, 0.4);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(99, 102, 241, 0), 0 0 12px rgba(99, 102, 241, 0.25);
+            }
+        }
+
+        @keyframes micWaveBar {
+            0%, 100% {
+                height: 4px;
+                opacity: 0.5;
+            }
+            50% {
+                height: 16px;
+                opacity: 1;
+            }
+        }
+
+        .mic-active-glow {
+            position: relative;
+            background: var(--md-sys-color-primary, #6366f1) !important;
+            color: var(--md-sys-color-on-primary, #ffffff) !important;
+            animation: micPulseRing 1.6s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+            border: 1px solid rgba(255, 255, 255, 0.25) !important;
+        }
+
+        .listening-wave-bar {
+            display: inline-block;
+            width: 2.5px;
+            background: currentColor;
+            border-radius: 9999px;
+            animation: micWaveBar 1s ease-in-out infinite;
+        }
+        .listening-wave-bar:nth-child(1) { animation-delay: 0.0s; }
+        .listening-wave-bar:nth-child(2) { animation-delay: 0.2s; }
+        .listening-wave-bar:nth-child(3) { animation-delay: 0.4s; }
+        .listening-wave-bar:nth-child(4) { animation-delay: 0.15s; }
+        .listening-wave-bar:nth-child(5) { animation-delay: 0.35s; }
+
+        /* ChatGPT-like Typing Cursor & Generation Fade Animation */
+        .chatgpt-typing-cursor {
+            display: inline-block;
+            width: 6.5px;
+            height: 15px;
+            background-color: var(--md-sys-color-primary, #6366f1);
+            margin-left: 3px;
+            vertical-align: middle;
+            border-radius: 2px;
+            animation: chatgptBlink 0.75s ease-in-out infinite;
+        }
+        @keyframes chatgptBlink {
+            0%, 100% { opacity: 1; transform: scaleY(1); }
+            50% { opacity: 0; transform: scaleY(0.9); }
+        }
+
+        .generating-token-stream {
+            display: inline;
         }
 
         /* ==========================================================================
@@ -1616,14 +1704,18 @@
         </div>
 
         <!-- Main Image container -->
-        <div class="relative max-w-4xl max-h-[80vh] flex items-center justify-center" onclick="event.stopPropagation();">
+        <div class="relative max-w-4xl max-h-[80vh] flex items-center justify-center min-w-[280px] min-h-[220px]" onclick="event.stopPropagation();">
+            <!-- Loading Spinner -->
+            <div id="lightbox-spinner" class="hidden absolute inset-0 flex items-center justify-center pointer-events-none z-20">
+                <div class="w-10 h-10 border-3 border-indigo-500/30 border-t-sky-400 rounded-full animate-spin"></div>
+            </div>
             <img id="lightbox-img" class="max-w-full max-h-[80vh] rounded-2xl object-contain shadow-2xl border border-white/10 transition-transform duration-300 ease-out" style="transform: scale(0.95);" />
             <!-- Caption -->
             <div id="lightbox-caption" class="absolute bottom-[-40px] left-1/2 transform -translate-x-1/2 text-white/85 text-xs font-bold tracking-wider uppercase bg-white/5 py-1.5 px-4 rounded-full border border-white/10 backdrop-blur-sm select-none">IMAGE PREVIEW</div>
         </div>
     </div>
-    <!-- GOOGLE TRANSLATE ANCHOR ELEMENT (HIDDEN) -->
-    <div id="google_translate_element" style="display:none;"></div>
+    <!-- GOOGLE TRANSLATE ANCHOR ELEMENT (HIDDEN OFF-SCREEN) -->
+    <div id="google_translate_element" style="position:fixed;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden;"></div>
 
     <!-- QUICK FULL-APP LANGUAGE & GOOGLE TRANSLATE MODAL -->
     <div id="quick-language-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[120] hidden flex items-center justify-center p-3 sm:p-4 opacity-0 transition-all duration-300" onclick="toggleQuickLanguageModal()">
@@ -1709,8 +1801,8 @@
         
         <div id="sidebar-footer" class="p-4 border-t border-[var(--md-sys-color-outline-variant)] flex flex-col gap-2">
             <button id="sidebar-personalize-btn" onclick="showWelcomeOnboarding(); toggleSidebar();" class="flex items-center gap-3 w-full py-2.5 px-4 bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/25 rounded-full font-bold text-xs transition-all active:scale-[0.98]">
-                <svg viewBox="0 0 24 24" class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2L2 12L16 18L30 12L16 2Z"/></svg>
-                <span id="sidebar-personalize-text">✨ Personalize Crystal Profile</span>
+                <svg viewBox="0 0 24 24" class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <span id="sidebar-personalize-text">Personalize Crystal Profile</span>
             </button>
             <button id="sidebar-settings-btn" onclick="toggleSettings(); toggleSidebar();" class="flex items-center gap-3 w-full py-3 px-4 hover:bg-[var(--md-sys-color-surface-container-high)] text-[var(--md-sys-color-on-surface)] rounded-full font-medium text-sm transition-colors active:scale-[0.98]">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
@@ -1776,19 +1868,19 @@
                     <!-- Horizontal Crystalline Quick Action Chips -->
                     <div class="flex flex-wrap items-center justify-center gap-2 max-w-lg w-full">
                         <button id="empty-action-product" class="px-3.5 py-2 rounded-full bg-slate-900/5 dark:bg-white/10 hover:bg-slate-900/10 dark:hover:bg-white/15 border border-slate-900/10 dark:border-white/10 text-xs sm:text-[13px] font-semibold text-[var(--text-color)] transition-all active:scale-95 flex items-center gap-1.5 shadow-2xs" onclick="triggerAction('core'); injectPrompt('Recommend the top 3 best wireless noise-canceling headphones with prices and store links')">
-                            <span>🛍️</span>
+                            <svg class="w-4 h-4 opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
                             <span id="empty-action-product-text">Find Products & Deals</span>
                         </button>
                         <button id="empty-action-reason" class="px-3.5 py-2 rounded-full bg-slate-900/5 dark:bg-white/10 hover:bg-slate-900/10 dark:hover:bg-white/15 border border-slate-900/10 dark:border-white/10 text-xs sm:text-[13px] font-semibold text-[var(--text-color)] transition-all active:scale-95 flex items-center gap-1.5 shadow-2xs" onclick="toggleDeepThinking(); injectPrompt('Explain quantum entanglement step-by-step with mathematical intuition')">
-                            <span>💎</span>
+                            <svg class="w-4 h-4 opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="6 2 18 2 22 8 12 22 2 8 6 2"/><line x1="2" y1="8" x2="22" y2="8"/><line x1="12" y1="2" x2="8" y2="8"/><line x1="12" y1="2" x2="16" y2="8"/></svg>
                             <span id="empty-action-reason-text">Deep Reasoning</span>
                         </button>
                         <button id="empty-action-code" class="px-3.5 py-2 rounded-full bg-slate-900/5 dark:bg-white/10 hover:bg-slate-900/10 dark:hover:bg-white/15 border border-slate-900/10 dark:border-white/10 text-xs sm:text-[13px] font-semibold text-[var(--text-color)] transition-all active:scale-95 flex items-center gap-1.5 shadow-2xs" onclick="triggerAction('copilot'); injectPrompt('Build an interactive responsive dashboard in React and Tailwind CSS')">
-                            <span>💻</span>
+                            <svg class="w-4 h-4 opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
                             <span id="empty-action-code-text">Write & Debug Code</span>
                         </button>
                         <button id="empty-action-image" class="px-3.5 py-2 rounded-full bg-slate-900/5 dark:bg-white/10 hover:bg-slate-900/10 dark:hover:bg-white/15 border border-slate-900/10 dark:border-white/10 text-xs sm:text-[13px] font-semibold text-[var(--text-color)] transition-all active:scale-95 flex items-center gap-1.5 shadow-2xs" onclick="triggerAction('image'); injectPrompt('Create a photorealistic image of a futuristic crystal observatory in the mountains')">
-                            <span>🎨</span>
+                            <svg class="w-4 h-4 opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
                             <span id="empty-action-image-text">Create Image</span>
                         </button>
                     </div>
@@ -1879,22 +1971,48 @@
                 </div>
 
                 <!-- Input Frame -->
-                <div class="w-full bg-[var(--md-sys-color-surface-container-high)] border border-[var(--md-sys-color-outline-variant)] rounded-[28px] p-2 pl-3 flex items-end gap-1.5 sm:gap-2 shadow-md">
-                    <input type="file" id="file-input" class="hidden" accept="image/*" multiple onchange="handleFileUpload(event)">
-                    <button onclick="toggleActionMenu(event)" class="p-2 sm:p-2.5 rounded-full hover:bg-[var(--md-sys-color-surface-container-highest)] text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] transition-all active:scale-95 shrink-0 flex items-center justify-center" title="Open Crystal Center Actions">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                    </button>
+                <div class="w-full flex flex-col gap-1.5">
+                    <!-- Live Voice Visualizer Bar (Shown during speech recognition) -->
+                    <div id="voice-listening-visualizer" class="hidden w-full items-center justify-between px-3.5 py-2 rounded-2xl bg-[var(--md-sys-color-surface-container-highest)] border border-[var(--md-sys-color-outline-variant)] text-[var(--md-sys-color-on-surface)] backdrop-blur-xl shadow-md transition-all duration-300">
+                        <div class="flex items-center gap-2.5">
+                            <span class="relative flex h-2.5 w-2.5">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--md-sys-color-primary)] opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-[var(--md-sys-color-primary)]"></span>
+                            </span>
+                            <span class="text-xs font-semibold text-[var(--md-sys-color-on-surface)] flex items-center gap-1.5 opacity-90">
+                                Listening... Speak clearly
+                            </span>
+                        </div>
+                        <div class="flex items-center gap-1 h-5 px-2 text-[var(--md-sys-color-primary)]">
+                            <span class="listening-wave-bar"></span>
+                            <span class="listening-wave-bar"></span>
+                            <span class="listening-wave-bar"></span>
+                            <span class="listening-wave-bar"></span>
+                            <span class="listening-wave-bar"></span>
+                        </div>
+                        <button onclick="toggleSpeech()" class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-[var(--md-sys-color-primary)] hover:opacity-90 text-[var(--md-sys-color-on-primary)] transition active:scale-95 shadow-xs flex items-center gap-1">
+                            <span>Done</span>
+                            <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        </button>
+                    </div>
 
-                    <textarea id="message" rows="1" placeholder="Message Crystal..." oninput="autoExpandTextarea(this)" onkeydown="checkSubmitKey(event)" class="flex-1 min-w-0 bg-transparent border-none py-2 px-1 text-[15px] sm:text-[16px] max-h-28 text-[var(--md-sys-color-on-surface)] outline-none resize-none font-medium leading-relaxed scrollbar-none"></textarea>
+                    <div class="w-full bg-[var(--md-sys-color-surface-container-high)] border border-[var(--md-sys-color-outline-variant)] rounded-[28px] p-2 pl-3 flex items-end gap-1.5 sm:gap-2 shadow-md">
+                        <input type="file" id="file-input" class="hidden" accept="image/*" multiple onchange="handleFileUpload(event)">
+                        <button onclick="toggleActionMenu(event)" class="p-2 sm:p-2.5 rounded-full hover:bg-[var(--md-sys-color-surface-container-highest)] text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] transition-all active:scale-95 shrink-0 flex items-center justify-center" title="Open Crystal Center Actions">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        </button>
 
-                    <!-- VOICE SPEECH TO TEXT TRIGGER -->
-                    <button id="mic-btn" onclick="toggleSpeech()" class="p-2 sm:p-2.5 rounded-full transition-all duration-200 active:scale-95 text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-surface-container-highest)] shrink-0 items-center justify-center" title="Voice Input">
-                        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
-                    </button>
+                        <textarea id="message" rows="1" placeholder="Message Crystal..." oninput="autoExpandTextarea(this)" onkeydown="checkSubmitKey(event)" class="flex-1 min-w-0 bg-transparent border-none py-2 px-1 text-[15px] sm:text-[16px] max-h-28 text-[var(--md-sys-color-on-surface)] outline-none resize-none font-medium leading-relaxed scrollbar-none"></textarea>
 
-                    <button type="submit" id="sendBtn" class="p-2.5 sm:p-3 bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] hover:opacity-90 disabled:opacity-30 rounded-full transition-all active:scale-95 flex items-center justify-center shadow-sm shrink-0" onclick="submitMessage(event)">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-                    </button>
+                        <!-- VOICE SPEECH TO TEXT TRIGGER -->
+                        <button id="mic-btn" onclick="toggleSpeech()" class="p-2 sm:p-2.5 rounded-full transition-all duration-300 active:scale-95 text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-surface-container-highest)] shrink-0 items-center justify-center flex" title="Voice Input">
+                            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
+                        </button>
+
+                        <button type="submit" id="sendBtn" class="p-2.5 sm:p-3 bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] hover:opacity-90 disabled:opacity-30 rounded-full transition-all active:scale-95 flex items-center justify-center shadow-sm shrink-0" onclick="submitMessage(event)">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -2541,10 +2659,14 @@
             }
         }
 
-        function animateParticles() {
+        let lastParticleFrame = 0;
+        function animateParticles(time) {
             try {
                 requestAnimationFrame(animateParticles);
-                if (!particleCtx) return;
+                if (document.hidden || !particleCtx) return;
+                // Throttle particle animation to ~30fps for smooth ambient visuals with near-zero CPU overhead
+                if (time - lastParticleFrame < 32) return;
+                lastParticleFrame = time;
                 particleCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
                 for (let i = 0; i < particlesArray.length; i++) {
                     particlesArray[i].update();
@@ -2552,15 +2674,19 @@
             } catch (e) {}
         }
         
+        let resizeParticleTimer = null;
         window.addEventListener('resize', () => {
-            if (particleCanvas) {
-                particleCanvas.width = window.innerWidth;
-                particleCanvas.height = window.innerHeight;
-            }
-            initParticles();
-        });
+            clearTimeout(resizeParticleTimer);
+            resizeParticleTimer = setTimeout(() => {
+                if (particleCanvas) {
+                    particleCanvas.width = window.innerWidth;
+                    particleCanvas.height = window.innerHeight;
+                }
+                initParticles();
+            }, 150);
+        }, { passive: true });
         initParticles();
-        animateParticles();
+        requestAnimationFrame(animateParticles);
 
         // System Config, Local storage & States variables
         let auth = null;
@@ -3275,71 +3401,157 @@
         }
         window.init3DCrystal = init3DCrystal;
 
+        // Dynamic Greeting Pool & Generator (Changes every time app opens or session starts)
+        let currentGreetingTemplateIndex = null;
+        let currentSubtitleIndex = null;
+        let lastTimeOfDayString = "";
+
+        const GREETING_TEMPLATES = [
+            (name, timeOfDay) => `${timeOfDay}, ${name}!`,
+            (name, timeOfDay) => `Welcome, ${name}!`,
+            (name, timeOfDay) => `Ready when you are, ${name}!`,
+            (name, timeOfDay) => `What shall we explore today, ${name}?`,
+            (name, timeOfDay) => `How can Crystal help you today, ${name}?`,
+            (name, timeOfDay) => `Let's build something brilliant, ${name}!`,
+            (name, timeOfDay) => `Your turn, ${name}!`,
+            (name, timeOfDay) => `What's on your mind today, ${name}?`,
+            (name, timeOfDay) => `Hello, ${name}! What would you like to create?`,
+            (name, timeOfDay) => `Great to see you, ${name}!`,
+            (name, timeOfDay) => `What are we working on today, ${name}?`,
+            (name, timeOfDay) => `Dive into ideas, ${name}!`
+        ];
+
+        const GREETING_SUBTITLES = [
+            "Ask Crystal anything, find products, analyze code, or create images.",
+            "Search the live web, generate concepts, solve math, or brainstorm ideas.",
+            "Explore real-time data, compare products, write code, and discover insights.",
+            "Ready to help you write, research, debug, calculate, and design.",
+            "Powered by advanced AI intelligence with live search and creative tools.",
+            "Ask questions, craft code, explore deals, or generate stunning visuals."
+        ];
+
+        function refreshDynamicGreeting() {
+            let newIdx = Math.floor(Math.random() * GREETING_TEMPLATES.length);
+            if (newIdx === currentGreetingTemplateIndex) {
+                newIdx = (newIdx + 1) % GREETING_TEMPLATES.length;
+            }
+            currentGreetingTemplateIndex = newIdx;
+            currentSubtitleIndex = Math.floor(Math.random() * GREETING_SUBTITLES.length);
+        }
+
+        function getTimeOfDayGreeting() {
+            const hour = new Date().getHours();
+            if (hour >= 5 && hour < 12) return "Good morning";
+            if (hour >= 12 && hour < 17) return "Good afternoon";
+            if (hour >= 17 && hour < 22) return "Good evening";
+            return "Good night";
+        }
+
+        function getGuestDisplayName() {
+            let saved = localStorage.getItem('crystal_username');
+            if (saved && saved.trim() && saved !== 'Itz_MeDark' && saved !== 'Input your Username' && saved !== 'Pujitha') {
+                return saved.trim();
+            }
+            if (typeof auth !== 'undefined' && auth && auth.currentUser) {
+                if (auth.currentUser.displayName) return auth.currentUser.displayName;
+                if (auth.currentUser.isAnonymous) {
+                    return 'Guest_' + auth.currentUser.uid.substring(0, 5).toUpperCase();
+                }
+                if (auth.currentUser.email && auth.currentUser.email.includes('guest')) {
+                    return 'Guest_' + auth.currentUser.uid.substring(0, 5).toUpperCase();
+                }
+            }
+            let guestId = localStorage.getItem('crystal_guest_id');
+            if (!guestId) {
+                guestId = 'Guest_' + Math.random().toString(36).substring(2, 6).toUpperCase();
+                localStorage.setItem('crystal_guest_id', guestId);
+            }
+            return guestId || 'Guest';
+        }
+
+        function renderDynamicGreeting(name) {
+            const greetEl = document.getElementById('dynamic-greeting');
+            const subEl = document.getElementById('empty-state-subtitle');
+            if (!greetEl) return;
+            
+            if (currentGreetingTemplateIndex === null) {
+                refreshDynamicGreeting();
+            }
+            
+            const timeOfDay = getTimeOfDayGreeting();
+            const effectiveName = (name && name.trim()) ? name.trim() : 'Guest';
+            const templateFn = GREETING_TEMPLATES[currentGreetingTemplateIndex] || GREETING_TEMPLATES[0];
+            
+            greetEl.textContent = templateFn(effectiveName, timeOfDay);
+            
+            if (subEl && currentSubtitleIndex !== null && GREETING_SUBTITLES[currentSubtitleIndex]) {
+                subEl.textContent = GREETING_SUBTITLES[currentSubtitleIndex];
+            }
+        }
+
         // Profile sync & Clock
         function updateProfileUI() {
             try {
                 let savedName = localStorage.getItem('crystal_username');
-                if (savedName === "Itz_MeDark" || savedName === "Input your Username" || savedName === "Pujitha") {
+                if (savedName === 'Itz_MeDark' || savedName === 'Input your Username' || savedName === 'Pujitha') {
                     localStorage.removeItem('crystal_username');
                     savedName = null;
                 }
                 
-                let displayName = savedName;
-                if (!displayName) {
-                    if (typeof auth !== 'undefined' && auth && auth.currentUser) {
-                        if (auth.currentUser.isAnonymous) {
-                            displayName = "Guest_" + auth.currentUser.uid.substring(0, 5);
-                        } else if (auth.currentUser.email && auth.currentUser.email.includes('guest')) {
-                            displayName = "Guest_" + auth.currentUser.uid.substring(0, 5);
-                        } else if (auth.currentUser.displayName) {
-                            displayName = auth.currentUser.displayName;
-                        } else if (auth.currentUser.email) {
-                            displayName = auth.currentUser.email.split('@')[0];
-                        } else {
-                            displayName = "Guest";
-                        }
-                    } else if (typeof isLocalGuest !== 'undefined' && isLocalGuest) {
-                        displayName = "Local Guest";
+                let isGuestUser = false;
+                let displayName = '';
+
+                if (savedName && savedName.trim()) {
+                    displayName = savedName.trim();
+                } else if (typeof auth !== 'undefined' && auth && auth.currentUser && !auth.currentUser.isAnonymous && !(auth.currentUser.email && auth.currentUser.email.includes('guest'))) {
+                    if (auth.currentUser.displayName) {
+                        displayName = auth.currentUser.displayName;
+                    } else if (auth.currentUser.email) {
+                        displayName = auth.currentUser.email.split('@')[0];
                     } else {
-                        displayName = "Guest";
+                        displayName = 'User';
                     }
+                } else {
+                    isGuestUser = true;
+                    displayName = getGuestDisplayName();
                 }
+
                 customUsername = displayName;
+
+                // 1. Sidebar email / display name (Guest name is clearly visible)
                 const emailEl = document.getElementById('user-email');
                 if (emailEl) emailEl.textContent = displayName;
-                const initEl = document.getElementById('user-initial');
-                if (initEl) initEl.textContent = displayName.charAt(0).toUpperCase();
 
-                const greetEl = document.getElementById('dynamic-greeting');
-                if (greetEl) {
-                    const activeName = (displayName && displayName !== 'Guest' && displayName !== 'Local Guest') ? displayName : (localStorage.getItem('crystal_username') || 'User');
-                    greetEl.textContent = 'Your move, ' + activeName + '!';
-                }
+                // 2. Initial avatar letter
+                const initEl = document.getElementById('user-initial');
+                if (initEl) initEl.textContent = (displayName && displayName.length > 0) ? displayName.charAt(0).toUpperCase() : 'G';
+
+                // 3. Dynamic greeting banner on home screen
+                renderDynamicGreeting(displayName);
                 
-                // Update dynamic account tier badge
+                // 4. Update dynamic account tier badge
                 const tierEl = document.getElementById('user-tier');
                 if (tierEl) {
                     tierEl.onclick = null;
-                    if (isLocalGuest) {
-                        tierEl.textContent = "LOCAL GUEST";
-                        tierEl.className = "text-[10px] uppercase font-bold tracking-wider text-amber-500";
+                    if (isGuestUser || isLocalGuest) {
+                        tierEl.textContent = 'GUEST SESSION';
+                        tierEl.className = 'text-[10px] uppercase font-bold tracking-wider text-amber-500';
                     } else if (auth && auth.currentUser) {
-                        if (auth.currentUser.isAnonymous || auth.currentUser.email?.includes('guest')) {
-                            tierEl.textContent = "GUEST SESSION";
-                            tierEl.className = "text-[10px] uppercase font-bold tracking-wider text-amber-500";
-                        } else {
-                            tierEl.textContent = "VERIFIED USER";
-                            tierEl.className = "text-[10px] uppercase font-bold tracking-wider text-emerald-400";
-                        }
+                        tierEl.textContent = 'VERIFIED USER';
+                        tierEl.className = 'text-[10px] uppercase font-bold tracking-wider text-emerald-400';
                     } else {
-                        tierEl.textContent = "LOCAL GUEST";
-                        tierEl.className = "text-[10px] uppercase font-bold tracking-wider text-amber-500";
+                        tierEl.textContent = 'GUEST SESSION';
+                        tierEl.className = 'text-[10px] uppercase font-bold tracking-wider text-amber-500';
                     }
+                }
+
+                if (typeof updateSettingsAccountStatus === 'function') {
+                    updateSettingsAccountStatus();
                 }
                 
                 return displayName;
             } catch (e) {
-                return "Guest";
+                return 'Guest';
             }
         }
 
@@ -3347,14 +3559,18 @@
             try {
                 const now = new Date();
                 const timeString = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                document.getElementById('live-clock').innerText = timeString;
+                const clockEl = document.getElementById('live-clock');
+                if (clockEl) clockEl.innerText = timeString;
 
-                const hour = now.getHours();
-                let greet = "Good Evening";
-                if (hour < 12) greet = "Good Morning";
-                else if (hour < 17) greet = "Good Afternoon";
-
-                updateProfileUI();
+                const currentTOD = getTimeOfDayGreeting();
+                if (lastTimeOfDayString && lastTimeOfDayString !== currentTOD) {
+                    lastTimeOfDayString = currentTOD;
+                    if (customUsername) {
+                        renderDynamicGreeting(customUsername);
+                    }
+                } else if (!lastTimeOfDayString) {
+                    lastTimeOfDayString = currentTOD;
+                }
             } catch (e) {}
         }
         setInterval(updateClock, 1000);
@@ -3945,8 +4161,30 @@
             const modal = document.getElementById('lightbox-modal');
             const img = document.getElementById('lightbox-img');
             const cap = document.getElementById('lightbox-caption');
+            const spinner = document.getElementById('lightbox-spinner');
             const saveText = document.getElementById('lightbox-save-text');
             if (!modal || !img) return;
+
+            if (spinner) spinner.classList.remove('hidden');
+            img.style.opacity = '0';
+
+            img.onload = function() {
+                if (spinner) spinner.classList.add('hidden');
+                img.style.opacity = '1';
+            };
+
+            img.onerror = function() {
+                if (spinner) spinner.classList.add('hidden');
+                img.style.opacity = '1';
+                if (src && src.startsWith('http') && !src.includes('/api/image-proxy')) {
+                    console.warn("Retrying image via proxy:", src);
+                    img.src = '/api/image-proxy?url=' + encodeURIComponent(src);
+                } else {
+                    console.warn("Failed to load lightbox image");
+                    if (typeof showToast === 'function') showToast("Preview image failed to load", "error");
+                }
+            };
+
             img.src = src;
             if (cap) cap.textContent = alt || 'Crystal Image Preview';
             if (saveText) saveText.textContent = 'Save Image';
@@ -4347,12 +4585,214 @@
         };
         const fetchGroqModelsLive = window.fetchGroqModelsLive;
 
-        // --- BUBBLE ACTIONS (COPY, TTS READ ALOUD, EXPORT, MEMORY BANK) ---
-        window.copyBubbleText = async function(btn) {
-            triggerHaptic();
+        // --- PROMPT ACTIONS (EDIT PROMPT, COPY PROMPT, RESEND PROMPT, HOLD CONTEXT MENU) ---
+        window.lastSentUserPromptText = "";
+        window.lastUserMessageWrapper = null;
+
+        window.editUserPrompt = function(promptText) {
+            triggerHaptic('medium');
+            window.closePromptContextMenu();
+            const textToEdit = (promptText && typeof promptText === 'string') ? promptText : (window.lastSentUserPromptText || '');
+            if (!textToEdit) {
+                showToast("No prompt text to edit", "error");
+                return;
+            }
+            const input = document.getElementById('message');
+            if (input) {
+                input.value = textToEdit;
+                input.style.height = 'auto';
+                input.style.height = Math.min(Math.max(input.scrollHeight, 44), 220) + 'px';
+                input.focus();
+                try {
+                    input.setSelectionRange(input.value.length, input.value.length);
+                } catch(e) {}
+                const chatArea = document.getElementById('chat-container');
+                if (chatArea) chatArea.scrollTop = chatArea.scrollHeight;
+                showToast("Prompt loaded into editor");
+            }
+        };
+
+        window.copyUserPromptText = async function(promptText, btn) {
+            triggerHaptic('light');
+            window.closePromptContextMenu();
+            const textToCopy = (promptText && typeof promptText === 'string') ? promptText : (window.lastSentUserPromptText || '');
+            if (!textToCopy) {
+                showToast("No prompt to copy", "error");
+                return;
+            }
             try {
-                const bubble = btn.closest('.flex-1')?.querySelector('.bubble, [class*="bubble"]') || btn.parentElement.previousElementSibling;
-                const text = bubble ? (bubble.innerText || bubble.textContent || '').trim() : '';
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(textToCopy);
+                } else {
+                    const temp = document.createElement('textarea');
+                    temp.value = textToCopy;
+                    temp.setAttribute('readonly', '');
+                    temp.style.position = 'absolute';
+                    temp.style.left = '-9999px';
+                    document.body.appendChild(temp);
+                    temp.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(temp);
+                }
+                if (btn) {
+                    const originalHtml = btn.innerHTML;
+                    btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Copied!`;
+                    btn.classList.add('text-emerald-400', 'border-emerald-500/50');
+                    setTimeout(() => {
+                        btn.innerHTML = originalHtml;
+                        btn.classList.remove('text-emerald-400', 'border-emerald-500/50');
+                    }, 2000);
+                }
+                showToast("Prompt copied to clipboard");
+            } catch (e) {
+                console.error("Copy prompt error:", e);
+                showToast("Failed to copy prompt", "error");
+            }
+        };
+
+        window.resendPrompt = function(promptText) {
+            triggerHaptic('medium');
+            window.closePromptContextMenu();
+            const textToSend = (promptText && typeof promptText === 'string') ? promptText : (window.lastSentUserPromptText || '');
+            if (!textToSend) return;
+            const input = document.getElementById('message');
+            if (input) {
+                input.value = textToSend;
+                submitMessage();
+            }
+        };
+
+        window.closePromptContextMenu = function() {
+            const menu = document.getElementById('prompt-context-menu');
+            if (menu) {
+                menu.classList.add('opacity-0', 'scale-95');
+                setTimeout(() => {
+                    if (menu && menu.parentNode) menu.remove();
+                }, 150);
+            }
+            document.querySelectorAll('.holding-prompt').forEach(el => el.classList.remove('holding-prompt'));
+            window._activeMenuBubble = null;
+        };
+
+        window.showBubbleContextMenu = function(x, y, bubbleElement, isBot) {
+            window.closePromptContextMenu();
+            if (!bubbleElement) return;
+            bubbleElement.classList.add('holding-prompt');
+            window._activeMenuBubble = bubbleElement;
+
+            const menu = document.createElement('div');
+            menu.id = "prompt-context-menu";
+            menu.className = "flex flex-col gap-1 p-1.5 rounded-2xl bg-[var(--md-sys-color-surface-container-highest)]/95 border border-indigo-500/30 shadow-2xl text-xs font-semibold text-[var(--text-color)] min-w-[185px] transition-all duration-150 select-none";
+
+            const rawContent = bubbleElement._rawContent || window.extractCleanTextFromBubble(bubbleElement) || '';
+            const isPaused = isBot && (rawContent.includes("*(Generation paused)*") || rawContent.includes("*(Response paused)*"));
+
+            if (!isBot) {
+                // User Prompt context menu
+                menu.innerHTML = `
+                    <div class="px-2.5 py-1 text-[10px] font-mono uppercase tracking-wider text-indigo-400 font-bold border-b border-[var(--border-color)]/60 flex items-center justify-between select-none">
+                        <span>Prompt Actions</span>
+                        <span class="text-[9px] opacity-60">Held</span>
+                    </div>
+                    <button type="button" onclick="window.editUserPrompt(window._activeMenuBubble?._rawContent)" class="flex items-center gap-2 px-2.5 py-2 rounded-xl hover:bg-indigo-500/15 hover:text-indigo-400 text-left transition-all active:scale-95 cursor-pointer">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        <span>Edit Prompt</span>
+                    </button>
+                    <button type="button" onclick="window.copyUserPromptText(window._activeMenuBubble?._rawContent)" class="flex items-center gap-2 px-2.5 py-2 rounded-xl hover:bg-indigo-500/15 hover:text-indigo-400 text-left transition-all active:scale-95 cursor-pointer">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                        <span>Copy Prompt</span>
+                    </button>
+                    <button type="button" onclick="window.resendPrompt(window._activeMenuBubble?._rawContent)" class="flex items-center gap-2 px-2.5 py-2 rounded-xl hover:bg-indigo-500/15 hover:text-indigo-400 text-left transition-all active:scale-95 cursor-pointer">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                        <span>Resend Prompt</span>
+                    </button>
+                `;
+            } else {
+                // Assistant / Bot message context menu
+                const isSpeaking = window.speechSynthesis && window.speechSynthesis.speaking;
+                menu.innerHTML = `
+                    <div class="px-2.5 py-1 text-[10px] font-mono uppercase tracking-wider text-indigo-400 font-bold border-b border-[var(--border-color)]/60 flex items-center justify-between select-none">
+                        <span>Response Actions</span>
+                        <span class="text-[9px] opacity-60">Held</span>
+                    </div>
+                    <button type="button" onclick="window.copyBubbleTextFromElement(window._activeMenuBubble)" class="flex items-center gap-2 px-2.5 py-2 rounded-xl hover:bg-indigo-500/15 hover:text-indigo-400 text-left transition-all active:scale-95 cursor-pointer">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                        <span>Copy Response</span>
+                    </button>
+                    <button type="button" onclick="window.speakBubbleTextFromElement(window._activeMenuBubble)" class="flex items-center gap-2 px-2.5 py-2 rounded-xl hover:bg-indigo-500/15 hover:text-indigo-400 text-left transition-all active:scale-95 cursor-pointer">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+                        <span>${isSpeaking ? 'Stop Audio' : 'Read Aloud'}</span>
+                    </button>
+                    <button type="button" onclick="window.downloadBubbleMarkdownFromElement(window._activeMenuBubble)" class="flex items-center gap-2 px-2.5 py-2 rounded-xl hover:bg-indigo-500/15 hover:text-indigo-400 text-left transition-all active:scale-95 cursor-pointer">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                        <span>Export Markdown</span>
+                    </button>
+                    <button type="button" onclick="window.saveMemoryFromElement(window._activeMenuBubble)" class="flex items-center gap-2 px-2.5 py-2 rounded-xl hover:bg-indigo-500/15 hover:text-indigo-400 text-left transition-all active:scale-95 cursor-pointer">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2a4.5 4.5 0 0 0-4.5 4.5c0 1.6.85 3 2.1 3.8C8.5 11.5 8 13.2 8 15v1h8v-1c0-1.8-.5-3.5-1.6-4.7 1.25-.8 2.1-2.2 2.1-3.8A4.5 4.5 0 0 0 12 2z"/></svg>
+                        <span>Save to Memory</span>
+                    </button>
+                    ${isPaused ? `
+                        <button type="button" onclick="window.editUserPrompt()" class="flex items-center gap-2 px-2.5 py-2 rounded-xl hover:bg-indigo-500/15 hover:text-indigo-400 text-left transition-all active:scale-95 cursor-pointer border-t border-[var(--border-color)]/60">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                            <span>Edit User Prompt</span>
+                        </button>
+                        <button type="button" onclick="window.retryLastUserMessage()" class="flex items-center gap-2 px-2.5 py-2 rounded-xl hover:bg-indigo-500/15 hover:text-indigo-400 text-left transition-all active:scale-95 cursor-pointer">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                            <span>Retry Response</span>
+                        </button>
+                    ` : ''}
+                `;
+            }
+
+            document.body.appendChild(menu);
+
+            const menuWidth = 190;
+            const menuHeight = isBot ? (isPaused ? 230 : 180) : 150;
+            let posX = x - (isBot ? 20 : menuWidth - 20);
+            let posY = y + 10;
+
+            if (posX < 10) posX = 10;
+            if (posX + menuWidth > window.innerWidth - 10) posX = window.innerWidth - menuWidth - 10;
+            if (posY + menuHeight > window.innerHeight - 10) posY = y - menuHeight - 10;
+            if (posY < 10) posY = 10;
+
+            menu.style.left = `${posX}px`;
+            menu.style.top = `${posY}px`;
+
+            const dismissHandler = (evt) => {
+                if (menu && !menu.contains(evt.target)) {
+                    window.closePromptContextMenu();
+                    document.removeEventListener('pointerdown', dismissHandler);
+                    document.removeEventListener('scroll', dismissHandler, true);
+                }
+            };
+            setTimeout(() => {
+                document.addEventListener('pointerdown', dismissHandler);
+                document.addEventListener('scroll', dismissHandler, true);
+            }, 50);
+        };
+
+        window.showPromptContextMenu = function(x, y, promptText, bubbleElement) {
+            window.showBubbleContextMenu(x, y, bubbleElement, false);
+        };
+
+        // --- BUBBLE ACTIONS (COPY, TTS READ ALOUD, EXPORT, MEMORY BANK) ---
+        window.extractCleanTextFromBubble = function(bubble) {
+            if (!bubble) return '';
+            if (bubble._rawContent && typeof bubble._rawContent === 'string' && bubble._rawContent.trim()) {
+                return bubble._rawContent.trim();
+            }
+            const clone = bubble.cloneNode(true);
+            clone.querySelectorAll('button, .select-none, .chatgpt-typing-cursor').forEach(el => el.remove());
+            let text = (clone.innerText || clone.textContent || '').trim();
+            return text;
+        };
+
+        window.copyBubbleTextFromElement = async function(bubble) {
+            triggerHaptic();
+            window.closePromptContextMenu();
+            try {
+                const text = window.extractCleanTextFromBubble(bubble);
                 if (!text) {
                     showToast("No content to copy", "error");
                     return;
@@ -4362,28 +4802,24 @@
                 } else {
                     const temp = document.createElement('textarea');
                     temp.value = text;
+                    temp.setAttribute('readonly', '');
+                    temp.style.position = 'absolute';
+                    temp.style.left = '-9999px';
                     document.body.appendChild(temp);
                     temp.select();
                     document.execCommand('copy');
                     document.body.removeChild(temp);
                 }
-                const originalHtml = btn.innerHTML;
-                btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Copied!`;
-                btn.classList.add('text-emerald-400', 'border-emerald-500/50');
-                showToast("Response copied to clipboard");
-                setTimeout(() => {
-                    btn.innerHTML = originalHtml;
-                    btn.classList.remove('text-emerald-400', 'border-emerald-500/50');
-                }, 2000);
+                showToast("Full response copied to clipboard");
             } catch (e) {
                 console.error("Copy failed:", e);
                 showToast("Failed to copy text", "error");
             }
         };
-        const copyBubbleText = window.copyBubbleText;
 
-        window.speakBubbleText = function(btn) {
+        window.speakBubbleTextFromElement = function(bubble) {
             triggerHaptic();
+            window.closePromptContextMenu();
             if (!('speechSynthesis' in window)) {
                 showToast("Speech synthesis not supported on this browser", "error");
                 return;
@@ -4391,14 +4827,11 @@
 
             if (window.speechSynthesis.speaking) {
                 window.speechSynthesis.cancel();
-                btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg> Read Aloud`;
-                btn.classList.remove('text-rose-400', 'border-rose-500/50');
                 showToast("Speech stopped");
                 return;
             }
 
-            const bubble = btn.closest('.flex-1')?.querySelector('.bubble, [class*="bubble"]') || btn.parentElement.previousElementSibling;
-            let text = bubble ? (bubble.innerText || bubble.textContent || '').trim() : '';
+            let text = window.extractCleanTextFromBubble(bubble);
             // Remove code block noise for speech clarity
             text = text.replace(/```[\s\S]*?```/g, ' Code snippet omitted. ');
 
@@ -4419,29 +4852,15 @@
                 if (matchedVoice) utterance.voice = matchedVoice;
             }
 
-            const defaultHtml = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg> Read Aloud`;
-            btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> Stop`;
-            btn.classList.add('text-rose-400', 'border-rose-500/50');
-
-            utterance.onend = () => {
-                btn.innerHTML = defaultHtml;
-                btn.classList.remove('text-rose-400', 'border-rose-500/50');
-            };
-            utterance.onerror = () => {
-                btn.innerHTML = defaultHtml;
-                btn.classList.remove('text-rose-400', 'border-rose-500/50');
-            };
-
             window.speechSynthesis.speak(utterance);
             showToast("Reading aloud...");
         };
-        const speakBubbleText = window.speakBubbleText;
 
-        window.downloadBubbleMarkdown = function(btn) {
+        window.downloadBubbleMarkdownFromElement = function(bubble) {
             triggerHaptic();
+            window.closePromptContextMenu();
             try {
-                const bubble = btn.closest('.flex-1')?.querySelector('.bubble, [class*="bubble"]') || btn.parentElement.previousElementSibling;
-                const text = bubble ? (bubble.innerText || bubble.textContent || '').trim() : '';
+                const text = window.extractCleanTextFromBubble(bubble);
                 if (!text) {
                     showToast("No content to export", "error");
                     return;
@@ -4461,13 +4880,12 @@
                 showToast("Failed to export markdown", "error");
             }
         };
-        const downloadBubbleMarkdown = window.downloadBubbleMarkdown;
 
-        window.saveMemoryFromBubble = function(btn) {
+        window.saveMemoryFromElement = function(bubble) {
             triggerHaptic();
+            window.closePromptContextMenu();
             try {
-                const bubble = btn.closest('.flex-1')?.querySelector('.bubble, [class*="bubble"]') || btn.parentElement.previousElementSibling;
-                const text = bubble ? (bubble.innerText || bubble.textContent || '').trim() : '';
+                const text = window.extractCleanTextFromBubble(bubble);
                 if (!text) {
                     showToast("No text to save to memory", "error");
                     return;
@@ -4482,6 +4900,39 @@
                 console.error("Memory save error:", e);
                 showToast("Failed to save memory", "error");
             }
+        };
+
+        window.getBubbleElementFromBtn = function(btn) {
+            if (!btn) return null;
+            const wrapper = btn.closest('[class*="flex-col"]') || btn.parentElement;
+            if (wrapper) {
+                const b = wrapper.querySelector('.bubble');
+                if (b) return b;
+            }
+            return btn.parentElement?.previousElementSibling || null;
+        };
+
+        window.copyBubbleText = async function(btn) {
+            const bubble = window.getBubbleElementFromBtn(btn) || window._activeMenuBubble;
+            return window.copyBubbleTextFromElement(bubble);
+        };
+        const copyBubbleText = window.copyBubbleText;
+
+        window.speakBubbleText = function(btn) {
+            const bubble = window.getBubbleElementFromBtn(btn) || window._activeMenuBubble;
+            return window.speakBubbleTextFromElement(bubble);
+        };
+        const speakBubbleText = window.speakBubbleText;
+
+        window.downloadBubbleMarkdown = function(btn) {
+            const bubble = window.getBubbleElementFromBtn(btn) || window._activeMenuBubble;
+            return window.downloadBubbleMarkdownFromElement(bubble);
+        };
+        const downloadBubbleMarkdown = window.downloadBubbleMarkdown;
+
+        window.saveMemoryFromBubble = function(btn) {
+            const bubble = window.getBubbleElementFromBtn(btn) || window._activeMenuBubble;
+            return window.saveMemoryFromElement(bubble);
         };
         const saveMemoryFromBubble = window.saveMemoryFromBubble;
 
@@ -4615,6 +5066,7 @@
             triggerHaptic();
             const micBtn = document.getElementById('mic-btn');
             const messageInput = document.getElementById('message');
+            const visualizer = document.getElementById('voice-listening-visualizer');
             
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
@@ -4626,6 +5078,7 @@
                 if (recognition) {
                     recognition.stop();
                 }
+                stopListeningState();
                 return;
             }
 
@@ -4649,8 +5102,17 @@
                 
                 recognition.onstart = () => {
                     isListening = true;
-                    micBtn.classList.add('text-red-500', 'bg-red-500/10', 'animate-pulse');
-                    messageInput.placeholder = "Listening... Speak clearly.";
+                    if (micBtn) {
+                        micBtn.classList.add('mic-active-glow');
+                        micBtn.classList.remove('text-[var(--md-sys-color-on-surface-variant)]');
+                    }
+                    if (visualizer) {
+                        visualizer.classList.remove('hidden');
+                        visualizer.classList.add('flex');
+                    }
+                    if (messageInput) {
+                        messageInput.placeholder = "Listening... Speak clearly.";
+                    }
                 };
                 
                 recognition.onresult = (event) => {
@@ -4663,11 +5125,11 @@
                 };
                 
                 recognition.onerror = (event) => {
-                    console.error("Speech recognition error", event.error);
-                    if (event.error === 'aborted' || event.error === 'no-speech') {
+                    console.warn("Speech recognition state note:", event.error);
+                    if (event.error === 'aborted' || event.error === 'no-speech' || event.error === 'audio-capture' || event.error === 'network') {
+                        stopListeningState();
                         return;
                     }
-                    showToast("Speech Recognition: " + event.error, "error");
                     stopListeningState();
                 };
                 
@@ -4687,8 +5149,14 @@
             isListening = false;
             const micBtn = document.getElementById('mic-btn');
             const messageInput = document.getElementById('message');
+            const visualizer = document.getElementById('voice-listening-visualizer');
             if (micBtn) {
-                micBtn.classList.remove('text-red-500', 'bg-red-500/10', 'animate-pulse');
+                micBtn.classList.remove('mic-active-glow', 'text-red-500', 'bg-red-500/10', 'animate-pulse');
+                micBtn.classList.add('text-[var(--md-sys-color-on-surface-variant)]');
+            }
+            if (visualizer) {
+                visualizer.classList.add('hidden');
+                visualizer.classList.remove('flex');
             }
             if (messageInput) {
                 messageInput.placeholder = isGhostMode ? "Incognito Stealth Mode..." : "Message Crystal...";
@@ -4814,7 +5282,10 @@
 
         window.getApiBaseUrl = function() {
             const custom = (localStorage.getItem('crystal_backend_api') || '').trim();
-            if (custom) return custom;
+            // Stale container domain safety: bypass if domain matches old ephemeral run.app instances
+            if (custom && !custom.includes('asia-southeast1.run.app') && !custom.includes('aistudio-app') && (custom.startsWith('http://') || custom.startsWith('https://'))) {
+                return custom;
+            }
             return '';
         };
 
@@ -4827,29 +5298,66 @@
         window.fetchCrystalApi = async function(route, options = {}) {
             const primaryEndpoint = window.getApiEndpoint(route);
             const cleanRoute = route.startsWith('/') ? route : '/' + route;
+            const callerSignal = options.signal;
+
+            const executeFetch = async (targetUrl, timeoutMs) => {
+                const controller = new AbortController();
+                let finished = false;
+                const timeoutTimer = setTimeout(() => {
+                    if (!finished) {
+                        try {
+                            controller.abort(new DOMException(`Request to ${targetUrl} timed out after ${timeoutMs / 1000}s`, 'TimeoutError'));
+                        } catch (e) {
+                            controller.abort();
+                        }
+                    }
+                }, timeoutMs);
+
+                const onAbort = () => {
+                    if (!finished) {
+                        try {
+                            controller.abort(callerSignal?.reason || new DOMException('User cancelled generation', 'AbortError'));
+                        } catch (e) {
+                            controller.abort();
+                        }
+                    }
+                };
+
+                if (callerSignal) {
+                    if (callerSignal.aborted) {
+                        clearTimeout(timeoutTimer);
+                        throw (callerSignal.reason || new DOMException('Generation aborted', 'AbortError'));
+                    }
+                    callerSignal.addEventListener('abort', onAbort, { once: true });
+                }
+
+                try {
+                    const fetchOpts = { ...options, signal: controller.signal };
+                    const res = await fetch(targetUrl, fetchOpts);
+                    finished = true;
+                    clearTimeout(timeoutTimer);
+                    if (callerSignal) callerSignal.removeEventListener('abort', onAbort);
+                    return res;
+                } catch (err) {
+                    finished = true;
+                    clearTimeout(timeoutTimer);
+                    if (callerSignal) callerSignal.removeEventListener('abort', onAbort);
+                    throw err;
+                }
+            };
 
             try {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 35000);
-                const res = await fetch(primaryEndpoint, {
-                    ...options,
-                    signal: controller.signal
-                });
-                clearTimeout(timeoutId);
-                return res;
+                return await executeFetch(primaryEndpoint, 45000);
             } catch (err) {
-                // If primary remote endpoint fails, fallback to relative local route if available
+                // If caller explicitly aborted or cancelled, do not attempt fallback
+                if (callerSignal?.aborted || err.name === 'AbortError') {
+                    throw err;
+                }
+                // If primary endpoint failed and differs from local cleanRoute, try relative route
                 if (primaryEndpoint !== cleanRoute) {
                     console.warn(`Primary endpoint ${primaryEndpoint} failed (${err.message}). Trying fallback ${cleanRoute}...`);
                     try {
-                        const fallbackController = new AbortController();
-                        const fbTimeoutId = setTimeout(() => fallbackController.abort(), 20000);
-                        const fbRes = await fetch(cleanRoute, {
-                            ...options,
-                            signal: fallbackController.signal
-                        });
-                        clearTimeout(fbTimeoutId);
-                        return fbRes;
+                        return await executeFetch(cleanRoute, 30000);
                     } catch (fbErr) {
                         throw err;
                     }
@@ -5054,55 +5562,100 @@
 
         // Markdown + Code Blocks + Collapsible thought processes
         
-        // Dynamic Crystalline Interactive Product Pill Component
+        // Dynamic Crystalline Interactive Product Pill Component using Official Website Logos & Accurate Location
         window.renderProductPillHtml = function(product) {
             const rawTitle = (product.title || 'Featured Product').trim();
             const title = rawTitle.replace(/"/g, '&quot;');
-            let brand = (product.brand || 'Verified Store').replace(/"/g, '&quot;');
+            let brand = (product.brand || 'Store').replace(/"/g, '&quot;');
             const price = (product.price || '').replace(/"/g, '&quot;');
             let url = (product.url || '').trim();
-            let img = (product.img || '').trim();
+            let imgSrc = (product.img || product.image || '').trim();
 
-            const lowerT = rawTitle.toLowerCase();
-            let fallbackImg = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&auto=format&fit=crop&q=80';
-            if (lowerT.includes('headphone') || lowerT.includes('earbud') || lowerT.includes('airpods') || lowerT.includes('audio')) {
-                fallbackImg = 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&auto=format&fit=crop&q=80';
-            } else if (lowerT.includes('phone') || lowerT.includes('iphone') || lowerT.includes('galaxy') || lowerT.includes('pixel')) {
-                fallbackImg = 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&auto=format&fit=crop&q=80';
-            } else if (lowerT.includes('laptop') || lowerT.includes('macbook') || lowerT.includes('dell') || lowerT.includes('computer')) {
-                fallbackImg = 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&auto=format&fit=crop&q=80';
-            } else if (lowerT.includes('watch') || lowerT.includes('smartwatch')) {
-                fallbackImg = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&auto=format&fit=crop&q=80';
-            } else if (lowerT.includes('shoe') || lowerT.includes('sneaker') || lowerT.includes('nike')) {
-                fallbackImg = 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&auto=format&fit=crop&q=80';
-            } else if (lowerT.includes('camera')) {
-                fallbackImg = 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&auto=format&fit=crop&q=80';
+            const isIndia = (function() {
+                try {
+                    const tz = (Intl.DateTimeFormat().resolvedOptions().timeZone || '').toLowerCase();
+                    const cur = (localStorage.getItem('crystal_currency') || '').toUpperCase();
+                    const country = (localStorage.getItem('crystal_user_country') || '').toUpperCase();
+                    const lang = (localStorage.getItem('crystal_language') || '').toLowerCase();
+                    return tz.includes('kolkata') || tz.includes('calcutta') || tz.includes('india') || tz.includes('ist') ||
+                           cur === 'INR' || country === 'IN' ||
+                           lang === 'telugu' || lang === 'hindi' || lang === 'tamil' || lang === 'bengali';
+                } catch(e) { return false; }
+            })();
+
+            let domain = '';
+            if (url && typeof url === 'string' && (url.startsWith('http://') || url.startsWith('https://'))) {
+                try {
+                    domain = new URL(url).hostname.replace(/^www\./, '');
+                } catch(e) {}
             }
 
-            if (!img || img.length < 10) {
-                img = fallbackImg;
+            if (!domain || domain === 'example.com' || domain === 'localhost') {
+                const combined = ((brand || '') + ' ' + rawTitle).toLowerCase();
+                if (combined.includes('amazon')) domain = isIndia ? 'amazon.in' : 'amazon.com';
+                else if (combined.includes('flipkart')) domain = 'flipkart.com';
+                else if (combined.includes('croma')) domain = 'croma.com';
+                else if (combined.includes('reliance')) domain = 'reliancedigital.in';
+                else if (combined.includes('myntra')) domain = 'myntra.com';
+                else if (combined.includes('best buy') || combined.includes('bestbuy')) domain = 'bestbuy.com';
+                else if (combined.includes('apple')) domain = isIndia ? 'apple.com/in' : 'apple.com';
+                else if (combined.includes('nike')) domain = isIndia ? 'nike.com/in' : 'nike.com';
+                else if (combined.includes('walmart')) domain = 'walmart.com';
+                else if (combined.includes('target')) domain = 'target.com';
+                else if (combined.includes('ebay')) domain = 'ebay.com';
+                else if (combined.includes('samsung')) domain = isIndia ? 'samsung.com/in' : 'samsung.com';
+                else if (combined.includes('google')) domain = 'store.google.com';
+                else if (combined.includes('sony')) domain = isIndia ? 'sony.co.in' : 'sony.com';
+                else domain = isIndia ? 'google.co.in' : 'google.com';
+            }
+
+            if (brand === 'Store' || brand === 'Verified' || brand === 'Verified Store') {
+                const mainName = domain.split('.')[0];
+                brand = mainName.charAt(0).toUpperCase() + mainName.slice(1);
             }
 
             if (!url || url === '#' || url === '' || url.includes('example.com') || !url.startsWith('http')) {
-                const searchQ = encodeURIComponent(rawTitle + ' ' + (brand !== 'Verified Store' ? brand : ''));
-                if (brand.toLowerCase().includes('amazon')) {
-                    url = 'https://www.amazon.com/s?k=' + searchQ;
-                } else if (brand.toLowerCase().includes('flipkart')) {
+                const searchQ = encodeURIComponent(rawTitle + (brand !== 'Store' ? ' ' + brand : ''));
+                if (domain.includes('amazon')) {
+                    url = isIndia ? 'https://www.amazon.in/s?k=' + searchQ : 'https://www.amazon.com/s?k=' + searchQ;
+                } else if (domain.includes('flipkart')) {
                     url = 'https://www.flipkart.com/search?q=' + searchQ;
-                } else if (brand.toLowerCase().includes('best buy') || brand.toLowerCase().includes('bestbuy')) {
+                } else if (domain.includes('croma')) {
+                    url = 'https://www.croma.com/searchB?q=' + searchQ;
+                } else if (domain.includes('reliancedigital')) {
+                    url = 'https://www.reliancedigital.in/search?q=' + searchQ;
+                } else if (domain.includes('myntra')) {
+                    url = 'https://www.myntra.com/' + searchQ;
+                } else if (domain.includes('bestbuy')) {
                     url = 'https://www.bestbuy.com/site/searchpage.jsp?st=' + searchQ;
+                } else if (domain.includes('walmart')) {
+                    url = 'https://www.walmart.com/search?q=' + searchQ;
+                } else if (domain.includes('target')) {
+                    url = 'https://www.target.com/s?searchTerm=' + searchQ;
+                } else if (domain.includes('ebay')) {
+                    url = 'https://www.ebay.com/sch/i.html?_nkw=' + searchQ;
                 } else {
-                    url = 'https://www.google.com/search?tbm=shop&q=' + searchQ;
+                    url = isIndia ? 'https://www.google.co.in/search?tbm=shop&q=' + searchQ : 'https://www.google.com/search?tbm=shop&q=' + searchQ;
                 }
             }
 
+            const websiteLogo = 'https://www.google.com/s2/favicons?domain=' + encodeURIComponent(domain.split('/')[0]) + '&sz=128';
+            const fallbackLogo = 'https://icons.duckduckgo.com/ip3/' + encodeURIComponent(domain.split('/')[0]) + '.ico';
             const priceHtml = price ? '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 tracking-tight shadow-xs">' + price + '</span>' : '';
 
-            return '<div class="my-3 w-full max-w-[540px] bg-slate-900/5 dark:bg-slate-900/80 hover:bg-slate-900/10 dark:hover:bg-slate-900/95 border border-slate-200 dark:border-indigo-500/30 rounded-[28px] p-3 sm:p-3.5 shadow-lg backdrop-blur-xl flex items-center justify-between gap-3 group select-none transition-all duration-300 hover:shadow-indigo-500/15 hover:-translate-y-0.5">' +
+            const imageHtml = imgSrc ? (
+                '<div class="relative w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-indigo-500/30 shrink-0 flex items-center justify-center p-1.5 shadow-xs overflow-hidden cursor-zoom-in" onclick="if(window.openLightbox) window.openLightbox(\'' + imgSrc.replace(/'/g, "\\'") + '\', \'' + title.replace(/'/g, "\\'") + '\'); event.stopPropagation();" title="Click to view image">' +
+                    '<img src="' + imgSrc + '" alt="' + title + '" class="w-full h-full object-cover rounded-xl transition-transform hover:scale-105" onerror="this.onerror=null; this.src=\'' + websiteLogo + '\'; this.className=\'w-full h-full object-contain p-1\';" />' +
+                '</div>'
+            ) : (
+                '<div class="relative w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-indigo-500/30 shrink-0 flex items-center justify-center p-2.5 shadow-xs">' +
+                    '<img src="' + websiteLogo + '" alt="' + brand + ' Logo" class="w-full h-full object-contain rounded" onerror="this.onerror=null; this.src=\'' + fallbackLogo + '\';" />' +
+                '</div>'
+            );
+
+            return '<div class="my-3 w-full max-w-[540px] bg-slate-900/5 dark:bg-slate-900/80 hover:bg-slate-900/10 dark:hover:bg-slate-900/95 border border-slate-200 dark:border-indigo-500/30 rounded-[24px] p-3 sm:p-3.5 shadow-lg backdrop-blur-xl flex items-center justify-between gap-3 group select-none transition-all duration-300 hover:shadow-indigo-500/15 hover:-translate-y-0.5">' +
                 '<div class="flex items-center gap-3 min-w-0 flex-1">' +
-                    '<div class="relative w-14 h-14 sm:w-16 sm:h-16 rounded-2xl overflow-hidden bg-black/10 dark:bg-black/50 border border-slate-200 dark:border-indigo-500/30 shrink-0 flex items-center justify-center cursor-zoom-in group/img shadow-inner" onclick="openLightbox(\'' + img + '\', \'' + title + '\')" title="Click to zoom image">' +
-                        '<img src="' + img + '" alt="' + title + '" class="w-full h-full object-cover transition-transform duration-300 group-hover/img:scale-110" onerror="this.onerror=null; this.src=\'' + fallbackImg + '\'" />' +
-                    '</div>' +
+                    imageHtml +
                     '<div class="flex flex-col min-w-0 flex-1 justify-center">' +
                         '<div class="flex items-center gap-1.5 mb-1 flex-wrap">' +
                             '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-indigo-500/15 text-indigo-600 dark:text-indigo-300 border border-indigo-500/25 shadow-2xs">' +
@@ -5113,17 +5666,27 @@
                         '</div>' +
                         '<h4 class="font-bold text-[13.5px] sm:text-[14px] text-slate-900 dark:text-slate-100 truncate leading-tight group-hover:text-indigo-500 dark:group-hover:text-indigo-300 transition-colors" title="' + title + '">' + title + '</h4>' +
                         '<span class="text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate mt-0.5 flex items-center gap-1">' +
-                            '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse"></span>' +
-                            'Verified Product • Tap to Open' +
+                            '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>' +
+                            domain.split('/')[0] + ' • Official Store' +
                         '</span>' +
                     '</div>' +
                 '</div>' +
                 '<a href="' + url + '" target="_blank" rel="noopener noreferrer" onclick="if(typeof triggerHaptic===\'function\') triggerHaptic(\'selection\');" class="shrink-0 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-full bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white text-xs font-bold inline-flex items-center gap-1.5 transition-all duration-200 active:scale-95 shadow-md hover:shadow-indigo-500/25 whitespace-nowrap">' +
-                    '<span>Open</span>' +
+                    '<span>Open Store</span>' +
                     '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>' +
                 '</a>' +
             '</div>';
         };
+
+        function parseInlineMarkdown(str) {
+            if (!str) return "";
+            let s = escapeHtml(str);
+            s = s.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-bold text-[var(--text-color)]">$1</strong>');
+            s = s.replace(/(^|[^*])\*([^*\n]+)\*([^*]|$)/g, '$1<em class="italic opacity-90">$2</em>$3');
+            s = s.replace(/\x60([^\x60\n]+)\x60/g, '<code class="bg-indigo-500/10 px-1.5 py-0.5 rounded text-indigo-400 font-mono text-[0.85em] font-semibold">$1</code>');
+            s = s.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" class="text-indigo-400 hover:text-indigo-300 font-bold underline transition-colors">$1</a>');
+            return s;
+        }
 
         function parseMarkdown(text) {
             try {
@@ -5208,22 +5771,44 @@
                     return { key: l, display: l.toUpperCase() };
                 };
 
-                // Extract Code Blocks with Real-Time Syntax Highlighting into tokens
-                // Extract Product Tags [product: Title | Image | Brand | Price | Link]
-                const productTagRegex = /\[product:\s*([^|\]]+?)(?:\s*\|\s*([^|\]]*?))?(?:\s*\|\s*([^|\]]*?))?(?:\s*\|\s*([^|\]]*?))?(?:\s*\|\s*([^|\]]*?))?\]/gi;
-                text = text.replace(productTagRegex, (match, title, img, brand, price, url) => {
+                // Extract Product Tags [product: Title | Image | Brand | Price | Link] or flexible arguments
+                const productTagRegex = /\[product:\s*([^\]]+?)\]/gi;
+                text = text.replace(productTagRegex, (match, body) => {
+                    const parts = (body || '').split('|').map(s => s.trim());
+                    const title = parts[0] || 'Featured Product';
+                    let img = '';
+                    let brand = '';
+                    let price = '';
+                    let url = '';
+
+                    const remaining = parts.slice(1);
+                    for (const p of remaining) {
+                        if (!p) continue;
+                        if (!url && p.startsWith('http') && !p.match(/\.(jpg|jpeg|png|webp|gif|svg)(\?.*)?$/i) && !p.includes('/api/image-proxy')) {
+                            url = p;
+                        } else if (!img && (p.startsWith('data:image') || p.match(/\.(jpg|jpeg|png|webp|gif|svg)(\?.*)?$/i) || p.includes('/api/image-proxy') || p.includes('image.pollinations.ai') || p.includes('images.') || p.includes('m.media-amazon.com') || p.includes('rukminim'))) {
+                            img = p;
+                        } else if (!price && (p.startsWith('₹') || p.startsWith('$') || p.startsWith('€') || p.startsWith('£') || p.startsWith('Rs') || /^\d[\d,.]*\s*(INR|USD|EUR)?$/i.test(p))) {
+                            price = p;
+                        } else if (!brand) {
+                            brand = p;
+                        } else if (!url && p.startsWith('http')) {
+                            url = p;
+                        }
+                    }
+
                     const cardHtml = window.renderProductPillHtml({
-                        title: title ? title.trim() : 'Featured Product',
-                        img: img ? img.trim() : '',
-                        brand: brand ? brand.trim() : 'Verified',
-                        price: price ? price.trim() : '',
-                        url: url ? url.trim() : ''
+                        title: title,
+                        img: img,
+                        brand: brand || 'Store',
+                        price: price,
+                        url: url
                     });
                     return addToken(cardHtml);
                 });
 
                 // Extract direct shopping store links into interactive product pills
-                const shoppingLinkRegex = /\[([^\]]+)\]\((https?:\/\/(?:www\.)?(?:amazon\.[a-z.]+|flipkart\.com|apple\.com\/[a-z/]*shop|store\.apple\.com|nike\.com|bestbuy\.com|target\.com|walmart\.com|myntra\.com|sephora\.com|zara\.com)[^\s)]+)\)/gi;
+                const shoppingLinkRegex = /\[([^\]]+)\]\((https?:\/\/(?:www\.)?(?:amazon\.[a-z.]+|flipkart\.com|croma\.com|reliancedigital\.in|tatacliq\.com|jiomart\.com|myntra\.com|meesho\.com|apple\.com\/[a-z/]*shop|store\.apple\.com|apple\.com|nike\.com|bestbuy\.com|target\.com|walmart\.com|sephora\.com|zara\.com|ebay\.[a-z.]+|samsung\.com|sony\.[a-z.]+)[^\s)]+)\)/gi;
                 text = text.replace(shoppingLinkRegex, (match, linkTitle, storeUrl) => {
                     let domainName = 'Store';
                     try {
@@ -5240,6 +5825,7 @@
                     return addToken(cardHtml);
                 });
 
+                // Extract Code Blocks
                 const codeBlockRegex = /\x60\x60\x60([a-zA-Z0-9-+#_]*)\n?([\s\S]*?)(?:\x60\x60\x60|$)/g;
                 text = text.replace(codeBlockRegex, (match, language, snippet) => {
                     const info = getPrismLangInfo(language);
@@ -5302,8 +5888,108 @@
                     return ' ' + addToken(imgCard) + ' ';
                 });
 
+                // Robust Markdown Table Parser
+                const rawLines = text.replace(/\r\n/g, '\n').split('\n');
+                const parsedLines = [];
+                let inTable = false;
+                let tableLines = [];
+
+                const isSeparatorLine = (line) => {
+                    const t = line.trim();
+                    if (!t.includes('-') && !t.includes('=')) return false;
+                    const clean = t.replace(/[\s\|\:\-\+=]/g, '');
+                    return clean === '' && (t.match(/[-=]/g) || []).length >= 2;
+                };
+
+                const isTableLine = (line) => {
+                    const t = line.trim();
+                    if (!t) return false;
+                    if (isSeparatorLine(t)) return true;
+                    return t.includes('|') || t.startsWith('+--') || t.startsWith('|--');
+                };
+
+                const buildTableCard = (tbl) => {
+                    // Filter out leading/trailing decorative border lines (like +---+---+ or ----------------)
+                    let cleanTbl = tbl.map(l => l.trim()).filter(Boolean);
+                    if (cleanTbl.length > 0 && isSeparatorLine(cleanTbl[0])) {
+                        cleanTbl = cleanTbl.slice(1);
+                    }
+                    if (cleanTbl.length > 0 && isSeparatorLine(cleanTbl[cleanTbl.length - 1])) {
+                        cleanTbl = cleanTbl.slice(0, cleanTbl.length - 1);
+                    }
+
+                    if (cleanTbl.length < 2) return tbl.join('\n');
+                    if (!isSeparatorLine(cleanTbl[1])) return tbl.join('\n');
+
+                    const splitCols = (rowStr) => {
+                        let r = rowStr.trim();
+                        if (r.startsWith('|') || r.startsWith('+')) r = r.substring(1);
+                        if (r.endsWith('|') || r.endsWith('+')) r = r.substring(0, r.length - 1);
+                        return r.split('|').map(c => c.trim());
+                    };
+
+                    const headerCells = splitCols(cleanTbl[0]);
+                    const separatorCells = splitCols(cleanTbl[1]);
+                    const dataRows = cleanTbl.slice(2);
+
+                    const alignments = separatorCells.map(col => {
+                        const c = col.trim();
+                        const left = c.startsWith(':');
+                        const right = c.endsWith(':');
+                        if (left && right) return 'text-center';
+                        if (right) return 'text-right';
+                        return 'text-left';
+                    });
+
+                    let thHtml = '';
+                    headerCells.forEach((h, idx) => {
+                        const align = alignments[idx] || 'text-left';
+                        thHtml += `<th class="px-4 py-3.5 ${align} font-bold text-xs uppercase tracking-wider text-slate-800 dark:text-slate-200 border-b border-r border-slate-200 dark:border-slate-800/80 last:border-r-0 whitespace-nowrap bg-slate-100/90 dark:bg-slate-900/90 select-text">${parseInlineMarkdown(h)}</th>`;
+                    });
+
+                    let trHtml = '';
+                    dataRows.forEach((rowLine, rIdx) => {
+                        if (!rowLine.trim()) return;
+                        const cells = splitCols(rowLine);
+                        let tdHtml = '';
+                        cells.forEach((c, idx) => {
+                            const align = alignments[idx] || 'text-left';
+                            tdHtml += `<td class="px-4 py-3 ${align} text-[13.5px] sm:text-sm border-b border-r border-slate-200/70 dark:border-slate-800/60 last:border-r-0 font-medium text-[var(--text-color)] select-text">${parseInlineMarkdown(c)}</td>`;
+                        });
+                        const rowBg = rIdx % 2 === 0 ? 'bg-transparent' : 'bg-slate-500/5 dark:bg-slate-800/20';
+                        trHtml += `<tr class="${rowBg} hover:bg-indigo-500/10 transition-colors">${tdHtml}</tr>`;
+                    });
+
+                    const tableCard = `<div class="my-4 overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800/90 shadow-md bg-white/70 dark:bg-slate-950/70 backdrop-blur-md select-text"><table class="w-full text-left border-collapse"><thead><tr>${thHtml}</tr></thead><tbody class="divide-y divide-slate-200/50 dark:divide-slate-800/50">${trHtml}</tbody></table></div>`;
+                    return addToken(tableCard);
+                };
+
+                for (let i = 0; i < rawLines.length; i++) {
+                    const curLine = rawLines[i];
+                    if (isTableLine(curLine)) {
+                        if (!inTable) {
+                            inTable = true;
+                            tableLines = [curLine];
+                        } else {
+                            tableLines.push(curLine);
+                        }
+                    } else {
+                        if (inTable) {
+                            inTable = false;
+                            parsedLines.push(buildTableCard(tableLines));
+                            tableLines = [];
+                        }
+                        parsedLines.push(curLine);
+                    }
+                }
+                if (inTable && tableLines.length > 0) {
+                    parsedLines.push(buildTableCard(tableLines));
+                }
+
+                let html = parsedLines.join('\n');
+
                 // Escape remaining HTML entities
-                let html = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                html = html.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
                 // Parse standard markdown links [text](url) - convert image links to image cards
                 html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (match, linkText, url) => {
@@ -5315,7 +6001,8 @@
                         </div>`;
                         return addToken(imgCard);
                     }
-                    return `<a href="${cleanUrl}" target="_blank" class="text-indigo-400 hover:text-indigo-300 font-bold underline transition-colors">${linkText}</a>`;
+                    const linkHtml = `<a href="${cleanUrl}" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:text-indigo-300 font-bold underline transition-colors">${linkText}</a>`;
+                    return addToken(linkHtml);
                 });
 
                 // Auto-link standalone URLs (without touching token placeholders)
@@ -5330,55 +6017,8 @@
                         </div>`;
                         return addToken(imgCard);
                     }
-                    return `<a href="${cleanUrl}" target="_blank" class="text-indigo-400 hover:text-indigo-300 font-bold underline transition-colors truncate max-w-xs inline-block align-bottom">${cleanUrl}</a>`;
-                });
-
-                
-                // Parse Markdown Tables
-                html = html.replace(/(?:^|\n)(\|[^\n]+\|\n\|[-:\s|]+\|(?:\n\|[^\n]+\|)*)/g, function(match, tableContent) {
-                    try {
-                        const lines = tableContent.trim().split('\n').map(function(l) { return l.trim(); }).filter(Boolean);
-                        if (lines.length < 2) return match;
-                        
-                        const parseRow = function(line) {
-                            return line.replace(/^\|/, '').replace(/\|$/, '').split('|').map(function(c) { return c.trim(); });
-                        };
-
-                        const headers = parseRow(lines[0]);
-                        const separators = parseRow(lines[1]);
-                        const dataLines = lines.slice(2);
-
-                        const alignments = separators.map(function(col) {
-                            const left = col.startsWith(':');
-                            const right = col.endsWith(':');
-                            if (left && right) return 'text-center';
-                            if (right) return 'text-right';
-                            return 'text-left';
-                        });
-
-                        let thHtml = '';
-                        headers.forEach(function(h, idx) {
-                            const align = alignments[idx] || 'text-left';
-                            thHtml += '<th class="px-4 py-3 ' + align + ' font-bold text-xs uppercase tracking-wider text-slate-800 dark:text-slate-200 border-b border-r border-slate-200 dark:border-slate-800/80 last:border-r-0 whitespace-nowrap bg-slate-100 dark:bg-slate-900/90">' + h + '</th>';
-                        });
-
-                        let trHtml = '';
-                        dataLines.forEach(function(rowLine, rIdx) {
-                            const cells = parseRow(rowLine);
-                            let tdHtml = '';
-                            cells.forEach(function(c, idx) {
-                                const align = alignments[idx] || 'text-left';
-                                tdHtml += '<td class="px-4 py-3 ' + align + ' text-[13.5px] sm:text-sm border-b border-r border-slate-200/70 dark:border-slate-800/60 last:border-r-0 font-medium text-[var(--text-color)]">' + c + '</td>';
-                            });
-                            const rowBg = rIdx % 2 === 0 ? 'bg-transparent' : 'bg-slate-500/5 dark:bg-slate-800/20';
-                            trHtml += '<tr class="' + rowBg + ' hover:bg-indigo-500/10 transition-colors">' + tdHtml + '</tr>';
-                        });
-
-                        const tableCard = '<div class="my-4 overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800/90 shadow-md bg-white/70 dark:bg-slate-950/70 backdrop-blur-md select-text"><table class="w-full text-left border-collapse"><thead><tr>' + thHtml + '</tr></thead><tbody class="divide-y divide-slate-200/50 dark:divide-slate-800/50">' + trHtml + '</tbody></table></div>';
-                        return '\n' + addToken(tableCard) + '\n';
-                    } catch(e) {
-                        return match;
-                    }
+                    const linkHtml = `<a href="${cleanUrl}" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:text-indigo-300 font-bold underline transition-colors truncate max-w-xs inline-block align-bottom">${cleanUrl}</a>`;
+                    return addToken(linkHtml);
                 });
 
                 // Parse standard markdown headers
@@ -6885,9 +7525,12 @@ print("Luau script execution finished.")
             }
         };
 
-        function crystal3DAnimate() {
+        let lastCrystalRenderTime = 0;
+        function crystal3DAnimate(timestamp) {
             crystal3D.animId = requestAnimationFrame(crystal3DAnimate);
-            if (!crystal3D.isInit || !crystal3D.renderer) return;
+            if (!crystal3D.isInit || !crystal3D.renderer || document.hidden) return;
+            if (timestamp && timestamp - lastCrystalRenderTime < 28) return; // Cap at ~35fps
+            lastCrystalRenderTime = timestamp || performance.now();
 
             const time = Date.now() * 0.0015;
 
@@ -7040,6 +7683,147 @@ print("Luau script execution finished.")
             return clean.trim();
         };
 
+        // Global Generation & Live Thinking Controllers
+        window.isGeneratingResponse = false;
+        window.activeAbortController = null;
+        window.activeTypewriterTimer = null;
+        window.activeFinalizeCallback = null;
+
+        function setGenerationButtonState(isGenerating) {
+            const sendBtn = document.getElementById('sendBtn');
+            if (!sendBtn) return;
+            if (isGenerating) {
+                sendBtn.disabled = false;
+                sendBtn.setAttribute('title', 'Pause / Stop generating');
+                sendBtn.setAttribute('aria-label', 'Stop generating');
+                sendBtn.classList.add('generating-active');
+                sendBtn.innerHTML = `
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" class="text-white">
+                        <rect x="5" y="5" width="14" height="14" rx="3"></rect>
+                    </svg>
+                `;
+            } else {
+                sendBtn.disabled = false;
+                sendBtn.removeAttribute('title');
+                sendBtn.setAttribute('aria-label', 'Send message');
+                sendBtn.classList.remove('generating-active');
+                sendBtn.innerHTML = `
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                `;
+            }
+        }
+
+        window.stopOrPauseGeneration = function(isChatSwitch = false) {
+            const hadActiveRequest = window.isGeneratingResponse;
+            if (window.activeAbortController) {
+                try { window.activeAbortController.abort(); } catch(e) {}
+                window.activeAbortController = null;
+            }
+            if (window.activeTypewriterTimer) {
+                clearTimeout(window.activeTypewriterTimer);
+                window.activeTypewriterTimer = null;
+            }
+            let hadFinalizeCallback = false;
+            if (typeof window.activeFinalizeCallback === 'function') {
+                hadFinalizeCallback = true;
+                window.activeFinalizeCallback(true);
+                window.activeFinalizeCallback = null;
+            }
+            window.isGeneratingResponse = false;
+            stopLiveThinkingStream();
+            const typingElem = document.getElementById('quantum-typing-bubble');
+            const hadTypingElem = Boolean(typingElem && typingElem.parentNode);
+            if (hadTypingElem) {
+                typingElem.remove();
+            }
+            const thinkingBg = document.getElementById('thinking-bg');
+            if (thinkingBg) thinkingBg.classList.remove('active');
+            setGenerationButtonState(false);
+            triggerHaptic('medium');
+
+            // If stopped while waiting for first tokens (before typewriter began) and NOT switching/clearing chats
+            if (!isChatSwitch && hadActiveRequest && !hadFinalizeCallback && hadTypingElem) {
+                addBubble("*(Generation paused)*", "bot", false);
+            }
+        };
+
+        window.streamTypewriterResponse = function(bubbleElement, fullText, onDone) {
+            if (!bubbleElement || !fullText) {
+                if (onDone) onDone(fullText || "");
+                return;
+            }
+            if (fullText.includes("data:image/") || fullText.length < 20) {
+                bubbleElement._rawContent = fullText;
+                bubbleElement.innerHTML = parseMarkdown(fullText);
+                if (onDone) onDone(fullText);
+                return;
+            }
+
+            const tokens = fullText.match(/(\s+|[^\s\w]+|\w+)/gu) || [fullText];
+            let currentIndex = 0;
+            let accumulatedText = "";
+            const chatArea = document.getElementById('chat-container');
+
+            // Highly responsive, ultra-snappy typewriter throughput for blazing fast responses
+            const stepSize = tokens.length > 500 ? 6 : (tokens.length > 250 ? 4 : (tokens.length > 80 ? 3 : 2));
+            const delay = tokens.length > 500 ? 6 : (tokens.length > 250 ? 8 : (tokens.length > 80 ? 10 : 12));
+
+            let isFinalized = false;
+            let scrollScheduled = false;
+
+            const finalize = (wasAborted = false) => {
+                if (isFinalized) return;
+                isFinalized = true;
+                if (window.activeTypewriterTimer) {
+                    clearTimeout(window.activeTypewriterTimer);
+                    window.activeTypewriterTimer = null;
+                }
+                window.activeFinalizeCallback = null;
+                const targetText = wasAborted ? (accumulatedText ? accumulatedText + "\n\n*(Generation paused)*" : "*(Generation paused)*") : fullText;
+                bubbleElement._rawContent = targetText;
+                bubbleElement.innerHTML = parseMarkdown(targetText);
+
+                if (onDone) onDone(targetText);
+            };
+
+            window.activeFinalizeCallback = finalize;
+
+            function step() {
+                if (!window.isGeneratingResponse) {
+                    finalize(true);
+                    return;
+                }
+
+                if (currentIndex >= tokens.length) {
+                    finalize(false);
+                    return;
+                }
+
+                for (let i = 0; i < stepSize && currentIndex < tokens.length; i++) {
+                    accumulatedText += tokens[currentIndex];
+                    currentIndex++;
+                }
+
+                bubbleElement.innerHTML = parseMarkdown(accumulatedText) + '<span class="chatgpt-typing-cursor"></span>';
+                
+                // Optimized RAF-batched auto scroll
+                if (chatArea && settingAutoScroll && !scrollScheduled) {
+                    scrollScheduled = true;
+                    requestAnimationFrame(() => {
+                        if (chatArea) chatArea.scrollTop = chatArea.scrollHeight;
+                        scrollScheduled = false;
+                    });
+                }
+
+                window.activeTypewriterTimer = setTimeout(step, delay);
+            }
+
+            step();
+        };
+
         // Live Thinking Feed Stream Controller
         let liveThinkingTimer = null;
         let liveThinkingInterval = null;
@@ -7061,36 +7845,11 @@ print("Luau script execution finished.")
 
             if (!feedLines) return;
 
-            const promptLower = (userPromptText || '').toLowerCase();
-            const thoughtSteps = [];
-
-            thoughtSteps.push(`Understanding request and conversation context...`);
-
-            if (/image|draw|picture|photo|illustration|render|portrait|gemini|sdxl|artwork|painting|generate an image/i.test(promptLower) || (typeof personas !== 'undefined' && (personas[activePersona] || '').includes('Image'))) {
-                thoughtSteps.push(`Synthesizing visual prompt aesthetics and scene composition...`);
-                thoughtSteps.push(`Configuring deep neural latent grid (Crystal AI & Gemini Neural Image Synthesis)...`);
-                thoughtSteps.push(`Executing deliberate multi-step denoising iterations...`);
-                thoughtSteps.push(`Refining volumetric lighting, textures, and ray-traced reflections...`);
-                thoughtSteps.push(`Finalizing high-resolution masterpiece render...`);
-            } else if (/code|python|javascript|html|css|bug|fix|error|function|api|build|script/i.test(promptLower)) {
-                thoughtSteps.push(`Analyzing code logic and architecture...`);
-                thoughtSteps.push(`Checking best practices, error handling & edge cases...`);
-                thoughtSteps.push(`Writing clean, well-commented implementation...`);
-            } else if (/math|solve|equation|calculate|integral|probability|physics|derivative/i.test(promptLower)) {
-                thoughtSteps.push(`Formulating clear problem steps & formulas...`);
-                thoughtSteps.push(`Working through step-by-step calculations...`);
-                thoughtSteps.push(`Verifying math solutions and results...`);
-            } else if (typeof enableWebSearch !== 'undefined' && enableWebSearch && (promptLower.length > 3 && !/^(hi|hello|hey)$/i.test(promptLower))) {
-                thoughtSteps.push(`Looking up relevant web sources and information...`);
-                thoughtSteps.push(`Reading key references & factual highlights...`);
-                thoughtSteps.push(`Organizing findings with clear citations...`);
-            } else {
-                thoughtSteps.push(`Connecting key concepts and ideas...`);
-                thoughtSteps.push(`Structuring clear, step-by-step reasoning...`);
-            }
-
-            thoughtSteps.push(`Reviewing response for clarity and helpfulness...`);
-            thoughtSteps.push(`Finalizing reply...`);
+            const thoughtSteps = [
+                "Connecting to reasoning engine...",
+                "Analyzing query context & constraints...",
+                "Formulating logical response..."
+            ];
 
             let stepIndex = 0;
             liveThinkingInterval = setInterval(() => {
@@ -7108,7 +7867,7 @@ print("Luau script execution finished.")
                 } else {
                     clearInterval(liveThinkingInterval);
                 }
-            }, 600);
+            }, 750);
         };
 
         window.stopLiveThinkingStream = function() {
@@ -7279,19 +8038,9 @@ print("Luau script execution finished.")
             if (steps.length === 0) {
                 steps = [
                     {
-                        title: "Intent & Context Analysis",
-                        badge: "Step 1",
-                        content: "Analyzed the user's prompt context, query intent, and conversation history."
-                    },
-                    {
-                        title: "Logical Breakdown & Reasoning",
-                        badge: "Step 2",
-                        content: "Evaluated core principles, key hypotheses, and structured response components."
-                    },
-                    {
-                        title: "Verification & Formatting",
-                        badge: "Step 3",
-                        content: `Verified factual consistency, applied markdown formatting, and finalized output in ${durationSec}s.`
+                        title: "Reasoning & Synthesis Complete",
+                        badge: "Verified",
+                        content: `Evaluated problem context, applied direct logic, and verified response formatting in ${durationSec}s.`
                     }
                 ];
             }
@@ -7313,7 +8062,7 @@ print("Luau script execution finished.")
             `).join('');
 
             return `
-                <details class="group select-none" open>
+                <details class="group select-none" ${hasRealThoughts ? 'open' : ''}>
                     <summary class="flex justify-between items-center font-bold tracking-tight text-[var(--text-color)] opacity-90 hover:opacity-100 transition-opacity cursor-pointer outline-none select-none">
                         <span class="flex items-center gap-2 text-[11px]">
                             <svg viewBox="0 0 32 32" class="w-4 h-4 animate-gemini-sparkle shrink-0 drop-shadow-[0_0_8px_rgba(99,102,241,0.5)]" fill="none">
@@ -7321,7 +8070,7 @@ print("Luau script execution finished.")
                                 <path d="M2 12L16 30L16 18L2 12Z" fill="#4f46e5"/>
                                 <path d="M30 12L16 30L16 18L30 12Z" fill="#818cf8"/>
                             </svg>
-                            <span class="gemini-shimmer-text font-bold text-xs tracking-tight">Thinking Process Feed</span>
+                            <span class="gemini-shimmer-text font-bold text-xs tracking-tight">${hasRealThoughts ? 'Reasoning Process' : 'Thinking Summary'}</span>
                             <span class="text-[10px] font-mono font-medium opacity-85 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/25 text-indigo-300 flex items-center gap-1.5 shadow-xs ml-1">
                                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                                 <span>${durationSec}s</span>
@@ -7339,7 +8088,7 @@ print("Luau script execution finished.")
                         ${hasRealThoughts ? `
                             <details class="mt-1 group/trace text-[10px] font-mono">
                                 <summary class="cursor-pointer opacity-60 hover:opacity-100 flex items-center gap-1.5 py-1 text-indigo-300">
-                                    <span>▸ View Raw Thought Trace</span>
+                                    <span>▸ View Raw Reasoning Trace</span>
                                 </summary>
                                 <div class="mt-1.5 p-2 rounded-xl bg-black/30 border border-indigo-500/20 font-mono text-[10px] text-indigo-200/80 max-h-48 overflow-y-auto whitespace-pre-wrap select-text leading-relaxed">
                                     ${escapeHtml(cleansedThinking)}
@@ -7352,7 +8101,7 @@ print("Luau script execution finished.")
         };
 
         // Adding Chat Bubbles dynamically
-        function addBubble(text, role, isTyping = false, sources = null, attachmentUrl = null, tokenizerInfo = null, thinkingText = null, searchQuery = null, latencyMs = null) {
+        function addBubble(text, role, isTyping = false, sources = null, attachmentUrl = null, tokenizerInfo = null, thinkingText = null, searchQuery = null, latencyMs = null, animateTypewriter = false, onStreamingDone = null) {
             try {
                 const empty = document.getElementById('empty-state');
                 if (empty && empty.style.opacity !== '0') {
@@ -7440,7 +8189,7 @@ print("Luau script execution finished.")
                             <div class="relative inline-flex items-center justify-center w-4 h-4 shrink-0 text-sky-400">
                                 <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <circle cx="12" cy="12" r="10"></circle>
-                                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                                    <line x1="12" y1="12" x2="22" y2="12"></line>
                                     <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10z"></path>
                                 </svg>
                                 <span class="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-sky-400 animate-ping"></span>
@@ -7456,22 +8205,94 @@ print("Luau script execution finished.")
                 }
 
                 // Thought Process Reasoning Feed Panel
-                if (!isTyping && isBot && (thinkingText || showThinking)) {
+                if (!isTyping && isBot && (thinkingText || (showThinking && thinkingText))) {
                     const cleansedThinking = thinkingText ? cleanseThinkingText(thinkingText) : "";
                     const hasRealThoughts = Boolean(cleansedThinking && cleansedThinking.length > 5);
-                    const durationSec = latencyMs ? (latencyMs / 1000).toFixed(1) : "0.8";
-                    const thoughtWordCount = cleansedThinking ? cleansedThinking.split(/\s+/).filter(Boolean).length : 0;
-                    
-                    const reasoningPanel = document.createElement('div');
-                    reasoningPanel.className = "mb-2.5 w-full border border-indigo-500/20 bg-indigo-950/15 dark:bg-indigo-950/30 rounded-2xl p-3 text-xs select-none max-w-full overflow-hidden transition-all duration-200 hover:border-indigo-500/35 shadow-sm";
-                    reasoningPanel.innerHTML = window.renderThinkingFeedHtml(cleansedThinking, durationSec, thoughtWordCount, hasRealThoughts);
-                    bubbleWrap.appendChild(reasoningPanel);
+                    if (hasRealThoughts || showThinking) {
+                        const durationSec = latencyMs ? (latencyMs / 1000).toFixed(1) : "0.8";
+                        const thoughtWordCount = cleansedThinking ? cleansedThinking.split(/\s+/).filter(Boolean).length : 0;
+                        
+                        const reasoningPanel = document.createElement('div');
+                        reasoningPanel.className = "mb-2.5 w-full border border-indigo-500/20 bg-indigo-950/15 dark:bg-indigo-950/30 rounded-2xl p-3 text-xs select-none max-w-full overflow-hidden transition-all duration-200 hover:border-indigo-500/35 shadow-sm";
+                        reasoningPanel.innerHTML = window.renderThinkingFeedHtml(cleansedThinking, durationSec, thoughtWordCount, hasRealThoughts);
+                        bubbleWrap.appendChild(reasoningPanel);
+                    }
                 }
 
                 // Core bubble body text
                 const bubble = document.createElement('div');
-                bubble.className = `bubble py-2.5 px-4 rounded-[20px] shadow-sm leading-relaxed min-w-0 max-w-full overflow-x-auto ${isBot ? 'bubble-bot backdrop-blur-[20px] rounded-tl-sm' : 'bubble-user rounded-tr-sm self-end'}`;
+                bubble.className = `bubble py-2.5 px-4 rounded-[20px] shadow-sm leading-relaxed min-w-0 max-w-full overflow-x-auto ${isBot ? 'bubble-bot backdrop-blur-[20px] rounded-tl-sm' : 'bubble-user rounded-tr-sm self-end select-text'}`;
+                bubble._rawContent = text || '';
+
+                if (!isBot) {
+                    window.lastSentUserPromptText = text || '';
+                    window.lastUserMessageWrapper = wrapper;
+                }
+
+                // Hold / Long-press interaction for both User Prompts and AI Response bubbles
+                if (!isTyping) {
+                    let holdTimer = null;
+                    let touchStartX = 0, touchStartY = 0;
+
+                    const handleHoldStart = (e) => {
+                        if (e.button !== undefined && e.button !== 0 && e.pointerType === 'mouse') return;
+                        touchStartX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+                        touchStartY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+                        clearTimeout(holdTimer);
+                        holdTimer = setTimeout(() => {
+                            triggerHaptic('medium');
+                            window.showBubbleContextMenu(touchStartX, touchStartY, bubble, isBot);
+                        }, 360);
+                    };
+
+                    const handleHoldMove = (e) => {
+                        const curX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : touchStartX);
+                        const curY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : touchStartY);
+                        if (Math.hypot(curX - touchStartX, curY - touchStartY) > 10) {
+                            clearTimeout(holdTimer);
+                        }
+                    };
+
+                    const handleHoldEnd = () => {
+                        clearTimeout(holdTimer);
+                    };
+
+                    bubble.addEventListener('pointerdown', handleHoldStart, { passive: true });
+                    bubble.addEventListener('pointermove', handleHoldMove, { passive: true });
+                    bubble.addEventListener('pointerup', handleHoldEnd, { passive: true });
+                    bubble.addEventListener('pointercancel', handleHoldEnd, { passive: true });
+                    bubble.addEventListener('pointerleave', handleHoldEnd, { passive: true });
+                    bubble.addEventListener('contextmenu', (e) => {
+                        e.preventDefault();
+                        clearTimeout(holdTimer);
+                        triggerHaptic('light');
+                        const x = e.clientX || touchStartX;
+                        const y = e.clientY || touchStartY;
+                        window.showBubbleContextMenu(x, y, bubble, isBot);
+                    });
+                }
                 
+                const attachActionsBar = () => {
+                    // Actions are cleanly accessible on hold/long-press
+                };
+
+                const triggerMathRendering = () => {
+                    setTimeout(() => {
+                        if (typeof renderMathInElement === 'function') {
+                            renderMathInElement(bubble, {
+                                delimiters: [
+                                    {left: '$$', right: '$$', display: true},
+                                    {left: '\\[', right: '\\]', display: true},
+                                    {left: '\\(', right: '\\)', display: false},
+                                    {left: '$', right: '$', display: false}
+                                ],
+                                throwOnError: false,
+                                ignoredTags: ["script", "noscript", "style", "textarea", "pre", "code"]
+                            });
+                        }
+                    }, 50);
+                };
+
                 if (isTyping) {
                     if (isUltraCoder) {
                         bubble.innerHTML = `
@@ -7508,7 +8329,7 @@ print("Luau script execution finished.")
                                 <div id="live-thinking-feed-lines" class="flex flex-col gap-2 font-mono text-[11px] max-h-[180px] overflow-y-auto pr-1">
                                     <div class="flex items-start gap-2 text-indigo-200/90 leading-tight">
                                         <span class="w-1.5 h-1.5 rounded-full bg-sky-400 shrink-0 mt-1 animate-pulse"></span>
-                                        <span>Organizing reasoning nodes and steps...</span>
+                                        <span>Connecting to reasoning engine...</span>
                                     </div>
                                 </div>
                             </div>
@@ -7533,51 +8354,21 @@ print("Luau script execution finished.")
                     }
                     wrapper.id = "quantum-typing-bubble";
                 } else {
-                    bubble.innerHTML = parseMarkdown(text);
-                    
-                    // Trigger KaTeX dynamic equation calculations on insertion
-                    setTimeout(() => {
-                        if (typeof renderMathInElement === 'function') {
-                            renderMathInElement(bubble, {
-                                delimiters: [
-                                    {left: '$$', right: '$$', display: true},
-                                    {left: '\\[', right: '\\]', display: true},
-                                    {left: '\\(', right: '\\)', display: false},
-                                    {left: '$', right: '$', display: false}
-                                ],
-                                throwOnError: false,
-                                ignoredTags: ["script", "noscript", "style", "textarea", "pre", "code"]
-                            });
-                        }
-                    }, 50);
+                    if (animateTypewriter && isBot) {
+                        bubble.innerHTML = '<span class="chatgpt-typing-cursor"></span>';
+                        window.streamTypewriterResponse(bubble, text, (completedText) => {
+                            attachActionsBar();
+                            triggerMathRendering();
+                            if (onStreamingDone) onStreamingDone(completedText);
+                        });
+                    } else {
+                        bubble.innerHTML = parseMarkdown(text);
+                        triggerMathRendering();
+                        attachActionsBar();
+                    }
                 }
 
                 bubbleWrap.appendChild(bubble);
-
-                if (isBot && !isTyping) {
-                    const actionsBar = document.createElement('div');
-                    actionsBar.className = "flex flex-wrap items-center gap-2 mt-1 select-none text-[11px] font-semibold text-gray-400";
-                    actionsBar.innerHTML = `
-                        <button onclick="window.copyBubbleText(this)" class="flex items-center gap-1.5 py-1 px-2.5 rounded-lg bg-[var(--sidebar-hover)] border border-[var(--border-color)] hover:border-indigo-500 hover:text-indigo-400 transition-all active:scale-95">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                            Copy
-                        </button>
-                        <button onclick="window.speakBubbleText(this)" class="flex items-center gap-1.5 py-1 px-2.5 rounded-lg bg-[var(--sidebar-hover)] border border-[var(--border-color)] hover:border-indigo-500 hover:text-indigo-400 transition-all active:scale-95">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-                            Read Aloud
-                        </button>
-                        <button onclick="window.downloadBubbleMarkdown(this)" class="flex items-center gap-1.5 py-1 px-2.5 rounded-lg bg-[var(--sidebar-hover)] border border-[var(--border-color)] hover:border-indigo-500 hover:text-indigo-400 transition-all active:scale-95">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-                            Export
-                        </button>
-                        <button onclick="window.saveMemoryFromBubble(this)" class="flex items-center gap-1.5 py-1 px-2.5 rounded-lg bg-[var(--sidebar-hover)] border border-[var(--border-color)] hover:border-indigo-500 hover:text-indigo-300 transition-all active:scale-95">
-                            <i class="fa-solid fa-brain text-[10px] text-indigo-400"></i>
-                            Save Memory
-                        </button>
-                    `;
-                    bubbleWrap.appendChild(actionsBar);
-                }
-
                 wrapper.appendChild(avatar);
                 wrapper.appendChild(bubbleWrap);
                 container.appendChild(wrapper);
@@ -7608,11 +8399,27 @@ print("Luau script execution finished.")
         // Send & Submission loops
         async function submitMessage(e) {
             if (e) e.preventDefault();
+
+            // If a response is already generating, pause/stop it
+            if (window.isGeneratingResponse) {
+                window.stopOrPauseGeneration();
+                return;
+            }
+
             const input = document.getElementById('message');
             const text = input.value.trim();
-            const sendBtn = document.getElementById('sendBtn');
 
             if (!text && currentAttachments.length === 0) return;
+
+            // Increment generation session ID to isolate this request from any subsequent chat switches
+            window.activeGenerationSessionId = (window.activeGenerationSessionId || 0) + 1;
+            const thisSessionId = window.activeGenerationSessionId;
+
+            // Ensure we have a persistent chatId before making the network request
+            if (!currentChatId) {
+                currentChatId = await ChatsDb.getChatId();
+            }
+            const requestChatId = currentChatId;
 
             // Location telemetry coordinates trigger for direct weather queries
             const lower = text.toLowerCase();
@@ -7626,7 +8433,7 @@ print("Luau script execution finished.")
             if (isWeatherIntent) {
                 const tempBubble = addBubble("Looking up current weather...", "bot", true);
                 await fetchUserLocation();
-                tempBubble.remove();
+                if (tempBubble && tempBubble.parentNode) tempBubble.remove();
             }
 
             // user display insertion
@@ -7640,16 +8447,37 @@ print("Luau script execution finished.")
             }
             chatHistory.push({ role: 'user', content: text + attachmentNotice });
 
+            // Immediately persist user prompt to ChatsDb for requestChatId
+            if (settingSaveHistory && !isGhostMode && requestChatId) {
+                try {
+                    await ChatsDb.saveChat(requestChatId, {
+                        title: chatHistory[0]?.content?.substring(0, 35) || 'General Chat',
+                        messages: chatHistory.map(m => ({
+                            role: m.role,
+                            content: m.content,
+                            sources: m.sources || null,
+                            search_query: m.search_query || null
+                        })),
+                        updatedAt: (auth && auth.currentUser && !isLocalGuest && db) ? firebase.firestore.FieldValue.serverTimestamp() : new Date().toISOString()
+                    });
+                    loadSidebar();
+                } catch(e) {}
+            }
+
             input.value = '';
             input.style.height = 'auto';
-            sendBtn.disabled = true;
+
+            window.isGeneratingResponse = true;
+            window.activeAbortController = new AbortController();
+            setGenerationButtonState(true);
 
             if (currentAttachments.length > 0) removeAllAttachments();
 
             const requestStartTime = performance.now();
 
             // Pulse Active hologram
-            document.getElementById('thinking-bg').classList.add('active');
+            const thinkingBg = document.getElementById('thinking-bg');
+            if (thinkingBg) thinkingBg.classList.add('active');
             const typingNode = addBubble('', 'bot', true);
             startLiveThinkingStream(text);
 
@@ -7679,7 +8507,9 @@ print("Luau script execution finished.")
                             "Adding clear comments and notes..."
                         ];
                         for (let i = 0; i < stages.length; i++) {
+                            if (window.activeGenerationSessionId !== thisSessionId) return resolve();
                             await new Promise(r => setTimeout(r, 650 + Math.random() * 300));
+                            if (window.activeGenerationSessionId !== thisSessionId) return resolve();
                             const termContainer = document.getElementById('ultra-coder-terminal-lines');
                             if (termContainer) {
                                 const div = document.createElement('div');
@@ -7696,6 +8526,7 @@ print("Luau script execution finished.")
                 const responsePromise = window.fetchCrystalApi('/api/chat', {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
+                    signal: window.activeAbortController.signal,
                     body: JSON.stringify({
                         message: text,
                         account_id: (auth && auth.currentUser ? auth.currentUser.uid : (localStorage.getItem('crystal_client_id') || 'client_session')),
@@ -7724,6 +8555,15 @@ print("Luau script execution finished.")
                 });
 
                 const response = await responsePromise;
+
+                // If user switched or cleared chats while request was in-flight, discard UI mutation
+                if (window.activeGenerationSessionId !== thisSessionId) {
+                    stopLiveThinkingStream();
+                    if (typingNode && typingNode.parentNode) typingNode.remove();
+                    if (thinkingBg) thinkingBg.classList.remove('active');
+                    return;
+                }
+
                 const responseText = await response.text();
                 let data = null;
 
@@ -7751,11 +8591,19 @@ print("Luau script execution finished.")
                 // Wait for simulated terminal if Ultra Coder is enabled
                 await terminalPromise;
 
-                stopLiveThinkingStream();
-                typingNode.remove();
-                document.getElementById('thinking-bg').classList.remove('active');
+                // Re-verify session after terminal animation
+                if (window.activeGenerationSessionId !== thisSessionId) {
+                    stopLiveThinkingStream();
+                    if (typingNode && typingNode.parentNode) typingNode.remove();
+                    if (thinkingBg) thinkingBg.classList.remove('active');
+                    return;
+                }
 
-                let botReply = data.reply || " Pipeline execution empty.";
+                stopLiveThinkingStream();
+                if (typingNode && typingNode.parentNode) typingNode.remove();
+                if (thinkingBg) thinkingBg.classList.remove('active');
+
+                let botReply = data.reply || "Pipeline execution empty.";
 
                 // Client-side anti-repetition filter to prevent runaway loops in non-Latin scripts
                 if (typeof botReply === 'string' && botReply.length > 30) {
@@ -7792,70 +8640,91 @@ print("Luau script execution finished.")
                 }
                 
                 const latencyMs = Math.round(performance.now() - requestStartTime);
-                addBubble(finalReply, 'bot', false, data.sources, null, data.tokenizer_info, thinkingContent, data.search_query, latencyMs);
 
-                let savedReply = botReply;
-                if (savedReply.includes("data:image/") && savedReply.length > 50000) {
-                    savedReply = "[Generated Image Delivered to UI]";
+                // If user switched or cleared chats while request was running or thinking, discard UI mutation
+                if (window.activeGenerationSessionId !== thisSessionId || currentChatId !== requestChatId) {
+                    stopLiveThinkingStream();
+                    if (typingNode && typingNode.parentNode) typingNode.remove();
+                    if (thinkingBg) thinkingBg.classList.remove('active');
+                    window.isGeneratingResponse = false;
+                    setGenerationButtonState(false);
+                    return;
                 }
-                chatHistory.push({ role: 'assistant', content: savedReply, sources: data.sources || null, search_query: data.search_query || null });
 
-                // Local/Remote Storage Sync
-                if (settingSaveHistory && !isGhostMode) {
-                    if (!currentChatId) {
-                        currentChatId = await ChatsDb.getChatId();
+                // Stream out bot reply with typewriter animation
+                addBubble(finalReply, 'bot', false, data.sources, null, data.tokenizer_info, thinkingContent, data.search_query, latencyMs, true, async (deliveredText) => {
+                    // Check again if user changed chats during typewriter streaming
+                    if (window.activeGenerationSessionId !== thisSessionId || currentChatId !== requestChatId) {
+                        return;
                     }
-                    const syncedHistory = chatHistory.map(m => ({
-                        role: m.role,
-                        content: m.content,
-                        sources: m.sources || null,
-                        search_query: m.search_query || null
-                    }));
 
-                    await ChatsDb.saveChat(currentChatId, {
-                        title: chatHistory[0].content.substring(0, 35) || 'General Chat',
-                        messages: syncedHistory,
-                        updatedAt: (auth && auth.currentUser && !isLocalGuest && db) ? firebase.firestore.FieldValue.serverTimestamp() : new Date().toISOString()
-                    });
+                    let savedReply = deliveredText || finalReply;
+                    if (savedReply.includes("data:image/") && savedReply.length > 50000) {
+                        savedReply = "[Generated Image Delivered to UI]";
+                    }
+                    chatHistory.push({ role: 'assistant', content: savedReply, sources: data.sources || null, search_query: data.search_query || null });
 
-                    loadSidebar();
-                }
+                    // Local/Remote Storage Sync
+                    if (settingSaveHistory && !isGhostMode && requestChatId) {
+                        const syncedHistory = chatHistory.map(m => ({
+                            role: m.role,
+                            content: m.content,
+                            sources: m.sources || null,
+                            search_query: m.search_query || null
+                        }));
+
+                        await ChatsDb.saveChat(requestChatId, {
+                            title: chatHistory[0]?.content?.substring(0, 35) || 'General Chat',
+                            messages: syncedHistory,
+                            updatedAt: (auth && auth.currentUser && !isLocalGuest && db) ? firebase.firestore.FieldValue.serverTimestamp() : new Date().toISOString()
+                        });
+
+                        loadSidebar();
+                    }
+
+                    window.isGeneratingResponse = false;
+                    setGenerationButtonState(false);
+                });
 
             } catch (err) {
-                console.error('[Crystal Chat API Error]:', err);
+                const wasAborted = (err && err.name === 'AbortError') || !window.isGeneratingResponse || window.activeGenerationSessionId !== thisSessionId;
+                
                 stopLiveThinkingStream();
                 if (typingNode && typingNode.parentNode) typingNode.remove();
-                const thinkingBg = document.getElementById('thinking-bg');
                 if (thinkingBg) thinkingBg.classList.remove('active');
-                const latencyMs = Math.round(performance.now() - requestStartTime);
                 
-                const isNetworkFailed = String(err.message || '').includes('Failed to fetch') || String(err.message || '').includes('NetworkError') || String(err.message || '').includes('Load failed');
-                const errorHtml = `
-                    <div class="flex flex-col gap-2.5 p-1">
-                        <div class="flex items-center gap-2 text-rose-400 font-bold text-sm">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                            <span>${isNetworkFailed ? 'Connection to Backend Failed' : 'Request Error'}</span>
+                if (!wasAborted && window.activeGenerationSessionId === thisSessionId && currentChatId === requestChatId) {
+                    console.error('[Crystal Chat API Error]:', err);
+                    const latencyMs = Math.round(performance.now() - requestStartTime);
+                    const isNetworkFailed = String(err.message || '').includes('Failed to fetch') || String(err.message || '').includes('NetworkError') || String(err.message || '').includes('Load failed');
+                    const errorHtml = `
+                        <div class="flex flex-col gap-2.5 p-1">
+                            <div class="flex items-center gap-2 text-rose-400 font-bold text-sm">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                <span>${isNetworkFailed ? 'Connection to Backend Failed' : 'Request Error'}</span>
+                            </div>
+                            <p class="text-xs text-[var(--text-color)] opacity-85 leading-relaxed">
+                                ${isNetworkFailed 
+                                    ? 'Unable to reach the Crystal AI backend service. The server may still be spinning up, or your backend connection needs a moment.'
+                                    : err.message}
+                            </p>
+                            <div class="flex flex-wrap items-center gap-2 pt-1">
+                                <button onclick="window.retryLastUserMessage()" class="px-3 py-1.5 rounded-xl bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] font-bold text-xs hover:opacity-90 active:scale-95 transition flex items-center gap-1.5 shadow-sm">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                                    Retry
+                                </button>
+                                <button onclick="openSettingsModal()" class="px-3 py-1.5 rounded-xl bg-[var(--sidebar-hover)] border border-[var(--border-color)] text-[var(--text-color)] font-semibold text-xs hover:border-indigo-500 active:scale-95 transition">
+                                    Backend Settings
+                                </button>
+                            </div>
                         </div>
-                        <p class="text-xs text-[var(--text-color)] opacity-85 leading-relaxed">
-                            ${isNetworkFailed 
-                                ? 'Unable to reach the Crystal AI backend service. The server may still be spinning up, or your backend connection needs a moment.'
-                                : err.message}
-                        </p>
-                        <div class="flex flex-wrap items-center gap-2 pt-1">
-                            <button onclick="window.retryLastUserMessage()" class="px-3 py-1.5 rounded-xl bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] font-bold text-xs hover:opacity-90 active:scale-95 transition flex items-center gap-1.5 shadow-sm">
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
-                                Retry
-                            </button>
-                            <button onclick="openSettingsModal()" class="px-3 py-1.5 rounded-xl bg-[var(--sidebar-hover)] border border-[var(--border-color)] text-[var(--text-color)] font-semibold text-xs hover:border-indigo-500 active:scale-95 transition">
-                                Backend Settings
-                            </button>
-                        </div>
-                    </div>
-                `;
-                addBubble(errorHtml, 'bot', false, null, null, null, null, null, latencyMs);
+                    `;
+                    addBubble(errorHtml, 'bot', false, null, null, null, null, null, latencyMs);
+                }
+                window.isGeneratingResponse = false;
+                setGenerationButtonState(false);
             }
 
-            sendBtn.disabled = false;
             triggerHaptic();
         }
 
@@ -8027,11 +8896,21 @@ print("Luau script execution finished.")
         }
 
         async function signInAnonymouslyUser(btn) {
-            if (!checkTermsAgreement()) return;
+            if (typeof triggerHaptic === 'function') triggerHaptic();
+            localStorage.setItem('crystal_terms_accepted', 'true');
+            const cb = document.getElementById('terms-checkbox');
+            if (cb) cb.checked = true;
+            
             const spinner = document.getElementById('guest-spinner');
             if (spinner) spinner.classList.remove('hidden');
-            document.getElementById('login-error').classList.add('hidden');
+            const errEl = document.getElementById('login-error');
+            if (errEl) errEl.classList.add('hidden');
             
+            if (!localStorage.getItem('crystal_guest_id')) {
+                const randId = Math.random().toString(36).substring(2, 6).toUpperCase();
+                localStorage.setItem('crystal_guest_id', 'Guest_' + randId);
+            }
+
             if (!auth) {
                 enableLocalGuestMode();
                 if (spinner) spinner.classList.add('hidden');
@@ -8040,41 +8919,18 @@ print("Luau script execution finished.")
 
             try {
                 await auth.signInAnonymously();
+                isLocalGuest = false;
+                localStorage.removeItem('crystal_local_guest');
+                document.getElementById('login-screen')?.classList.add('hidden');
+                refreshDynamicGreeting();
+                updateProfileUI();
+                updateSystemBars();
+                loadSidebar();
+                authResolved = true;
+                checkDismissSplash();
             } catch (e) {
-                console.warn("Standard Firebase anonymous login failed/restricted, trying smart unique guest email login...", e);
-                
-                // Retrieve or generate a unique guest credential for this device/browser
-                let guestEmail = localStorage.getItem('crystal_fallback_guest_email');
-                let guestPass = localStorage.getItem('crystal_fallback_guest_password');
-                
-                if (!guestEmail || !guestPass) {
-                    const randSuffix = Math.random().toString(36).substring(2, 10);
-                    guestEmail = `guest_${randSuffix}@crystal-ai.app`;
-                    guestPass = `Pass_${Math.random().toString(36).substring(2, 12)}!`;
-                }
-                
-                try {
-                    // Try to sign in first
-                    await auth.signInWithEmailAndPassword(guestEmail, guestPass);
-                    // Store if successful
-                    localStorage.setItem('crystal_fallback_guest_email', guestEmail);
-                    localStorage.setItem('crystal_fallback_guest_password', guestPass);
-                } catch (signInErr) {
-                    if (signInErr.code === 'auth/user-not-found' || signInErr.code === 'auth/invalid-credential' || signInErr.code === 'auth/wrong-password' || signInErr.code === 'auth/operation-not-allowed') {
-                        // Create the account if it doesn't exist yet
-                        try {
-                            await auth.createUserWithEmailAndPassword(guestEmail, guestPass);
-                            localStorage.setItem('crystal_fallback_guest_email', guestEmail);
-                            localStorage.setItem('crystal_fallback_guest_password', guestPass);
-                        } catch (createErr) {
-                            console.error("Failed to create unique guest fallback user. Falling back to local offline guest mode:", createErr);
-                            enableLocalGuestMode();
-                        }
-                    } else {
-                        console.error("Failed to login fallback guest user. Falling back to local offline guest mode:", signInErr);
-                        enableLocalGuestMode();
-                    }
-                }
+                console.warn("Firebase anonymous login failed, switching to instant offline guest mode:", e);
+                enableLocalGuestMode();
             } finally {
                 if (spinner) spinner.classList.add('hidden');
             }
@@ -8083,7 +8939,12 @@ print("Luau script execution finished.")
         function enableLocalGuestMode() {
             localStorage.setItem('crystal_local_guest', 'true');
             isLocalGuest = true;
-            document.getElementById('login-screen').classList.add('hidden');
+            if (!localStorage.getItem('crystal_guest_id')) {
+                const randId = Math.random().toString(36).substring(2, 6).toUpperCase();
+                localStorage.setItem('crystal_guest_id', 'Guest_' + randId);
+            }
+            document.getElementById('login-screen')?.classList.add('hidden');
+            refreshDynamicGreeting();
             updateProfileUI();
             updateSystemBars();
             loadSidebar();
@@ -8257,19 +9118,20 @@ print("Luau script execution finished.")
                 const badgeEl = document.getElementById('settings-account-badge');
                 if (!emailEl || !badgeEl) return;
 
+                const guestName = customUsername || getGuestDisplayName();
                 if (isLocalGuest || !auth || !auth.currentUser) {
-                    emailEl.textContent = "Local Guest (Offline)";
+                    emailEl.textContent = `${guestName} (Local Guest)`;
                     badgeEl.textContent = "Guest Mode";
                     badgeEl.className = "text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20";
                 } else {
                     const u = auth.currentUser;
                     const isGuest = u.isAnonymous || (u.email && u.email.startsWith('guest_') && u.email.endsWith('@crystal-ai.app'));
                     if (isGuest) {
-                        emailEl.textContent = "Guest Account (" + u.uid.substring(0, 6) + ")";
+                        emailEl.textContent = `${guestName} (Guest Session)`;
                         badgeEl.textContent = "Guest Session";
                         badgeEl.className = "text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20";
                     } else {
-                        emailEl.textContent = u.email || "Registered User";
+                        emailEl.textContent = u.email || u.displayName || guestName || "Verified User";
                         badgeEl.textContent = "Active Account";
                         badgeEl.className = "text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
                     }
@@ -8286,6 +9148,7 @@ print("Luau script execution finished.")
         function resendEmailVerificationLink() {}
         function instantVerifyAndUnlock() {}
         function markUserAsVerified() {}
+
         function handleAppDeepLinks() {
             if (window.location.search && window.history && window.history.replaceState) {
                 const search = window.location.search;
@@ -8317,6 +9180,7 @@ print("Luau script execution finished.")
             currentChatId = null;
             document.getElementById('sidebar-list').innerHTML = '';
             document.getElementById('login-screen').classList.remove('hidden');
+            refreshDynamicGreeting();
             updateProfileUI();
             updateSystemBars();
             const sm = document.getElementById('settings-modal');
@@ -8449,13 +9313,19 @@ print("Luau script execution finished.")
 
         function loadChat(chatId, messages) {
             if (!messages) return;
+            if (window.isGeneratingResponse) {
+                window.stopOrPauseGeneration(true);
+            }
+            window.activeGenerationSessionId = (window.activeGenerationSessionId || 0) + 1;
+
             currentChatId = chatId;
-            chatHistory = messages;
+            chatHistory = Array.isArray(messages) ? [...messages] : [];
 
             document.getElementById('chat-inner').innerHTML = '';
-            document.getElementById('empty-state').style.display = 'none';
+            const empty = document.getElementById('empty-state');
+            if (empty) empty.style.display = 'none';
 
-            messages.forEach(m => {
+            chatHistory.forEach(m => {
                 addBubble(m.content, m.role, false, m.sources, null, null, null, m.search_query);
             });
 
@@ -8464,12 +9334,22 @@ print("Luau script execution finished.")
         }
 
         function startNewChat() {
+            if (window.isGeneratingResponse) {
+                window.stopOrPauseGeneration(true);
+            }
+            window.activeGenerationSessionId = (window.activeGenerationSessionId || 0) + 1;
+
             document.body.classList.remove('sidebar-open');
             document.getElementById('chat-inner').innerHTML = '';
             
+            refreshDynamicGreeting();
+            if (typeof updateProfileUI === 'function') updateProfileUI();
+
             const empty = document.getElementById('empty-state');
-            empty.style.display = 'flex';
-            setTimeout(() => empty.style.opacity = '1', 50);
+            if (empty) {
+                empty.style.display = 'flex';
+                setTimeout(() => empty.style.opacity = '1', 50);
+            }
 
             chatHistory = [];
             currentChatId = null;
@@ -9277,9 +10157,12 @@ echo "Status: ONLINE"
 
             // 5. Trigger Google Translate for 100% full-page DOM translation
             try {
+                const host = window.location.hostname;
                 if (langCode === 'en' || langName === 'English') {
                     document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+                    document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=${host}; path=/;`;
                     document.cookie = `googtrans=/en/en; path=/;`;
+                    document.cookie = `googtrans=/en/en; domain=${host}; path=/;`;
                     const combo = document.querySelector('.goog-te-combo');
                     if (combo) {
                         combo.value = 'en';
@@ -9287,12 +10170,25 @@ echo "Status: ONLINE"
                     }
                 } else {
                     let gtCode = langCode;
-                    if (gtCode === 'pt-PT') gtCode = 'pt';
+                    if (gtCode === 'pt-PT' || gtCode === 'pt-BR') gtCode = 'pt';
+                    if (gtCode === 'zh-CN') gtCode = 'zh-CN';
+                    if (gtCode === 'zh-TW') gtCode = 'zh-TW';
+                    document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+                    document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=${host}; path=/;`;
                     document.cookie = `googtrans=/en/${gtCode}; path=/;`;
+                    document.cookie = `googtrans=/en/${gtCode}; domain=${host}; path=/;`;
                     const combo = document.querySelector('.goog-te-combo');
                     if (combo) {
                         combo.value = gtCode;
                         combo.dispatchEvent(new Event('change'));
+                    } else {
+                        setTimeout(() => {
+                            const lateCombo = document.querySelector('.goog-te-combo');
+                            if (lateCombo) {
+                                lateCombo.value = gtCode;
+                                lateCombo.dispatchEvent(new Event('change'));
+                            }
+                        }, 500);
                     }
                 }
             } catch(e) {
@@ -9377,7 +10273,7 @@ echo "Status: ONLINE"
                     ? 'bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] border-[var(--md-sys-color-primary)] font-bold shadow-xs'
                     : 'bg-[var(--md-sys-color-surface-container)] hover:bg-[var(--md-sys-color-surface-container-high)] text-[var(--md-sys-color-on-surface)] border-[var(--md-sys-color-outline-variant)]';
 
-                return '<button onclick="applyAppLanguage(\'' + lang.name + '\')" class="flex items-center justify-between p-2.5 rounded-xl border text-left text-xs transition-all active:scale-95 ' + activeClass + '">' +
+                return '<button onclick="applyAppLanguage(\'' + lang.name + '\'); toggleQuickLanguageModal();" class="flex items-center justify-between p-2.5 rounded-xl border text-left text-xs transition-all active:scale-95 ' + activeClass + '">' +
                     '<div class="flex items-center gap-2 min-w-0">' +
                         '<span class="text-base">' + (lang.flag || '🌐') + '</span>' +
                         '<div class="truncate">' +
@@ -9459,13 +10355,249 @@ echo "Status: ONLINE"
             applyAppLanguage(langName, false);
         };
 
-        if (typeof window.updateUIStrings !== 'function') {
-            window.updateUIStrings = function(lang) {
-                console.log('App UI localized to:', lang);
-            };
-        }
+        window.updateUIStrings = function(langName) {
+            try {
+                const lang = (langName || 'English').toLowerCase();
+                const dict = {
+                    english: {
+                        placeholder: "Ask anything, search the web, generate images...",
+                        greeting: "What's on your mind today?",
+                        newChat: "New Chat",
+                        skip: "Skip for now",
+                        finish: "Get Started with Crystal"
+                    },
+                    telugu: {
+                        placeholder: "ఏదైనా అడగండి, వెబ్‌లో వెతకండి, చిత్రాలు రూపొందించండి...",
+                        greeting: "ఈరోజు మీ ఆలోచన ఏమిటి?",
+                        newChat: "కొత్త సంభాషణ",
+                        skip: "ఇప్పుడు దాటవేయి",
+                        finish: "క్రిస్టల్‌తో ప్రారంభించండి"
+                    },
+                    hindi: {
+                        placeholder: "कुछ भी पूछें, वेब खोजें, छवियां बनाएं...",
+                        greeting: "आज आपके मन में क्या है?",
+                        newChat: "नई चैट",
+                        skip: "अभी छोड़ें",
+                        finish: "क्रिस्टल शुरू करें"
+                    },
+                    spanish: {
+                        placeholder: "Pregunta lo que sea, busca en la web, genera imágenes...",
+                        greeting: "¿Qué tienes en mente hoy?",
+                        newChat: "Nuevo chat",
+                        skip: "Omitir por ahora",
+                        finish: "Comenzar con Crystal"
+                    },
+                    french: {
+                        placeholder: "Demandez n'importe quoi, recherchez, créez des images...",
+                        greeting: "À quoi pensez-vous aujourd'hui ?",
+                        newChat: "Nouvelle discussion",
+                        skip: "Ignorer pour l'instant",
+                        finish: "Commencer avec Crystal"
+                    },
+                    german: {
+                        placeholder: "Fragen Sie alles, im Web suchen, Bilder generieren...",
+                        greeting: "Was beschäftigt Sie heute?",
+                        newChat: "Neuer Chat",
+                        skip: "Jetzt überspringen",
+                        finish: "Mit Crystal starten"
+                    },
+                    japanese: {
+                        placeholder: "何でも質問、ウェブ検索、画像生成...",
+                        greeting: "今日はどのようなご用件でしょうか？",
+                        newChat: "新しいチャット",
+                        skip: "今はスキップ",
+                        finish: "Crystal を始める"
+                    },
+                    chinese: {
+                        placeholder: "询问任何问题、搜索网络、生成图像...",
+                        greeting: "今天有什么想法？",
+                        newChat: "新建对话",
+                        skip: "暂时跳过",
+                        finish: "开始使用 Crystal"
+                    },
+                    arabic: {
+                        placeholder: "اسأل أي شيء، ابحث في الويب، أنشئ صوراً...",
+                        greeting: "ما الذي يدور في ذهنك اليوم؟",
+                        newChat: "محادثة جديدة",
+                        skip: "تخطي الآن",
+                        finish: "ابدأ مع كريستال"
+                    },
+                    portuguese: {
+                        placeholder: "Pergunte qualquer coisa, pesquise na web, gere imagens...",
+                        greeting: "O que você tem em mente hoje?",
+                        newChat: "Nova conversa",
+                        skip: "Pular por enquanto",
+                        finish: "Começar com Crystal"
+                    },
+                    tamil: {
+                        placeholder: "எதையும் கேளுங்கள், இணையத்தில் தேடுங்கள், படங்களை உருவாக்குங்கள்...",
+                        greeting: "இன்று உங்கள் மனதில் என்ன இருக்கிறது?",
+                        newChat: "புதிய அரட்டை",
+                        skip: "இப்போது தவிர்க்கவும்",
+                        finish: "கிரிஸ்டலுடன் தொடங்குங்கள்"
+                    },
+                    kannada: {
+                        placeholder: "ಏನನ್ನಾದರೂ ಕೇಳಿ, ವೆಬ್‌ನಲ್ಲಿ ಹುಡುಕಿ, ಚಿತ್ರಗಳನ್ನು ರಚಿಸಿ...",
+                        greeting: "ಇಂದು ನಿಮ್ಮ ಮನಸ್ಸಿನಲ್ಲಿ ಏನಿದೆ?",
+                        newChat: "ಹೊಸ ಚಾಟ್",
+                        skip: "ಈಗ ಬಿಟ್ಟುಬಿಡಿ",
+                        finish: "ಕ್ರಿಸ್ಟಲ್‌ನೊಂದಿಗೆ ಪ್ರಾರಂಭಿಸಿ"
+                    },
+                    bengali: {
+                        placeholder: "যেকোনো কিছু জিজ্ঞাসা করুন, ওয়েব খুঁজুন, ছবি তৈরি করুন...",
+                        greeting: "আজ আপনার মনে কী আছে?",
+                        newChat: "নতুন চ্যাট",
+                        skip: "এখনই এড়িয়ে যান",
+                        finish: "ক্রিস্টাল দিয়ে শুরু করুন"
+                    }
+                };
+
+                let matched = dict[lang];
+                if (!matched) {
+                    for (const k in dict) {
+                        if (lang.includes(k)) {
+                            matched = dict[k];
+                            break;
+                        }
+                    }
+                }
+                if (!matched) matched = dict.english;
+
+                const msgInput = document.getElementById('message');
+                if (msgInput) msgInput.placeholder = matched.placeholder;
+
+                const emptySub = document.getElementById('dynamic-greeting-sub');
+                if (emptySub) emptySub.textContent = matched.greeting;
+
+                const newChatSpan = document.getElementById('new-chat-btn-text');
+                if (newChatSpan) newChatSpan.textContent = matched.newChat;
+
+                const finishBtnText = document.getElementById('onboarding-finish-btn-text');
+                if (finishBtnText) finishBtnText.textContent = matched.finish;
+                
+                const skipBtn1 = document.getElementById('onboarding-skip-btn-1');
+                if (skipBtn1) skipBtn1.textContent = matched.skip;
+                const skipBtn2 = document.getElementById('onboarding-skip-btn-2');
+                if (skipBtn2) skipBtn2.textContent = matched.skip;
+            } catch(e) {
+                console.warn("[updateUIStrings error]:", e);
+            }
+        };
+
+        // Welcome Onboarding Lifecycle Functions
+        window.showWelcomeOnboarding = function() {
+            triggerHaptic('light');
+            const modal = document.getElementById('welcome-onboarding-modal');
+            if (!modal) return;
+
+            if (typeof initBirthdayPickers === 'function') {
+                initBirthdayPickers();
+            }
+
+            // Prepopulate nickname or name
+            const nameInput = document.getElementById('onboarding-name');
+            if (nameInput) {
+                const currentName = (typeof customUsername !== 'undefined' && customUsername) || localStorage.getItem('crystal_username') || (typeof auth !== 'undefined' && auth && auth.currentUser ? (auth.currentUser.displayName || auth.currentUser.email?.split('@')[0]) : '');
+                if (currentName && currentName !== 'Guest' && currentName !== 'Local Guest' && !currentName.startsWith('Guest_')) {
+                    nameInput.value = currentName;
+                }
+            }
+
+            // Prepopulate birthday
+            const savedBday = localStorage.getItem('crystal_birthday');
+            if (savedBday && typeof applySavedBirthdayToPickers === 'function') {
+                applySavedBirthdayToPickers(savedBday);
+            }
+
+            // Prepopulate language
+            const currentLang = localStorage.getItem('crystal_language') || 'English';
+            window.selectedOnboardingLang = currentLang;
+            const langObj = (typeof ALL_WORLD_LANGUAGES !== 'undefined' ? ALL_WORLD_LANGUAGES : []).find(l => l.name.toLowerCase() === currentLang.toLowerCase()) || { flag: '🌐', name: currentLang };
+            const badge = document.getElementById('onboarding-lang-selected-badge');
+            if (badge) {
+                badge.innerHTML = `${langObj.flag || '🌐'} ${langObj.name || currentLang}`;
+            }
+            if (typeof renderOnboardingLanguages === 'function') {
+                renderOnboardingLanguages('');
+            }
+
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
+        };
+
+        window.skipOnboarding = function() {
+            triggerHaptic('light');
+            const modal = document.getElementById('welcome-onboarding-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.style.display = 'none';
+            }
+            localStorage.setItem('crystal_onboarding_completed', 'true');
+            if (typeof showToast === 'function') {
+                showToast("Preferences saved. You can personalize them anytime in Settings.");
+            }
+        };
+
+        window.finishOnboarding = function() {
+            triggerHaptic('medium');
+            const modal = document.getElementById('welcome-onboarding-modal');
+
+            // Save Name
+            const nameInput = document.getElementById('onboarding-name');
+            const newName = nameInput ? nameInput.value.trim() : '';
+            if (newName) {
+                customUsername = newName;
+                localStorage.setItem('crystal_username', newName);
+                if (typeof auth !== 'undefined' && auth && auth.currentUser && typeof db !== 'undefined' && db) {
+                    db.collection('users').doc(auth.currentUser.uid).set({
+                        displayName: newName,
+                        username: newName
+                    }, { merge: true }).catch(() => {});
+                }
+            }
+
+            // Save Birthday
+            const mEl = document.getElementById('onboarding-bday-month');
+            const dEl = document.getElementById('onboarding-bday-day');
+            const yEl = document.getElementById('onboarding-bday-year');
+            const month = mEl ? mEl.value : '';
+            const day = dEl ? dEl.value : '';
+            const year = yEl ? yEl.value : '';
+            if (month && day) {
+                const fullYear = year || new Date().getFullYear().toString();
+                const bdayStr = `${fullYear}-${month}-${day}`;
+                localStorage.setItem('crystal_birthday', bdayStr);
+                if (typeof auth !== 'undefined' && auth && auth.currentUser && typeof db !== 'undefined' && db) {
+                    db.collection('users').doc(auth.currentUser.uid).set({
+                        birthday: bdayStr
+                    }, { merge: true }).catch(() => {});
+                }
+            }
+
+            // Save & Apply Language
+            const lang = window.selectedOnboardingLang || localStorage.getItem('crystal_language') || 'English';
+            if (typeof applyAppLanguage === 'function') {
+                applyAppLanguage(lang, false);
+            }
+
+            localStorage.setItem('crystal_onboarding_completed', 'true');
+
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.style.display = 'none';
+            }
+
+            if (typeof updateProfileUI === 'function') updateProfileUI();
+            refreshDynamicGreeting();
+
+            if (typeof showToast === 'function') {
+                showToast(`Welcome to Crystal${newName ? ', ' + newName : ''}! Your profile is ready.`);
+            }
+        };
 
         document.addEventListener('DOMContentLoaded', () => {
+            refreshDynamicGreeting();
+            
             const savedLang = localStorage.getItem('crystal_language') || 'English';
             if (typeof applyAppLanguage === 'function') {
                 applyAppLanguage(savedLang, false);
@@ -9476,8 +10608,59 @@ echo "Status: ONLINE"
             if (typeof renderOnboardingLanguages === 'function') {
                 renderOnboardingLanguages('');
             }
+
+            // Auth state persistence & auto-login
+            if (typeof auth !== 'undefined' && auth && typeof auth.onAuthStateChanged === 'function') {
+                auth.onAuthStateChanged((user) => {
+                    if (user) {
+                        isLocalGuest = false;
+                        localStorage.removeItem('crystal_local_guest');
+                        document.getElementById('login-screen')?.classList.add('hidden');
+                        updateProfileUI();
+                        loadSidebar();
+                        authResolved = true;
+                        checkDismissSplash();
+                    } else {
+                        const localGuestStored = localStorage.getItem('crystal_local_guest') === 'true';
+                        if (localGuestStored || isLocalGuest) {
+                            isLocalGuest = true;
+                            document.getElementById('login-screen')?.classList.add('hidden');
+                            updateProfileUI();
+                            loadSidebar();
+                            authResolved = true;
+                            checkDismissSplash();
+                        } else {
+                            document.getElementById('login-screen')?.classList.remove('hidden');
+                            updateProfileUI();
+                            authResolved = true;
+                            checkDismissSplash();
+                        }
+                    }
+                });
+            } else {
+                const localGuestStored = localStorage.getItem('crystal_local_guest') === 'true';
+                if (localGuestStored || isLocalGuest) {
+                    isLocalGuest = true;
+                    document.getElementById('login-screen')?.classList.add('hidden');
+                } else {
+                    document.getElementById('login-screen')?.classList.remove('hidden');
+                }
+                updateProfileUI();
+                loadSidebar();
+                authResolved = true;
+                checkDismissSplash();
+            }
         });
-    
+
+        // App visibility / focus listener to refresh greeting on app resume
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                refreshDynamicGreeting();
+                updateProfileUI();
+            }
+        });
+
+
         // Crystal Model Selector Engine
         function toggleModelSelectorModal() {
             triggerHaptic('selection');

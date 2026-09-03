@@ -102,8 +102,8 @@
 
     <!-- KaTeX Math Equation Renderers -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
 
     <!-- Prism.js Syntax Highlighting Engine & Multi-Language Autoloader -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
@@ -170,7 +170,7 @@
         body { top: 0px !important; position: static !important; }
         .goog-tooltip, .goog-tooltip:hover { display: none !important; }
         .goog-text-highlight { background-color: transparent !important; border: none !important; box-shadow: none !important; }
-        #google_translate_element { display: none !important; }
+        #google_translate_element { position: fixed !important; left: -9999px !important; top: -9999px !important; width: 1px !important; height: 1px !important; opacity: 0 !important; pointer-events: none !important; overflow: hidden !important; }
         .goog-te-gadget { display: none !important; }
         .skiptranslate:not(.allowed-translate) { font-family: inherit !important; }
         #goog-gt-tt { display: none !important; }
@@ -531,17 +531,25 @@
             margin-bottom: 0 !important;
         }
 
-        /* KaTeX Math Equations Responsiveness & Overflow Prevention */
+        /* KaTeX Math Equations Responsiveness, Styling & Overflow Prevention */
         .katex-display {
             display: block !important;
             max-width: 100% !important;
             overflow-x: auto !important;
             overflow-y: hidden !important;
-            padding: 0.5rem 0.25rem !important;
-            margin: 0.65rem 0 !important;
+            padding: 0.65rem 0.85rem !important;
+            margin: 0.75rem 0 !important;
             -webkit-overflow-scrolling: touch !important;
             scrollbar-width: thin !important;
             box-sizing: border-box !important;
+            background: rgba(99, 102, 241, 0.04);
+            border: 1px solid rgba(99, 102, 241, 0.15);
+            border-radius: 12px;
+        }
+
+        .dark .katex-display {
+            background: rgba(15, 23, 42, 0.55);
+            border: 1px solid rgba(99, 102, 241, 0.25);
         }
 
         .katex-display::-webkit-scrollbar {
@@ -555,7 +563,6 @@
         }
 
         .katex {
-            max-width: 100% !important;
             font-size: 1.05em !important;
             text-rendering: optimizeLegibility !important;
         }
@@ -566,10 +573,10 @@
             text-align: left !important;
         }
 
-        .bubble .katex {
-            max-width: 100% !important;
-            overflow-x: auto !important;
-            overflow-y: hidden !important;
+        .katex-inline {
+            display: inline !important;
+            white-space: nowrap !important;
+            padding: 0 1px !important;
         }
 
         @keyframes iosGlassFadeIn {
@@ -1387,6 +1394,41 @@
                     </div>
                 </div>
 
+                <!-- SECTION 1.6: BACKEND & CLOUD RUNTIME -->
+                <div class="flex flex-col gap-3">
+                    <h2 id="settings-heading-backend" class="text-xs font-bold uppercase tracking-wider text-indigo-400 opacity-90 px-1">Cloud Engine & Backend Connection</h2>
+                    
+                    <div class="p-5 bg-[var(--bubble-bot)] rounded-2xl border border-[var(--glass-border)] shadow-sm flex flex-col gap-3.5">
+                        <div class="flex items-center justify-between">
+                            <div class="flex flex-col">
+                                <span class="font-bold text-sm text-[var(--text-color)]">API Server Status</span>
+                                <span class="text-[11px] opacity-50">Powers Gemini AI models & live search</span>
+                            </div>
+                            <div id="backend-status-indicator" class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                <span>Connected</span>
+                            </div>
+                        </div>
+
+                        <div class="p-3 bg-[var(--sidebar-hover)] border border-[var(--border-color)] rounded-xl flex flex-col gap-1.5">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] font-bold uppercase tracking-wider opacity-60">Active Server Endpoint</span>
+                                <button type="button" onclick="testBackendConnection()" class="text-[10px] font-bold text-indigo-400 hover:text-indigo-300 underline cursor-pointer">Ping Server</button>
+                            </div>
+                            <div id="active-backend-display" class="text-xs font-mono font-medium text-[var(--text-color)] break-all select-all">Auto (Cloud Run)</div>
+                        </div>
+
+                        <div class="flex flex-col gap-1.5 pt-1">
+                            <label for="custom-backend-url" class="font-bold text-xs uppercase tracking-wider opacity-60">Custom Backend Endpoint (Optional)</label>
+                            <p class="text-[11px] opacity-50 leading-normal">Android apps auto-connect to the official cloud backend. You can optionally override this with your own self-hosted URL.</p>
+                            <div class="flex items-center gap-2">
+                                <input type="url" id="custom-backend-url" class="flex-1 bg-[var(--sidebar-hover)] border border-[var(--border-color)] text-[var(--text-color)] p-2.5 rounded-xl text-xs outline-none focus:border-indigo-500 font-mono transition-colors placeholder:text-gray-500/50" placeholder="https://your-custom-backend.com">
+                                <button type="button" onclick="testCustomBackendUrl()" class="px-3 py-2.5 text-xs font-semibold rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 border border-indigo-500/30 active:scale-95 transition-all">Test</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- SECTION 2: DISPLAY & PREFERENCES -->
                 <div class="flex flex-col gap-3">
                     <h2 id="settings-heading-display" class="text-xs font-bold uppercase tracking-wider text-indigo-400 opacity-90 px-1">Display & Preferences</h2>
@@ -1704,14 +1746,18 @@
         </div>
 
         <!-- Main Image container -->
-        <div class="relative max-w-4xl max-h-[80vh] flex items-center justify-center" onclick="event.stopPropagation();">
+        <div class="relative max-w-4xl max-h-[80vh] flex items-center justify-center min-w-[280px] min-h-[220px]" onclick="event.stopPropagation();">
+            <!-- Loading Spinner -->
+            <div id="lightbox-spinner" class="hidden absolute inset-0 flex items-center justify-center pointer-events-none z-20">
+                <div class="w-10 h-10 border-3 border-indigo-500/30 border-t-sky-400 rounded-full animate-spin"></div>
+            </div>
             <img id="lightbox-img" class="max-w-full max-h-[80vh] rounded-2xl object-contain shadow-2xl border border-white/10 transition-transform duration-300 ease-out" style="transform: scale(0.95);" />
             <!-- Caption -->
             <div id="lightbox-caption" class="absolute bottom-[-40px] left-1/2 transform -translate-x-1/2 text-white/85 text-xs font-bold tracking-wider uppercase bg-white/5 py-1.5 px-4 rounded-full border border-white/10 backdrop-blur-sm select-none">IMAGE PREVIEW</div>
         </div>
     </div>
-    <!-- GOOGLE TRANSLATE ANCHOR ELEMENT (HIDDEN) -->
-    <div id="google_translate_element" style="display:none;"></div>
+    <!-- GOOGLE TRANSLATE ANCHOR ELEMENT (HIDDEN OFF-SCREEN) -->
+    <div id="google_translate_element" style="position:fixed;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden;"></div>
 
     <!-- QUICK FULL-APP LANGUAGE & GOOGLE TRANSLATE MODAL -->
     <div id="quick-language-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[120] hidden flex items-center justify-center p-3 sm:p-4 opacity-0 transition-all duration-300" onclick="toggleQuickLanguageModal()">
@@ -2737,7 +2783,7 @@
         let isDarkMode = true;
         let isGhostMode = false;
         let isUltraCoder = false;
-        let showThinking = true;
+        let showThinking = false;
         let enableWebSearch = true;
         let settingSaveHistory = true;
         let isOnlineMode = true;
@@ -3731,7 +3777,7 @@
                 enableHapticSound = localStorage.getItem('crystal_typing_synth') !== 'false';
                 settingAutoScroll = localStorage.getItem('crystal_scroll') !== 'false';
                 isUltraCoder = localStorage.getItem('crystal_ultra_coder') === 'true';
-                showThinking = localStorage.getItem('crystal_show_thinking') !== 'false';
+                showThinking = localStorage.getItem('crystal_show_thinking') === 'true';
                 enableWebSearch = localStorage.getItem('crystal_enable_web_search') !== 'false';
                 sysInstructions = localStorage.getItem('crystal_instructions') || "";
                 
@@ -3767,7 +3813,10 @@
                 const backendIndicator = document.getElementById('backend-status-indicator');
 
                 if (backendInput) backendInput.value = savedBackendUrl;
-                if (backendDisplay) backendDisplay.textContent = savedBackendUrl || 'Auto (Relative)';
+                if (backendDisplay) {
+                    const activeBase = window.getApiBaseUrl ? window.getApiBaseUrl() : '';
+                    backendDisplay.textContent = savedBackendUrl || (activeBase ? `${activeBase} (Auto Cloud Server)` : 'Auto (Same Origin)');
+                }
                 if (backendIndicator) {
                     if (savedBackendUrl) {
                         backendIndicator.className = 'text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5';
@@ -3844,6 +3893,16 @@
                 } else {
                     localStorage.setItem('crystal_username', inputName);
                     customUsername = inputName;
+                }
+
+                const backendInput = document.getElementById('custom-backend-url');
+                if (backendInput) {
+                    const customVal = backendInput.value.trim().replace(/\/+$/, '');
+                    if (customVal && (customVal.startsWith('http://') || customVal.startsWith('https://'))) {
+                        localStorage.setItem('crystal_backend_api', customVal);
+                    } else if (!customVal) {
+                        localStorage.removeItem('crystal_backend_api');
+                    }
                 }
                 
                 // Firestore synchronization for custom username & custom instructions
@@ -4157,8 +4216,31 @@
             const modal = document.getElementById('lightbox-modal');
             const img = document.getElementById('lightbox-img');
             const cap = document.getElementById('lightbox-caption');
+            const spinner = document.getElementById('lightbox-spinner');
             const saveText = document.getElementById('lightbox-save-text');
             if (!modal || !img) return;
+
+            if (spinner) spinner.classList.remove('hidden');
+            img.style.opacity = '0';
+
+            img.onload = function() {
+                if (spinner) spinner.classList.add('hidden');
+                img.style.opacity = '1';
+            };
+
+            img.onerror = function() {
+                if (spinner) spinner.classList.add('hidden');
+                img.style.opacity = '1';
+                if (src && src.startsWith('http') && !src.includes('/api/image-proxy')) {
+                    console.warn("Retrying image via proxy:", src);
+                    const proxyBase = typeof window.getApiEndpoint === 'function' ? window.getApiEndpoint('/api/image-proxy') : '/api/image-proxy';
+                    img.src = proxyBase + '?url=' + encodeURIComponent(src);
+                } else {
+                    console.warn("Failed to load lightbox image");
+                    if (typeof showToast === 'function') showToast("Preview image failed to load", "error");
+                }
+            };
+
             img.src = src;
             if (cap) cap.textContent = alt || 'Crystal Image Preview';
             if (saveText) saveText.textContent = 'Save Image';
@@ -5256,7 +5338,19 @@
 
         window.getApiBaseUrl = function() {
             const custom = (localStorage.getItem('crystal_backend_api') || '').trim();
-            if (custom) return custom;
+            if (custom && (custom.startsWith('http://') || custom.startsWith('https://'))) {
+                return custom.replace(/\/+$/, '');
+            }
+            // Check if running inside native Android / mobile Capacitor or bundled webview
+            const isNative = (typeof window.Capacitor !== 'undefined' && 
+                             ((window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) || 
+                              (window.Capacitor.getPlatform && window.Capacitor.getPlatform() !== 'web'))) ||
+                             window.location.origin.includes('localhost') ||
+                             window.location.protocol === 'capacitor:';
+            if (isNative) {
+                // If running in standalone Android APK, auto-route to the cloud-hosted backend server
+                return 'https://ais-pre-ou77fkmqnai5ygl3akges5-278962941255.asia-southeast1.run.app';
+            }
             return '';
         };
 
@@ -5264,6 +5358,60 @@
             const base = window.getApiBaseUrl().replace(/\/+$/, '');
             const cleanRoute = route.startsWith('/') ? route : '/' + route;
             return `${base}${cleanRoute}`;
+        };
+
+        window.testBackendConnection = async function() {
+            const display = document.getElementById('active-backend-display');
+            const indicator = document.getElementById('backend-status-indicator');
+            const endpoint = window.getApiEndpoint('/health');
+            if (display) display.textContent = `Pinging ${endpoint}...`;
+            try {
+                const res = await fetch(endpoint, { method: 'GET', signal: AbortSignal.timeout(6000) });
+                if (res.ok) {
+                    if (display) display.textContent = `${endpoint} (Online 200 OK)`;
+                    if (indicator) {
+                        indicator.className = 'text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5';
+                        indicator.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><span>Connected</span>';
+                    }
+                    if (typeof showToast === 'function') showToast('Successfully reached Crystal backend!', 'success');
+                } else {
+                    throw new Error(`HTTP ${res.status}`);
+                }
+            } catch (err) {
+                if (display) display.textContent = `${endpoint} (${err.message})`;
+                if (indicator) {
+                    indicator.className = 'text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-1.5';
+                    indicator.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span><span>Unreachable</span>';
+                }
+                if (typeof showToast === 'function') showToast(`Backend ping failed: ${err.message}`, 'error');
+            }
+        };
+
+        window.testCustomBackendUrl = async function() {
+            const input = document.getElementById('custom-backend-url');
+            if (!input || !input.value.trim()) {
+                if (typeof showToast === 'function') showToast('Please enter a server URL to test', 'warning');
+                return;
+            }
+            const clean = input.value.trim().replace(/\/+$/, '');
+            try {
+                const res = await fetch(`${clean}/health`, { method: 'GET', signal: AbortSignal.timeout(6000) });
+                if (res.ok) {
+                    localStorage.setItem('crystal_backend_api', clean);
+                    if (typeof showToast === 'function') showToast('Custom backend connected and saved!', 'success');
+                    const display = document.getElementById('active-backend-display');
+                    if (display) display.textContent = `${clean} (Online)`;
+                    const indicator = document.getElementById('backend-status-indicator');
+                    if (indicator) {
+                        indicator.className = 'text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5';
+                        indicator.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><span>Custom URL</span>';
+                    }
+                } else {
+                    throw new Error(`HTTP ${res.status}`);
+                }
+            } catch (e) {
+                if (typeof showToast === 'function') showToast(`Custom backend check failed: ${e.message}`, 'error');
+            }
         };
 
         window.fetchCrystalApi = async function(route, options = {}) {
@@ -5324,9 +5472,16 @@
                 if (callerSignal?.aborted || err.name === 'AbortError') {
                     throw err;
                 }
-                // If primary endpoint failed and differs from local cleanRoute, try relative route
-                if (primaryEndpoint !== cleanRoute) {
-                    console.warn(`Primary endpoint ${primaryEndpoint} failed (${err.message}). Trying fallback ${cleanRoute}...`);
+                const cloudFallback = 'https://ais-pre-ou77fkmqnai5ygl3akges5-278962941255.asia-southeast1.run.app' + cleanRoute;
+                if (primaryEndpoint !== cloudFallback && !primaryEndpoint.includes('asia-southeast1.run.app')) {
+                    console.warn(`Primary endpoint ${primaryEndpoint} failed (${err.message}). Trying cloud fallback ${cloudFallback}...`);
+                    try {
+                        return await executeFetch(cloudFallback, 35000);
+                    } catch (fbErr) {
+                        throw err;
+                    }
+                } else if (primaryEndpoint !== cleanRoute && cleanRoute.startsWith('/')) {
+                    console.warn(`Primary endpoint ${primaryEndpoint} failed (${err.message}). Trying relative fallback ${cleanRoute}...`);
                     try {
                         return await executeFetch(cleanRoute, 30000);
                     } catch (fbErr) {
@@ -5533,13 +5688,26 @@
 
         // Markdown + Code Blocks + Collapsible thought processes
         
-        // Dynamic Crystalline Interactive Product Pill Component using Official Website Logos
+        // Dynamic Crystalline Interactive Product Pill Component using Official Website Logos & Accurate Location
         window.renderProductPillHtml = function(product) {
             const rawTitle = (product.title || 'Featured Product').trim();
             const title = rawTitle.replace(/"/g, '&quot;');
             let brand = (product.brand || 'Store').replace(/"/g, '&quot;');
             const price = (product.price || '').replace(/"/g, '&quot;');
             let url = (product.url || '').trim();
+            let imgSrc = (product.img || product.image || '').trim();
+
+            const isIndia = (function() {
+                try {
+                    const tz = (Intl.DateTimeFormat().resolvedOptions().timeZone || '').toLowerCase();
+                    const cur = (localStorage.getItem('crystal_currency') || '').toUpperCase();
+                    const country = (localStorage.getItem('crystal_user_country') || '').toUpperCase();
+                    const lang = (localStorage.getItem('crystal_language') || '').toLowerCase();
+                    return tz.includes('kolkata') || tz.includes('calcutta') || tz.includes('india') || tz.includes('ist') ||
+                           cur === 'INR' || country === 'IN' ||
+                           lang === 'telugu' || lang === 'hindi' || lang === 'tamil' || lang === 'bengali';
+                } catch(e) { return false; }
+            })();
 
             let domain = '';
             if (url && typeof url === 'string' && (url.startsWith('http://') || url.startsWith('https://'))) {
@@ -5550,22 +5718,21 @@
 
             if (!domain || domain === 'example.com' || domain === 'localhost') {
                 const combined = ((brand || '') + ' ' + rawTitle).toLowerCase();
-                if (combined.includes('amazon')) domain = 'amazon.com';
+                if (combined.includes('amazon')) domain = isIndia ? 'amazon.in' : 'amazon.com';
                 else if (combined.includes('flipkart')) domain = 'flipkart.com';
+                else if (combined.includes('croma')) domain = 'croma.com';
+                else if (combined.includes('reliance')) domain = 'reliancedigital.in';
+                else if (combined.includes('myntra')) domain = 'myntra.com';
                 else if (combined.includes('best buy') || combined.includes('bestbuy')) domain = 'bestbuy.com';
-                else if (combined.includes('apple')) domain = 'apple.com';
-                else if (combined.includes('nike')) domain = 'nike.com';
+                else if (combined.includes('apple')) domain = isIndia ? 'apple.com/in' : 'apple.com';
+                else if (combined.includes('nike')) domain = isIndia ? 'nike.com/in' : 'nike.com';
                 else if (combined.includes('walmart')) domain = 'walmart.com';
                 else if (combined.includes('target')) domain = 'target.com';
                 else if (combined.includes('ebay')) domain = 'ebay.com';
-                else if (combined.includes('samsung')) domain = 'samsung.com';
-                else if (combined.includes('myntra')) domain = 'myntra.com';
-                else if (combined.includes('croma')) domain = 'croma.com';
-                else if (combined.includes('aliexpress')) domain = 'aliexpress.com';
+                else if (combined.includes('samsung')) domain = isIndia ? 'samsung.com/in' : 'samsung.com';
                 else if (combined.includes('google')) domain = 'store.google.com';
-                else if (combined.includes('microsoft')) domain = 'microsoft.com';
-                else if (combined.includes('sony')) domain = 'sony.com';
-                else domain = 'google.com';
+                else if (combined.includes('sony')) domain = isIndia ? 'sony.co.in' : 'sony.com';
+                else domain = isIndia ? 'google.co.in' : 'google.com';
             }
 
             if (brand === 'Store' || brand === 'Verified' || brand === 'Verified Store') {
@@ -5576,9 +5743,15 @@
             if (!url || url === '#' || url === '' || url.includes('example.com') || !url.startsWith('http')) {
                 const searchQ = encodeURIComponent(rawTitle + (brand !== 'Store' ? ' ' + brand : ''));
                 if (domain.includes('amazon')) {
-                    url = 'https://www.amazon.com/s?k=' + searchQ;
+                    url = isIndia ? 'https://www.amazon.in/s?k=' + searchQ : 'https://www.amazon.com/s?k=' + searchQ;
                 } else if (domain.includes('flipkart')) {
                     url = 'https://www.flipkart.com/search?q=' + searchQ;
+                } else if (domain.includes('croma')) {
+                    url = 'https://www.croma.com/searchB?q=' + searchQ;
+                } else if (domain.includes('reliancedigital')) {
+                    url = 'https://www.reliancedigital.in/search?q=' + searchQ;
+                } else if (domain.includes('myntra')) {
+                    url = 'https://www.myntra.com/' + searchQ;
                 } else if (domain.includes('bestbuy')) {
                     url = 'https://www.bestbuy.com/site/searchpage.jsp?st=' + searchQ;
                 } else if (domain.includes('walmart')) {
@@ -5588,19 +5761,27 @@
                 } else if (domain.includes('ebay')) {
                     url = 'https://www.ebay.com/sch/i.html?_nkw=' + searchQ;
                 } else {
-                    url = 'https://www.google.com/search?tbm=shop&q=' + searchQ;
+                    url = isIndia ? 'https://www.google.co.in/search?tbm=shop&q=' + searchQ : 'https://www.google.com/search?tbm=shop&q=' + searchQ;
                 }
             }
 
-            const websiteLogo = 'https://www.google.com/s2/favicons?domain=' + encodeURIComponent(domain) + '&sz=128';
-            const fallbackLogo = 'https://icons.duckduckgo.com/ip3/' + encodeURIComponent(domain) + '.ico';
+            const websiteLogo = 'https://www.google.com/s2/favicons?domain=' + encodeURIComponent(domain.split('/')[0]) + '&sz=128';
+            const fallbackLogo = 'https://icons.duckduckgo.com/ip3/' + encodeURIComponent(domain.split('/')[0]) + '.ico';
             const priceHtml = price ? '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 tracking-tight shadow-xs">' + price + '</span>' : '';
+
+            const imageHtml = imgSrc ? (
+                '<div class="relative w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-indigo-500/30 shrink-0 flex items-center justify-center p-1.5 shadow-xs overflow-hidden cursor-zoom-in" onclick="if(window.openLightbox) window.openLightbox(\'' + imgSrc.replace(/'/g, "\\'") + '\', \'' + title.replace(/'/g, "\\'") + '\'); event.stopPropagation();" title="Click to view image">' +
+                    '<img src="' + imgSrc + '" alt="' + title + '" class="w-full h-full object-cover rounded-xl transition-transform hover:scale-105" onerror="this.onerror=null; this.src=\'' + websiteLogo + '\'; this.className=\'w-full h-full object-contain p-1\';" />' +
+                '</div>'
+            ) : (
+                '<div class="relative w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-indigo-500/30 shrink-0 flex items-center justify-center p-2.5 shadow-xs">' +
+                    '<img src="' + websiteLogo + '" alt="' + brand + ' Logo" class="w-full h-full object-contain rounded" onerror="this.onerror=null; this.src=\'' + fallbackLogo + '\';" />' +
+                '</div>'
+            );
 
             return '<div class="my-3 w-full max-w-[540px] bg-slate-900/5 dark:bg-slate-900/80 hover:bg-slate-900/10 dark:hover:bg-slate-900/95 border border-slate-200 dark:border-indigo-500/30 rounded-[24px] p-3 sm:p-3.5 shadow-lg backdrop-blur-xl flex items-center justify-between gap-3 group select-none transition-all duration-300 hover:shadow-indigo-500/15 hover:-translate-y-0.5">' +
                 '<div class="flex items-center gap-3 min-w-0 flex-1">' +
-                    '<div class="relative w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-indigo-500/30 shrink-0 flex items-center justify-center p-2.5 shadow-xs">' +
-                        '<img src="' + websiteLogo + '" alt="' + brand + ' Logo" class="w-full h-full object-contain rounded" onerror="this.onerror=null; this.src=\'' + fallbackLogo + '\';" />' +
-                    '</div>' +
+                    imageHtml +
                     '<div class="flex flex-col min-w-0 flex-1 justify-center">' +
                         '<div class="flex items-center gap-1.5 mb-1 flex-wrap">' +
                             '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-indigo-500/15 text-indigo-600 dark:text-indigo-300 border border-indigo-500/25 shadow-2xs">' +
@@ -5612,7 +5793,7 @@
                         '<h4 class="font-bold text-[13.5px] sm:text-[14px] text-slate-900 dark:text-slate-100 truncate leading-tight group-hover:text-indigo-500 dark:group-hover:text-indigo-300 transition-colors" title="' + title + '">' + title + '</h4>' +
                         '<span class="text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate mt-0.5 flex items-center gap-1">' +
                             '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>' +
-                            domain + ' • Official Store' +
+                            domain.split('/')[0] + ' • Official Store' +
                         '</span>' +
                     '</div>' +
                 '</div>' +
@@ -5629,7 +5810,10 @@
             s = s.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-bold text-[var(--text-color)]">$1</strong>');
             s = s.replace(/(^|[^*])\*([^*\n]+)\*([^*]|$)/g, '$1<em class="italic opacity-90">$2</em>$3');
             s = s.replace(/\x60([^\x60\n]+)\x60/g, '<code class="bg-indigo-500/10 px-1.5 py-0.5 rounded text-indigo-400 font-mono text-[0.85em] font-semibold">$1</code>');
-            s = s.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" class="text-indigo-400 hover:text-indigo-300 font-bold underline transition-colors">$1</a>');
+            s = s.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (match, linkText, url) => {
+                const cleanUrl = url.trim().replace(/&amp;/g, '&');
+                return `<a href="${cleanUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-indigo-400 hover:text-indigo-300 font-semibold underline transition-colors">${linkText} <svg class="w-3 h-3 inline-block shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>`;
+            });
             return s;
         }
 
@@ -5716,36 +5900,101 @@
                     return { key: l, display: l.toUpperCase() };
                 };
 
-                // Extract Product Tags [product: Title | Image | Brand | Price | Link]
-                const productTagRegex = /\[product:\s*([^|\]]+?)(?:\s*\|\s*([^|\]]*?))?(?:\s*\|\s*([^|\]]*?))?(?:\s*\|\s*([^|\]]*?))?(?:\s*\|\s*([^|\]]*?))?\]/gi;
-                text = text.replace(productTagRegex, (match, title, img, brand, price, url) => {
+                // Extract Display Math Blocks ($$...$$ and \[...\]) into pristine tokens
+                const displayMathRegex = /(\$\$[\s\S]*?\$\$|\\\[[\s\S]*?\\\])/g;
+                text = text.replace(displayMathRegex, (match) => {
+                    let expr = match;
+                    if (expr.startsWith('$$') && expr.endsWith('$$')) {
+                        expr = expr.slice(2, -2).trim();
+                    } else if (expr.startsWith('\\[') && expr.endsWith('\\]')) {
+                        expr = expr.slice(2, -2).trim();
+                    }
+                    if (!expr) return '';
+                    if (typeof katex !== 'undefined' && typeof katex.renderToString === 'function') {
+                        try {
+                            const mathHtml = katex.renderToString(expr, { displayMode: true, throwOnError: false });
+                            return addToken(`<div class="katex-display my-3.5 overflow-x-auto text-center">${mathHtml}</div>`);
+                        } catch (e) {}
+                    }
+                    return addToken(`<div class="katex-display katex-math-block my-3.5 overflow-x-auto text-center" data-display="true" data-expr="${encodeURIComponent(expr)}">$$${escapeHtml(expr)}$$</div>`);
+                });
+
+                // Extract Inline Math ($...$ and \(...\)) into pristine tokens
+                const inlineMathRegex = /(\$([^\$\n\r]+?)\$|\\\(([\s\S]*?)\\\))/g;
+                text = text.replace(inlineMathRegex, (match, p1, p2, p3) => {
+                    let expr = p2 !== undefined ? p2 : p3;
+                    if (!expr || !expr.trim()) return match;
+                    // Protect standard currency figures ($50, $19.99, $1,000) from being parsed as math
+                    if (/^\s*\d+([.,]\d+)?\s*(USD|EUR|GBP|INR)?\s*$/i.test(expr)) {
+                        return match;
+                    }
+                    expr = expr.trim();
+                    if (typeof katex !== 'undefined' && typeof katex.renderToString === 'function') {
+                        try {
+                            const mathHtml = katex.renderToString(expr, { displayMode: false, throwOnError: false });
+                            return addToken(`<span class="katex-inline inline">${mathHtml}</span>`);
+                        } catch (e) {}
+                    }
+                    return addToken(`<span class="katex-inline katex-math-inline inline" data-display="false" data-expr="${encodeURIComponent(expr)}">$${escapeHtml(expr)}$</span>`);
+                });
+
+                // Extract Product Tags [product: Title | Image | Brand | Price | Link] or flexible arguments
+                const productTagRegex = /\[product:\s*([^\]]+?)\]/gi;
+                text = text.replace(productTagRegex, (match, body) => {
+                    const parts = (body || '').split('|').map(s => s.trim());
+                    const title = parts[0] || 'Featured Product';
+                    let img = '';
+                    let brand = '';
+                    let price = '';
+                    let url = '';
+
+                    const remaining = parts.slice(1);
+                    for (const p of remaining) {
+                        if (!p) continue;
+                        if (!url && p.startsWith('http') && !p.match(/\.(jpg|jpeg|png|webp|gif|svg)(\?.*)?$/i) && !p.includes('/api/image-proxy')) {
+                            url = p;
+                        } else if (!img && (p.startsWith('data:image') || p.match(/\.(jpg|jpeg|png|webp|gif|svg)(\?.*)?$/i) || p.includes('/api/image-proxy') || p.includes('image.pollinations.ai') || p.includes('images.') || p.includes('m.media-amazon.com') || p.includes('rukminim'))) {
+                            img = p;
+                        } else if (!price && (p.startsWith('₹') || p.startsWith('$') || p.startsWith('€') || p.startsWith('£') || p.startsWith('Rs') || /^\d[\d,.]*\s*(INR|USD|EUR)?$/i.test(p))) {
+                            price = p;
+                        } else if (!brand) {
+                            brand = p;
+                        } else if (!url && p.startsWith('http')) {
+                            url = p;
+                        }
+                    }
+
                     const cardHtml = window.renderProductPillHtml({
-                        title: title ? title.trim() : 'Featured Product',
-                        img: img ? img.trim() : '',
-                        brand: brand ? brand.trim() : (img && !img.startsWith('http') ? img.trim() : 'Store'),
-                        price: price ? price.trim() : '',
-                        url: url ? url.trim() : ''
+                        title: title,
+                        img: img,
+                        brand: brand || 'Store',
+                        price: price,
+                        url: url
                     });
                     return addToken(cardHtml);
                 });
 
-                // Extract direct shopping store links into interactive product pills
-                const shoppingLinkRegex = /\[([^\]]+)\]\((https?:\/\/(?:www\.)?(?:amazon\.[a-z.]+|flipkart\.com|apple\.com\/[a-z/]*shop|store\.apple\.com|nike\.com|bestbuy\.com|target\.com|walmart\.com|myntra\.com|sephora\.com|zara\.com|ebay\.com)[^\s)]+)\)/gi;
-                text = text.replace(shoppingLinkRegex, (match, linkTitle, storeUrl) => {
-                    let domainName = 'Store';
-                    try {
-                        domainName = new URL(storeUrl).hostname.replace(/^www\./, '').split('.')[0];
-                        domainName = domainName.charAt(0).toUpperCase() + domainName.slice(1);
-                    } catch(e) {}
-                    const cardHtml = window.renderProductPillHtml({
-                        title: linkTitle.trim(),
-                        img: '',
-                        brand: domainName,
-                        price: '',
-                        url: storeUrl.trim()
+                // Extract direct shopping store links into interactive product pills ONLY outside of markdown tables
+                const shoppingLinkRegex = /\[([^\]]+)\]\((https?:\/\/(?:www\.)?(?:amazon\.[a-z.]+|flipkart\.com|croma\.com|reliancedigital\.in|tatacliq\.com|jiomart\.com|myntra\.com|meesho\.com|apple\.com\/[a-z/]*shop|store\.apple\.com|apple\.com|nike\.com|bestbuy\.com|target\.com|walmart\.com|sephora\.com|zara\.com|ebay\.[a-z.]+|samsung\.com|sony\.[a-z.]+)[^\s)]+)\)/gi;
+                const preTableLines = text.split('\n');
+                text = preTableLines.map(line => {
+                    if (line.includes('|')) return line; // preserve inline for table cells
+                    return line.replace(shoppingLinkRegex, (match, linkTitle, storeUrl) => {
+                        let domainName = 'Store';
+                        try {
+                            domainName = new URL(storeUrl).hostname.replace(/^www\./, '').split('.')[0];
+                            domainName = domainName.charAt(0).toUpperCase() + domainName.slice(1);
+                        } catch(e) {}
+                        const cardHtml = window.renderProductPillHtml({
+                            title: linkTitle.trim(),
+                            img: '',
+                            brand: domainName,
+                            price: '',
+                            url: storeUrl.trim()
+                        });
+                        return addToken(cardHtml);
                     });
-                    return addToken(cardHtml);
-                });
+                }).join('\n');
 
                 // Extract Code Blocks
                 const codeBlockRegex = /\x60\x60\x60([a-zA-Z0-9-+#_]*)\n?([\s\S]*?)(?:\x60\x60\x60|$)/g;
@@ -5968,11 +6217,45 @@
                 }
                 html = blocks.join('');
 
-                // Restore all placeholder tokens
-                tokens.forEach((tokenHtml, idx) => {
-                    const placeholder = `%%CRYSTAL_BLOCK_${idx}%%`;
-                    html = html.split(placeholder).join(tokenHtml);
-                });
+                // Step 1: Pre-resolve nested tokens inside the tokens array itself
+                for (let pass = 0; pass < 5; pass++) {
+                    let hasNested = false;
+                    for (let i = 0; i < tokens.length; i++) {
+                        if (typeof tokens[i] === 'string' && tokens[i].includes('%%CRYSTAL_BLOCK_')) {
+                            tokens[i] = tokens[i].replace(/%%CRYSTAL_BLOCK_(\d+)%%/g, (m, id) => {
+                                const n = parseInt(id, 10);
+                                if (n < tokens.length && n !== i) {
+                                    hasNested = true;
+                                    return tokens[n];
+                                }
+                                return m;
+                            });
+                        }
+                    }
+                    if (!hasNested) break;
+                }
+
+                // Step 2: Multi-pass restore tokens into html until no placeholders remain
+                let maxPasses = 10;
+                while (html.includes('%%CRYSTAL_BLOCK_') && maxPasses-- > 0) {
+                    let replacedAny = false;
+                    tokens.forEach((tokenHtml, idx) => {
+                        const placeholder = `%%CRYSTAL_BLOCK_${idx}%%`;
+                        if (html.includes(placeholder)) {
+                            html = html.split(placeholder).join(tokenHtml);
+                            replacedAny = true;
+                        }
+                    });
+                    if (!replacedAny) break;
+                }
+
+                // Step 3: Absolute safety net - resolve any stubborn orphan placeholders
+                if (html.includes('%%CRYSTAL_BLOCK_')) {
+                    html = html.replace(/%%CRYSTAL_BLOCK_(\d+)%%/g, (m, id) => {
+                        const n = parseInt(id, 10);
+                        return (n < tokens.length) ? tokens[n] : '';
+                    });
+                }
 
                 return html;
             } catch (e) {
@@ -7638,7 +7921,7 @@ print("Luau script execution finished.")
             }
         }
 
-        window.stopOrPauseGeneration = function() {
+        window.stopOrPauseGeneration = function(isChatSwitch = false) {
             const hadActiveRequest = window.isGeneratingResponse;
             if (window.activeAbortController) {
                 try { window.activeAbortController.abort(); } catch(e) {}
@@ -7666,8 +7949,8 @@ print("Luau script execution finished.")
             setGenerationButtonState(false);
             triggerHaptic('medium');
 
-            // If stopped while waiting for first tokens (before typewriter began), add paused bubble
-            if (hadActiveRequest && !hadFinalizeCallback && hadTypingElem) {
+            // If stopped while waiting for first tokens (before typewriter began) and NOT switching/clearing chats
+            if (!isChatSwitch && hadActiveRequest && !hadFinalizeCallback && hadTypingElem) {
                 addBubble("*(Generation paused)*", "bot", false);
             }
         };
@@ -8199,20 +8482,36 @@ print("Luau script execution finished.")
                 };
 
                 const triggerMathRendering = () => {
-                    setTimeout(() => {
+                    const doRender = () => {
                         if (typeof renderMathInElement === 'function') {
-                            renderMathInElement(bubble, {
-                                delimiters: [
-                                    {left: '$$', right: '$$', display: true},
-                                    {left: '\\[', right: '\\]', display: true},
-                                    {left: '\\(', right: '\\)', display: false},
-                                    {left: '$', right: '$', display: false}
-                                ],
-                                throwOnError: false,
-                                ignoredTags: ["script", "noscript", "style", "textarea", "pre", "code"]
+                            try {
+                                renderMathInElement(bubble, {
+                                    delimiters: [
+                                        {left: '$$', right: '$$', display: true},
+                                        {left: '\\[', right: '\\]', display: true},
+                                        {left: '\\(', right: '\\)', display: false},
+                                        {left: '$', right: '$', display: false}
+                                    ],
+                                    throwOnError: false,
+                                    ignoredTags: ["script", "noscript", "style", "textarea", "pre", "code"]
+                                });
+                            } catch (e) {}
+                        }
+                        if (typeof katex !== 'undefined' && typeof katex.render === 'function') {
+                            bubble.querySelectorAll('.katex-math-block[data-expr], .katex-math-inline[data-expr]').forEach(el => {
+                                try {
+                                    const rawExpr = decodeURIComponent(el.getAttribute('data-expr') || '');
+                                    const isDisplay = el.getAttribute('data-display') === 'true';
+                                    if (rawExpr) {
+                                        katex.render(rawExpr, el, { displayMode: isDisplay, throwOnError: false });
+                                    }
+                                } catch (e) {}
                             });
                         }
-                    }, 50);
+                    };
+                    doRender();
+                    setTimeout(doRender, 40);
+                    setTimeout(doRender, 200);
                 };
 
                 if (isTyping) {
@@ -8419,6 +8718,7 @@ print("Luau script execution finished.")
                 let terminalPromise = Promise.resolve();
                 const activeTier = localStorage.getItem('selected_crystal_tier') || 'crystal_core';
 
+                let terminalDone = false;
                 if (isUltraCoder) {
                     terminalPromise = new Promise(async (resolve) => {
                         const stages = [
@@ -8429,8 +8729,8 @@ print("Luau script execution finished.")
                             "Adding clear comments and notes..."
                         ];
                         for (let i = 0; i < stages.length; i++) {
-                            if (window.activeGenerationSessionId !== thisSessionId) return resolve();
-                            await new Promise(r => setTimeout(r, 650 + Math.random() * 300));
+                            if (window.activeGenerationSessionId !== thisSessionId || terminalDone) return resolve();
+                            await new Promise(r => setTimeout(r, 60));
                             if (window.activeGenerationSessionId !== thisSessionId) return resolve();
                             const termContainer = document.getElementById('ultra-coder-terminal-lines');
                             if (termContainer) {
@@ -8511,6 +8811,7 @@ print("Luau script execution finished.")
                 }
                 
                 // Wait for simulated terminal if Ultra Coder is enabled
+                terminalDone = true;
                 await terminalPromise;
 
                 // Re-verify session after terminal animation
@@ -8562,6 +8863,16 @@ print("Luau script execution finished.")
                 }
                 
                 const latencyMs = Math.round(performance.now() - requestStartTime);
+
+                // If user switched or cleared chats while request was running or thinking, discard UI mutation
+                if (window.activeGenerationSessionId !== thisSessionId || currentChatId !== requestChatId) {
+                    stopLiveThinkingStream();
+                    if (typingNode && typingNode.parentNode) typingNode.remove();
+                    if (thinkingBg) thinkingBg.classList.remove('active');
+                    window.isGeneratingResponse = false;
+                    setGenerationButtonState(false);
+                    return;
+                }
 
                 // Stream out bot reply with typewriter animation
                 addBubble(finalReply, 'bot', false, data.sources, null, data.tokenizer_info, thinkingContent, data.search_query, latencyMs, true, async (deliveredText) => {
@@ -9226,7 +9537,7 @@ print("Luau script execution finished.")
         function loadChat(chatId, messages) {
             if (!messages) return;
             if (window.isGeneratingResponse) {
-                window.stopOrPauseGeneration();
+                window.stopOrPauseGeneration(true);
             }
             window.activeGenerationSessionId = (window.activeGenerationSessionId || 0) + 1;
 
@@ -9247,7 +9558,7 @@ print("Luau script execution finished.")
 
         function startNewChat() {
             if (window.isGeneratingResponse) {
-                window.stopOrPauseGeneration();
+                window.stopOrPauseGeneration(true);
             }
             window.activeGenerationSessionId = (window.activeGenerationSessionId || 0) + 1;
 
@@ -10069,9 +10380,12 @@ echo "Status: ONLINE"
 
             // 5. Trigger Google Translate for 100% full-page DOM translation
             try {
+                const host = window.location.hostname;
                 if (langCode === 'en' || langName === 'English') {
                     document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+                    document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=${host}; path=/;`;
                     document.cookie = `googtrans=/en/en; path=/;`;
+                    document.cookie = `googtrans=/en/en; domain=${host}; path=/;`;
                     const combo = document.querySelector('.goog-te-combo');
                     if (combo) {
                         combo.value = 'en';
@@ -10079,12 +10393,25 @@ echo "Status: ONLINE"
                     }
                 } else {
                     let gtCode = langCode;
-                    if (gtCode === 'pt-PT') gtCode = 'pt';
+                    if (gtCode === 'pt-PT' || gtCode === 'pt-BR') gtCode = 'pt';
+                    if (gtCode === 'zh-CN') gtCode = 'zh-CN';
+                    if (gtCode === 'zh-TW') gtCode = 'zh-TW';
+                    document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+                    document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=${host}; path=/;`;
                     document.cookie = `googtrans=/en/${gtCode}; path=/;`;
+                    document.cookie = `googtrans=/en/${gtCode}; domain=${host}; path=/;`;
                     const combo = document.querySelector('.goog-te-combo');
                     if (combo) {
                         combo.value = gtCode;
                         combo.dispatchEvent(new Event('change'));
+                    } else {
+                        setTimeout(() => {
+                            const lateCombo = document.querySelector('.goog-te-combo');
+                            if (lateCombo) {
+                                lateCombo.value = gtCode;
+                                lateCombo.dispatchEvent(new Event('change'));
+                            }
+                        }, 500);
                     }
                 }
             } catch(e) {
@@ -10169,7 +10496,7 @@ echo "Status: ONLINE"
                     ? 'bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] border-[var(--md-sys-color-primary)] font-bold shadow-xs'
                     : 'bg-[var(--md-sys-color-surface-container)] hover:bg-[var(--md-sys-color-surface-container-high)] text-[var(--md-sys-color-on-surface)] border-[var(--md-sys-color-outline-variant)]';
 
-                return '<button onclick="applyAppLanguage(\'' + lang.name + '\')" class="flex items-center justify-between p-2.5 rounded-xl border text-left text-xs transition-all active:scale-95 ' + activeClass + '">' +
+                return '<button onclick="applyAppLanguage(\'' + lang.name + '\'); toggleQuickLanguageModal();" class="flex items-center justify-between p-2.5 rounded-xl border text-left text-xs transition-all active:scale-95 ' + activeClass + '">' +
                     '<div class="flex items-center gap-2 min-w-0">' +
                         '<span class="text-base">' + (lang.flag || '🌐') + '</span>' +
                         '<div class="truncate">' +
@@ -10251,11 +10578,245 @@ echo "Status: ONLINE"
             applyAppLanguage(langName, false);
         };
 
-        if (typeof window.updateUIStrings !== 'function') {
-            window.updateUIStrings = function(lang) {
-                console.log('App UI localized to:', lang);
-            };
-        }
+        window.updateUIStrings = function(langName) {
+            try {
+                const lang = (langName || 'English').toLowerCase();
+                const dict = {
+                    english: {
+                        placeholder: "Ask anything, search the web, generate images...",
+                        greeting: "What's on your mind today?",
+                        newChat: "New Chat",
+                        skip: "Skip for now",
+                        finish: "Get Started with Crystal"
+                    },
+                    telugu: {
+                        placeholder: "ఏదైనా అడగండి, వెబ్‌లో వెతకండి, చిత్రాలు రూపొందించండి...",
+                        greeting: "ఈరోజు మీ ఆలోచన ఏమిటి?",
+                        newChat: "కొత్త సంభాషణ",
+                        skip: "ఇప్పుడు దాటవేయి",
+                        finish: "క్రిస్టల్‌తో ప్రారంభించండి"
+                    },
+                    hindi: {
+                        placeholder: "कुछ भी पूछें, वेब खोजें, छवियां बनाएं...",
+                        greeting: "आज आपके मन में क्या है?",
+                        newChat: "नई चैट",
+                        skip: "अभी छोड़ें",
+                        finish: "क्रिस्टल शुरू करें"
+                    },
+                    spanish: {
+                        placeholder: "Pregunta lo que sea, busca en la web, genera imágenes...",
+                        greeting: "¿Qué tienes en mente hoy?",
+                        newChat: "Nuevo chat",
+                        skip: "Omitir por ahora",
+                        finish: "Comenzar con Crystal"
+                    },
+                    french: {
+                        placeholder: "Demandez n'importe quoi, recherchez, créez des images...",
+                        greeting: "À quoi pensez-vous aujourd'hui ?",
+                        newChat: "Nouvelle discussion",
+                        skip: "Ignorer pour l'instant",
+                        finish: "Commencer avec Crystal"
+                    },
+                    german: {
+                        placeholder: "Fragen Sie alles, im Web suchen, Bilder generieren...",
+                        greeting: "Was beschäftigt Sie heute?",
+                        newChat: "Neuer Chat",
+                        skip: "Jetzt überspringen",
+                        finish: "Mit Crystal starten"
+                    },
+                    japanese: {
+                        placeholder: "何でも質問、ウェブ検索、画像生成...",
+                        greeting: "今日はどのようなご用件でしょうか？",
+                        newChat: "新しいチャット",
+                        skip: "今はスキップ",
+                        finish: "Crystal を始める"
+                    },
+                    chinese: {
+                        placeholder: "询问任何问题、搜索网络、生成图像...",
+                        greeting: "今天有什么想法？",
+                        newChat: "新建对话",
+                        skip: "暂时跳过",
+                        finish: "开始使用 Crystal"
+                    },
+                    arabic: {
+                        placeholder: "اسأل أي شيء، ابحث في الويب، أنشئ صوراً...",
+                        greeting: "ما الذي يدور في ذهنك اليوم؟",
+                        newChat: "محادثة جديدة",
+                        skip: "تخطي الآن",
+                        finish: "ابدأ مع كريستال"
+                    },
+                    portuguese: {
+                        placeholder: "Pergunte qualquer coisa, pesquise na web, gere imagens...",
+                        greeting: "O que você tem em mente hoje?",
+                        newChat: "Nova conversa",
+                        skip: "Pular por enquanto",
+                        finish: "Começar com Crystal"
+                    },
+                    tamil: {
+                        placeholder: "எதையும் கேளுங்கள், இணையத்தில் தேடுங்கள், படங்களை உருவாக்குங்கள்...",
+                        greeting: "இன்று உங்கள் மனதில் என்ன இருக்கிறது?",
+                        newChat: "புதிய அரட்டை",
+                        skip: "இப்போது தவிர்க்கவும்",
+                        finish: "கிரிஸ்டலுடன் தொடங்குங்கள்"
+                    },
+                    kannada: {
+                        placeholder: "ಏನನ್ನಾದರೂ ಕೇಳಿ, ವೆಬ್‌ನಲ್ಲಿ ಹುಡುಕಿ, ಚಿತ್ರಗಳನ್ನು ರಚಿಸಿ...",
+                        greeting: "ಇಂದು ನಿಮ್ಮ ಮನಸ್ಸಿನಲ್ಲಿ ಏನಿದೆ?",
+                        newChat: "ಹೊಸ ಚಾಟ್",
+                        skip: "ಈಗ ಬಿಟ್ಟುಬಿಡಿ",
+                        finish: "ಕ್ರಿಸ್ಟಲ್‌ನೊಂದಿಗೆ ಪ್ರಾರಂಭಿಸಿ"
+                    },
+                    bengali: {
+                        placeholder: "যেকোনো কিছু জিজ্ঞাসা করুন, ওয়েব খুঁজুন, ছবি তৈরি করুন...",
+                        greeting: "আজ আপনার মনে কী আছে?",
+                        newChat: "নতুন চ্যাট",
+                        skip: "এখনই এড়িয়ে যান",
+                        finish: "ক্রিস্টাল দিয়ে শুরু করুন"
+                    }
+                };
+
+                let matched = dict[lang];
+                if (!matched) {
+                    for (const k in dict) {
+                        if (lang.includes(k)) {
+                            matched = dict[k];
+                            break;
+                        }
+                    }
+                }
+                if (!matched) matched = dict.english;
+
+                const msgInput = document.getElementById('message');
+                if (msgInput) msgInput.placeholder = matched.placeholder;
+
+                const emptySub = document.getElementById('dynamic-greeting-sub');
+                if (emptySub) emptySub.textContent = matched.greeting;
+
+                const newChatSpan = document.getElementById('new-chat-btn-text');
+                if (newChatSpan) newChatSpan.textContent = matched.newChat;
+
+                const finishBtnText = document.getElementById('onboarding-finish-btn-text');
+                if (finishBtnText) finishBtnText.textContent = matched.finish;
+                
+                const skipBtn1 = document.getElementById('onboarding-skip-btn-1');
+                if (skipBtn1) skipBtn1.textContent = matched.skip;
+                const skipBtn2 = document.getElementById('onboarding-skip-btn-2');
+                if (skipBtn2) skipBtn2.textContent = matched.skip;
+            } catch(e) {
+                console.warn("[updateUIStrings error]:", e);
+            }
+        };
+
+        // Welcome Onboarding Lifecycle Functions
+        window.showWelcomeOnboarding = function() {
+            triggerHaptic('light');
+            const modal = document.getElementById('welcome-onboarding-modal');
+            if (!modal) return;
+
+            if (typeof initBirthdayPickers === 'function') {
+                initBirthdayPickers();
+            }
+
+            // Prepopulate nickname or name
+            const nameInput = document.getElementById('onboarding-name');
+            if (nameInput) {
+                const currentName = (typeof customUsername !== 'undefined' && customUsername) || localStorage.getItem('crystal_username') || (typeof auth !== 'undefined' && auth && auth.currentUser ? (auth.currentUser.displayName || auth.currentUser.email?.split('@')[0]) : '');
+                if (currentName && currentName !== 'Guest' && currentName !== 'Local Guest' && !currentName.startsWith('Guest_')) {
+                    nameInput.value = currentName;
+                }
+            }
+
+            // Prepopulate birthday
+            const savedBday = localStorage.getItem('crystal_birthday');
+            if (savedBday && typeof applySavedBirthdayToPickers === 'function') {
+                applySavedBirthdayToPickers(savedBday);
+            }
+
+            // Prepopulate language
+            const currentLang = localStorage.getItem('crystal_language') || 'English';
+            window.selectedOnboardingLang = currentLang;
+            const langObj = (typeof ALL_WORLD_LANGUAGES !== 'undefined' ? ALL_WORLD_LANGUAGES : []).find(l => l.name.toLowerCase() === currentLang.toLowerCase()) || { flag: '🌐', name: currentLang };
+            const badge = document.getElementById('onboarding-lang-selected-badge');
+            if (badge) {
+                badge.innerHTML = `${langObj.flag || '🌐'} ${langObj.name || currentLang}`;
+            }
+            if (typeof renderOnboardingLanguages === 'function') {
+                renderOnboardingLanguages('');
+            }
+
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
+        };
+
+        window.skipOnboarding = function() {
+            triggerHaptic('light');
+            const modal = document.getElementById('welcome-onboarding-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.style.display = 'none';
+            }
+            localStorage.setItem('crystal_onboarding_completed', 'true');
+            if (typeof showToast === 'function') {
+                showToast("Preferences saved. You can personalize them anytime in Settings.");
+            }
+        };
+
+        window.finishOnboarding = function() {
+            triggerHaptic('medium');
+            const modal = document.getElementById('welcome-onboarding-modal');
+
+            // Save Name
+            const nameInput = document.getElementById('onboarding-name');
+            const newName = nameInput ? nameInput.value.trim() : '';
+            if (newName) {
+                customUsername = newName;
+                localStorage.setItem('crystal_username', newName);
+                if (typeof auth !== 'undefined' && auth && auth.currentUser && typeof db !== 'undefined' && db) {
+                    db.collection('users').doc(auth.currentUser.uid).set({
+                        displayName: newName,
+                        username: newName
+                    }, { merge: true }).catch(() => {});
+                }
+            }
+
+            // Save Birthday
+            const mEl = document.getElementById('onboarding-bday-month');
+            const dEl = document.getElementById('onboarding-bday-day');
+            const yEl = document.getElementById('onboarding-bday-year');
+            const month = mEl ? mEl.value : '';
+            const day = dEl ? dEl.value : '';
+            const year = yEl ? yEl.value : '';
+            if (month && day) {
+                const fullYear = year || new Date().getFullYear().toString();
+                const bdayStr = `${fullYear}-${month}-${day}`;
+                localStorage.setItem('crystal_birthday', bdayStr);
+                if (typeof auth !== 'undefined' && auth && auth.currentUser && typeof db !== 'undefined' && db) {
+                    db.collection('users').doc(auth.currentUser.uid).set({
+                        birthday: bdayStr
+                    }, { merge: true }).catch(() => {});
+                }
+            }
+
+            // Save & Apply Language
+            const lang = window.selectedOnboardingLang || localStorage.getItem('crystal_language') || 'English';
+            if (typeof applyAppLanguage === 'function') {
+                applyAppLanguage(lang, false);
+            }
+
+            localStorage.setItem('crystal_onboarding_completed', 'true');
+
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.style.display = 'none';
+            }
+
+            if (typeof updateProfileUI === 'function') updateProfileUI();
+            refreshDynamicGreeting();
+
+            if (typeof showToast === 'function') {
+                showToast(`Welcome to Crystal${newName ? ', ' + newName : ''}! Your profile is ready.`);
+            }
+        };
 
         document.addEventListener('DOMContentLoaded', () => {
             refreshDynamicGreeting();
