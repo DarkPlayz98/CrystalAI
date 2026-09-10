@@ -166,10 +166,10 @@ jobs:
           # Test gradle-wrapper.jar validity
           if [ -f "gradle/wrapper/gradle-wrapper.jar" ] && unzip -t "gradle/wrapper/gradle-wrapper.jar" >/dev/null 2>&1; then
             echo "Gradle wrapper verified successfully."
-            ./gradlew assembleRelease -x lint -x lintVitalAnalyzeRelease -x lintVitalReportRelease --no-daemon --stacktrace
+            ./gradlew assembleRelease --no-daemon --stacktrace
           else
             echo "Executing via Gradle toolchain directly..."
-            gradle assembleRelease -x lint -x lintVitalAnalyzeRelease -x lintVitalReportRelease --no-daemon --stacktrace
+            gradle assembleRelease --no-daemon --stacktrace
           fi
 
       - name: Sign APK
