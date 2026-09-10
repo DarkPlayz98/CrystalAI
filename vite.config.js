@@ -1,5 +1,18 @@
 import { defineConfig } from 'vite';
-import { handleChatRoute, handleModelsRoute, handleSendVerificationEmailRoute } from './api.js';
+import { 
+  handleChatRoute, 
+  handleModelsRoute, 
+  handleSendVerificationEmailRoute, 
+  handleTermuxExecRoute,
+  handleTermuxFileRoute,
+  handleBugAnalysisRoute,
+  handleImageGenerateRoute,
+  handleImageProxyRoute,
+  handleFeedbackRoute,
+  handleGetFeedbackRoute,
+  handleMarkFeedbackReadRoute,
+  handleDeleteFeedbackRoute
+} from './api.js';
 
 function expressApiPlugin() {
   return {
@@ -33,8 +46,28 @@ function expressApiPlugin() {
               await handleModelsRoute(req, res);
             } else if (url.startsWith('/api/chat')) {
               await handleChatRoute(req, res);
+            } else if (url.startsWith('/api/termux/file')) {
+              await handleTermuxFileRoute(req, res);
+            } else if (url.startsWith('/api/bug-analysis')) {
+              await handleBugAnalysisRoute(req, res);
+            } else if (url.startsWith('/api/image/generate') || url.startsWith('/api/generate-image') || url === '/api/image' || url.startsWith('/api/image?')) {
+              await handleImageGenerateRoute(req, res);
+            } else if (url.startsWith('/api/image-proxy')) {
+              await handleImageProxyRoute(req, res);
+            } else if (url.startsWith('/api/termux/exec') || url.startsWith('/api/exec')) {
+              await handleTermuxExecRoute(req, res);
             } else if (url.startsWith('/api/auth/send-verification') || url.startsWith('/api/send-email')) {
               await handleSendVerificationEmailRoute(req, res);
+            } else if (url === '/api/feedback/read') {
+              await handleMarkFeedbackReadRoute(req, res);
+            } else if (url === '/api/feedback/delete' || url.startsWith('/api/feedback/')) {
+              await handleDeleteFeedbackRoute(req, res);
+            } else if (url === '/api/feedback' || url.startsWith('/api/feedback?')) {
+              if (req.method === 'GET') {
+                await handleGetFeedbackRoute(req, res);
+              } else {
+                await handleFeedbackRoute(req, res);
+              }
             } else {
               next();
             }
