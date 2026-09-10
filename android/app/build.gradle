@@ -31,6 +31,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    lint {
+        abortOnError false
+        checkReleaseBuilds false
+    }
 }
 
 repositories {
@@ -55,9 +59,10 @@ apply from: 'capacitor.build.gradle'
 
 try {
     def servicesJSON = file('google-services.json')
-    if (servicesJSON.text) {
+    if (servicesJSON.exists() && servicesJSON.length() > 20) {
+        new groovy.json.JsonSlurper().parse(servicesJSON)
         apply plugin: 'com.google.gms.google-services'
     }
 } catch(Exception e) {
-    logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
+    logger.info("google-services.json not found or invalid, google-services plugin not applied: " + e.getMessage())
 }

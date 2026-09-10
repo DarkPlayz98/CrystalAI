@@ -89,10 +89,11 @@
             };
         })();
 
+        let isBootDark = true;
         try {
             const savedDark = localStorage.getItem('crystal_dark_mode');
-            const isDark = savedDark !== 'false' && savedDark !== 'light';
-            if (isDark) {
+            isBootDark = savedDark !== 'false' && savedDark !== 'light';
+            if (isBootDark) {
                 document.documentElement.classList.add('dark', 'dark-mode');
             } else {
                 document.documentElement.classList.remove('dark', 'dark-mode');
@@ -102,10 +103,10 @@
         }
     </script>
 
-    <!-- Google Fonts for Material 3 (Material You) -->
+    <!-- Google Fonts for Material 3 (Material You) and Modern Display Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;1,400&family=Google+Sans:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Roboto:ital,wght@0,300;0,400;0,500;0,700;1,400&family=Google+Sans:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
 
     <!-- KaTeX Math Equation Renderers -->
@@ -167,8 +168,9 @@
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['Roboto', 'Google Sans', 'Plus Jakarta Sans', '-apple-system', 'sans-serif'],
-                        display: ['Google Sans', 'Roboto', 'sans-serif'],
+                        sans: ['Outfit', 'Plus Jakarta Sans', 'Roboto', 'Google Sans', '-apple-system', 'sans-serif'],
+                        display: ['Outfit', 'Plus Jakarta Sans', 'Google Sans', 'sans-serif'],
+                        outfit: ['Outfit', 'Plus Jakarta Sans', 'sans-serif'],
                         mono: ['JetBrains Mono', 'Roboto Mono', 'monospace']
                     },
                     borderRadius: {
@@ -208,9 +210,101 @@
         };
     </script>
     <script type="text/javascript" async defer src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    <!-- Crystal Comprehensive Multilingual Engine (134+ Languages) -->
+    <script src="/translations.js"></script>
 
     <style>
         .hidden { display: none !important; }
+
+        /* CLUE-STYLE ULTRA-MODERN DARK LANDING & AUTH SCREEN */
+        .clue-hero-wrapper {
+            background-color: #060709;
+            background-image: 
+                radial-gradient(circle at 18% 22%, rgba(112, 239, 125, 0.08) 0%, transparent 45%),
+                radial-gradient(circle at 82% 38%, rgba(192, 132, 252, 0.07) 0%, transparent 50%),
+                radial-gradient(circle at 50% 85%, rgba(56, 189, 248, 0.06) 0%, transparent 50%);
+            color: #ffffff;
+            font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .clue-hero-text {
+            font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+            font-weight: 900;
+            line-height: 0.92;
+            letter-spacing: -0.04em;
+            text-transform: uppercase;
+        }
+
+        .clue-fill-gradient {
+            background: linear-gradient(135deg, #70ef7d 0%, #38bdf8 45%, #c084fc 80%, #ffffff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+            filter: drop-shadow(0 0 24px rgba(112, 239, 125, 0.28));
+            transition: filter 0.3s ease;
+        }
+
+        .clue-stroke-outline {
+            color: transparent;
+            -webkit-text-stroke: 1.6px rgba(255, 255, 255, 0.45);
+            display: inline-block;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .clue-stroke-outline:hover {
+            -webkit-text-stroke: 1.6px rgba(255, 255, 255, 0.95);
+            filter: drop-shadow(0 0 20px rgba(112, 239, 125, 0.65));
+            transform: scale(1.02);
+        }
+
+        .clue-primary-btn {
+            background-color: #70ef7d;
+            color: #070709;
+            box-shadow: 0 0 24px rgba(112, 239, 125, 0.35);
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .clue-primary-btn:hover {
+            background-color: #5fe66d;
+            box-shadow: 0 0 36px rgba(112, 239, 125, 0.6);
+            transform: translateY(-1px);
+        }
+
+        .clue-primary-btn:active {
+            transform: scale(0.97);
+        }
+
+        .clue-secondary-btn {
+            background-color: #ffffff;
+            color: #070709;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .clue-secondary-btn:hover {
+            background-color: #f4f4f5;
+            box-shadow: 0 6px 28px rgba(255, 255, 255, 0.25);
+            transform: translateY(-1px);
+        }
+
+        .clue-secondary-btn:active {
+            transform: scale(0.97);
+        }
+
+        .clue-bento-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0.04) 50%, rgba(192, 132, 252, 0.07) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.75), inset 0 1px 1px rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            transition: transform 0.2s ease-out, box-shadow 0.2s ease-out, border-color 0.2s ease-out;
+            transform-style: preserve-3d;
+        }
+
+        .clue-bento-card:hover {
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 35px 65px -15px rgba(0, 0, 0, 0.9), 0 0 45px rgba(112, 239, 125, 0.15);
+        }
 
         /* Crisp High-Contrast Syntax Highlighting Tokens */
         pre code {
@@ -287,18 +381,18 @@
             --md-sys-color-on-tertiary: #ffffff;
             --md-sys-color-tertiary-container: #ffd9e3;
             --md-sys-color-on-tertiary-container: #31111d;
-            --md-sys-color-surface: #fffbfe;
-            --md-sys-color-on-surface: #1c1b1f;
-            --md-sys-color-surface-variant: #e7e0ec;
-            --md-sys-color-on-surface-variant: #49454f;
+            --md-sys-color-surface: #f8fafc;
+            --md-sys-color-on-surface: #0f172a;
+            --md-sys-color-surface-variant: #f1f5f9;
+            --md-sys-color-on-surface-variant: #475569;
             --md-sys-color-surface-container-lowest: #ffffff;
-            --md-sys-color-surface-container-low: #f7f2fa;
-            --md-sys-color-surface-container: #f3edf7;
-            --md-sys-color-surface-container-high: #ece6f0;
-            --md-sys-color-surface-container-highest: #e6e0e9;
-            --md-sys-color-outline: #79747e;
-            --md-sys-color-outline-variant: #cac4d0;
-            --md-sys-color-shadow: rgba(0, 0, 0, 0.12);
+            --md-sys-color-surface-container-low: #f8fafc;
+            --md-sys-color-surface-container: #ffffff;
+            --md-sys-color-surface-container-high: #f1f5f9;
+            --md-sys-color-surface-container-highest: #e2e8f0;
+            --md-sys-color-outline: #94a3b8;
+            --md-sys-color-outline-variant: #e2e8f0;
+            --md-sys-color-shadow: rgba(0, 0, 0, 0.08);
 
             /* Legacy mappings forced to Material 3 tokens */
             --m3-primary: var(--md-sys-color-primary);
@@ -315,46 +409,46 @@
             --m3-outline: var(--md-sys-color-outline);
             --m3-outline-variant: var(--md-sys-color-outline-variant);
 
-            --bg-color: var(--md-sys-color-surface);
-            --text-color: var(--md-sys-color-on-surface);
-            --bubble-user: var(--md-sys-color-primary-container);
-            --bubble-user-text: var(--md-sys-color-on-primary-container);
-            --bubble-bot: var(--md-sys-color-surface-container-low);
-            --border-color: var(--md-sys-color-outline-variant);
-            --input-bg: var(--md-sys-color-surface-container-high);
-            --sidebar-bg: var(--md-sys-color-surface-container-low);
-            --sidebar-hover: var(--md-sys-color-surface-container-highest);
-            --glass-border: var(--md-sys-color-outline-variant);
-            --glass-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            --bg-color: #f8fafc;
+            --text-color: #0f172a;
+            --bubble-user: #4f46e5;
+            --bubble-user-text: #ffffff;
+            --bubble-bot: #ffffff;
+            --border-color: #e2e8f0;
+            --input-bg: #ffffff;
+            --sidebar-bg: #ffffff;
+            --sidebar-hover: #f1f5f9;
+            --glass-border: #e2e8f0;
+            --glass-shadow: 0 4px 16px rgba(0,0,0,0.05);
             --glow-color: transparent;
         }
 
         html.dark, html.dark-mode {
-            /* Material 3 Dark Theme Tokens (M3 Expressive Purple/Violet) */
-            --md-sys-color-primary: #d0bcff;
-            --md-sys-color-on-primary: #381e72;
-            --md-sys-color-primary-container: #4f378b;
-            --md-sys-color-on-primary-container: #eaddff;
-            --md-sys-color-secondary: #ccc2dc;
-            --md-sys-color-on-secondary: #332d41;
-            --md-sys-color-secondary-container: #4a4458;
-            --md-sys-color-on-secondary-container: #e8def8;
-            --md-sys-color-tertiary: #efb8c8;
-            --md-sys-color-on-tertiary: #492532;
-            --md-sys-color-tertiary-container: #633b48;
-            --md-sys-color-on-tertiary-container: #ffd9e3;
-            --md-sys-color-surface: #141218;
-            --md-sys-color-on-surface: #e6e1e5;
-            --md-sys-color-surface-variant: #49454f;
-            --md-sys-color-on-surface-variant: #cac4cf;
-            --md-sys-color-surface-container-lowest: #0f0d13;
-            --md-sys-color-surface-container-low: #1d1b20;
-            --md-sys-color-surface-container: #211f26;
-            --md-sys-color-surface-container-high: #2b292f;
-            --md-sys-color-surface-container-highest: #36343b;
-            --md-sys-color-outline: #938f99;
-            --md-sys-color-outline-variant: #49454f;
-            --md-sys-color-shadow: rgba(0, 0, 0, 0.35);
+            /* Material 3 Dark Theme Tokens (Deep Cosmic Obsidian & Vibrant Clue Accents) */
+            --md-sys-color-primary: #70ef7d;
+            --md-sys-color-on-primary: #060709;
+            --md-sys-color-primary-container: rgba(112, 239, 125, 0.16);
+            --md-sys-color-on-primary-container: #70ef7d;
+            --md-sys-color-secondary: #38bdf8;
+            --md-sys-color-on-secondary: #060709;
+            --md-sys-color-secondary-container: rgba(56, 189, 248, 0.16);
+            --md-sys-color-on-secondary-container: #38bdf8;
+            --md-sys-color-tertiary: #c084fc;
+            --md-sys-color-on-tertiary: #060709;
+            --md-sys-color-tertiary-container: rgba(192, 132, 252, 0.16);
+            --md-sys-color-on-tertiary-container: #e9d5ff;
+            --md-sys-color-surface: #060709;
+            --md-sys-color-on-surface: #f4f4f5;
+            --md-sys-color-surface-variant: #131722;
+            --md-sys-color-on-surface-variant: #a1a1aa;
+            --md-sys-color-surface-container-lowest: #020304;
+            --md-sys-color-surface-container-low: #090c13;
+            --md-sys-color-surface-container: rgba(13, 16, 24, 0.85);
+            --md-sys-color-surface-container-high: #141824;
+            --md-sys-color-surface-container-highest: #1a2030;
+            --md-sys-color-outline: #52525b;
+            --md-sys-color-outline-variant: rgba(255, 255, 255, 0.1);
+            --md-sys-color-shadow: rgba(0, 0, 0, 0.6);
 
             --m3-primary: var(--md-sys-color-primary);
             --m3-on-primary: var(--md-sys-color-on-primary);
@@ -370,18 +464,18 @@
             --m3-outline: var(--md-sys-color-outline);
             --m3-outline-variant: var(--md-sys-color-outline-variant);
 
-            --bg-color: var(--md-sys-color-surface);
-            --text-color: var(--md-sys-color-on-surface);
-            --bubble-user: var(--md-sys-color-primary-container);
-            --bubble-user-text: var(--md-sys-color-on-primary-container);
-            --bubble-bot: var(--md-sys-color-surface-container-low);
-            --border-color: var(--md-sys-color-outline-variant);
-            --input-bg: var(--md-sys-color-surface-container-high);
-            --sidebar-bg: var(--md-sys-color-surface-container-low);
-            --sidebar-hover: var(--md-sys-color-surface-container-highest);
-            --glass-border: var(--md-sys-color-outline-variant);
-            --glass-shadow: 0 4px 16px rgba(0,0,0,0.3);
-            --glow-color: transparent;
+            --bg-color: #060709;
+            --text-color: #f4f4f5;
+            --bubble-user: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+            --bubble-user-text: #ffffff;
+            --bubble-bot: rgba(18, 22, 32, 0.82);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --input-bg: rgba(13, 16, 24, 0.95);
+            --sidebar-bg: #090c13;
+            --sidebar-hover: rgba(255, 255, 255, 0.06);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --glass-shadow: 0 12px 40px rgba(0,0,0,0.6);
+            --glow-color: rgba(112, 239, 125, 0.2);
         }
 
         html.ghost-mode-active {
@@ -488,19 +582,33 @@
         ::-webkit-scrollbar { display: none; }
         * { scrollbar-width: none; -ms-overflow-style: none; }
 
-        /* Material 3 Surface System & Elevations */
-        .glass-panel,
-        .ios-liquid-glass,
-        .ios-glass-card,
-        .ios-glass-pill,
-        .prime-thinking-pill,
-        .gemini-thinking-pill {
-            background: var(--md-sys-color-surface-container) !important;
-            backdrop-filter: none !important;
-            -webkit-backdrop-filter: none !important;
-            border: 1px solid var(--md-sys-color-outline-variant) !important;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12) !important;
-            color: var(--md-sys-color-on-surface) !important;
+        /* Material 3 Surface System & Authentic Frosted Glass */
+        html.dark .glass-panel,
+        html.dark .ios-liquid-glass,
+        html.dark .ios-glass-card,
+        html.dark .ios-glass-pill,
+        html.dark-mode .glass-panel,
+        html.dark-mode .ios-liquid-glass,
+        html.dark-mode .ios-glass-card,
+        html.dark-mode .ios-glass-pill {
+            background: rgba(10, 13, 20, 0.78) !important;
+            backdrop-filter: blur(24px) !important;
+            -webkit-backdrop-filter: blur(24px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.09) !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45) !important;
+            color: #f4f4f5 !important;
+        }
+
+        html:not(.dark):not(.dark-mode) .glass-panel,
+        html:not(.dark):not(.dark-mode) .ios-liquid-glass,
+        html:not(.dark):not(.dark-mode) .ios-glass-card,
+        html:not(.dark):not(.dark-mode) .ios-glass-pill {
+            background: rgba(255, 255, 255, 0.85) !important;
+            backdrop-filter: blur(24px) !important;
+            -webkit-backdrop-filter: blur(24px) !important;
+            border: 1px solid rgba(226, 232, 240, 0.85) !important;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05) !important;
+            color: #0f172a !important;
         }
 
         .ios-glass-button {
@@ -787,39 +895,40 @@
         }
 
         .living-thinking-bg.active {
-            opacity: 0.35;
+            opacity: 0.75;
             animation: wavePulse 3s ease-in-out infinite;
         }
 
         #particle-canvas {
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
+            width: 100vw;
+            height: 100vh;
             pointer-events: none;
-            z-index: 1;
-            opacity: 0.25;
+            z-index: 0;
+            opacity: 1;
         }
 
+        /* Ambient Floating Orbs for Chat Animation */
         .ambient-orb {
-            position: absolute;
+            position: fixed;
             border-radius: 50%;
-            filter: blur(120px);
-            opacity: 0.5;
+            filter: blur(90px);
+            opacity: 0.35;
             z-index: 0;
             pointer-events: none;
             animation: orbFloat 25s infinite alternate ease-in-out;
         }
 
-        html.dark .ambient-orb, html.dark-mode .ambient-orb { opacity: 0.35; }
-        html.ghost-mode-active .ambient-orb { opacity: 0.2; }
+        html.dark-mode .ambient-orb, html.dark .ambient-orb, [data-theme="dark"] .ambient-orb { opacity: 0.25; }
+        html.ghost-mode-active .ambient-orb { opacity: 0.15; }
 
-        .orb-1 { width: 450px; height: 450px; background: var(--md-sys-color-primary-container); top: -80px; left: -100px; }
-        .orb-2 { width: 500px; height: 500px; background: var(--md-sys-color-tertiary-container); bottom: 50px; right: -120px; animation-delay: -10s; }
+        .orb-1 { width: 350px; height: 350px; background: #6366f1; top: -50px; left: -100px; }
+        .orb-2 { width: 400px; height: 400px; background: #a855f7; bottom: 100px; right: -150px; animation-delay: -10s; }
         
-        html.ghost-mode-active .orb-1 { background: #93000a; }
-        html.ghost-mode-active .orb-2 { background: #690005; }
+        html.ghost-mode-active .orb-1 { background: #ef4444; }
+        html.ghost-mode-active .orb-2 { background: #991b1b; }
 
         @keyframes orbFloat {
             0% { transform: translate(0, 0) scale(1); }
@@ -1184,10 +1293,9 @@
 </head>
 <body class="relative">
 
-    <!-- SPLASH SCREEN WITH ANIMATED LOGO -->
-    <div id="splash-screen" class="fixed inset-0 bg-[#000000] flex flex-col items-center justify-center z-[200] transition-all duration-700 ease-out">
-        <div class="flex flex-col items-center text-center relative z-10 scale-95 animate-[springIn_1s_cubic-bezier(0.16,1,0.3,1)_forwards]">
-            <!-- Animated Crystal Logo (Ultra-Minimalist) -->
+    <!-- SPLASH / INITIAL LOAD SCREEN (MINIMAL) -->
+    <div id="splash-screen" class="fixed inset-0 z-[200] bg-[#060709] flex flex-col items-center justify-center select-none transition-opacity duration-700">
+        <div class="flex flex-col items-center select-none animate-[springIn_0.6s_cubic-bezier(0.16,1,0.3,1)_forwards]">
             <div class="w-14 h-14 mb-4 flex items-center justify-center animate-pulse duration-[2000ms]">
                 <svg viewBox="0 0 32 32" class="w-12 h-12 stroke-white/80" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M16 2L2 12L16 18L30 12L16 2Z"/>
@@ -1196,114 +1304,306 @@
                     <path d="M16 18L16 30"/>
                 </svg>
             </div>
-            <h2 id="splash-crystal-logo-text" class="text-xs font-black tracking-[0.4em] text-white/90 uppercase pl-[0.4em]">Crystal</h2>
+            <h2 class="text-xs font-black tracking-[0.4em] text-white/90 uppercase pl-[0.4em]">Crystal</h2>
         </div>
     </div>
 
     <!-- THE INTERACTIVE BACKGROUND PARTICLE MATRIX -->
     <canvas id="particle-canvas"></canvas>
 
-    <!-- AMBIENT FLOATING ORBS -->
+    <!-- AMBIENT FLOATING ORBS FOR CHAT -->
     <div class="ambient-orb orb-1"></div>
     <div class="ambient-orb orb-2"></div>
 
     <!-- HOLOGRAM PULSING ACTIVE THINKING BACKGROUND -->
     <div id="thinking-bg" class="living-thinking-bg"></div>
 
-    <!-- LOGIN SCREEN (MATERIAL 3 PURE WHITE) -->
-    <div id="login-screen" class="fixed inset-0 flex flex-col items-center justify-center px-6 sm:px-8 z-[100] bg-white text-zinc-900 overflow-y-auto hidden select-none">
-        <div class="w-full max-w-sm flex flex-col items-center my-auto py-6">
-            <!-- Material 3 Minimal Icon -->
-            <div class="w-16 h-16 mb-4 rounded-3xl bg-indigo-50 border border-indigo-100 flex items-center justify-center shadow-xs">
-                <svg viewBox="0 0 32 32" class="w-10 h-10 stroke-indigo-600" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M16 2L2 12L16 18L30 12L16 2Z"/>
-                    <path d="M2 12L16 30L16 18"/>
-                    <path d="M30 12L16 30"/>
-                    <path d="M16 18L16 30"/>
-                </svg>
-            </div>
+    <!-- LOGIN / LANDING SCREEN (ULTRA-MODERN DARK CLUE-INSPIRED AESTHETIC) -->
+    <div id="login-screen" class="fixed inset-0 z-[100] bg-[#060709] text-white overflow-x-hidden overflow-y-auto hidden select-none clue-hero-wrapper">
+        <!-- Interactive Living Ribbon & Topographic Canvas -->
+        <canvas id="clue-ribbon-canvas" class="fixed inset-0 pointer-events-none z-0 w-full h-full opacity-90"></canvas>
 
-            <h1 id="onboarding-crystal-logo-title" class="text-3xl font-extrabold tracking-tight mb-1 text-zinc-900 font-display">Crystal</h1>
-            <p id="onboarding-crystal-logo-sub" class="text-zinc-500 font-medium mb-6 text-center text-xs">Your smart, friendly personal assistant</p>
-
-            <div id="login-error" class="hidden w-full mb-4 p-3.5 border border-red-200 bg-red-50 text-red-700 text-xs font-semibold rounded-2xl text-center shadow-xs"></div>
-
-            <!-- TERMS AND CONDITIONS CHECKBOX -->
-            <div class="w-full mb-5 flex items-center justify-center gap-2 text-xs text-zinc-500">
-                <input type="checkbox" id="terms-checkbox" class="w-4 h-4 accent-indigo-600 rounded cursor-pointer shrink-0">
-                <label for="terms-checkbox" class="cursor-pointer select-none font-medium text-[11px] sm:text-xs">
-                    I agree to the <button type="button" onclick="openTermsModal()" class="text-indigo-600 font-semibold hover:underline focus:outline-none ml-0.5">Terms & Conditions</button>
-                </label>
-            </div>
-
-            <!-- PRIMARY AUTH BUTTONS (M3 WHITE / TONAL) -->
-            <div id="auth-buttons" class="w-full flex flex-col gap-3">
-                <button onclick="signInWithGoogle(this)" class="w-full flex items-center justify-center gap-3 bg-white text-zinc-800 border border-zinc-200 hover:bg-zinc-50 py-3.5 px-4 rounded-full font-semibold text-xs sm:text-sm shadow-xs transition duration-150 active:scale-[0.98]">
-                    <span id="google-spinner" class="hidden w-4 h-4 border-2 border-zinc-800 border-t-transparent rounded-full animate-spin"></span>
-                    <span class="flex items-center gap-2.5">
-                        <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                        </svg>
-                        Continue with Google
-                    </span>
-                </button>
-
-                <button onclick="showEmailForm()" class="w-full flex items-center justify-center gap-2.5 bg-zinc-900 hover:bg-zinc-800 text-white py-3.5 px-4 rounded-full font-semibold text-xs sm:text-sm shadow-xs transition duration-150 active:scale-[0.98]">
-                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                    <span>Continue with Email</span>
-                </button>
-
-                <button onclick="signInAnonymouslyUser(this)" class="w-full flex items-center justify-center gap-2.5 bg-indigo-50 hover:bg-indigo-100/80 border border-indigo-100 text-indigo-700 py-3.5 px-4 rounded-full font-semibold text-xs sm:text-sm transition duration-150 active:scale-[0.98]">
-                    <span id="guest-spinner" class="hidden w-4 h-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></span>
-                    <svg class="w-4 h-4 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                    <span>Continue as Guest</span>
-                </button>
-            </div>
-
-            <!-- EMAIL SIGN IN / SIGN UP FORM (MATERIAL 3 FULL WHITE) -->
-            <div id="email-form" class="w-full hidden flex-col gap-3.5 bg-zinc-50/90 border border-zinc-200 rounded-[28px] p-5 shadow-xs text-left">
-                <!-- Segmented Tab Switcher -->
-                <div class="flex items-center p-1 bg-zinc-200/60 rounded-full border border-zinc-300/40">
-                    <button type="button" id="tab-email-login" onclick="switchAuthEmailMode('login')" class="flex-1 py-1.5 rounded-full bg-white text-zinc-900 font-bold text-xs shadow-xs transition-all text-center">
-                        Sign In
-                    </button>
-                    <button type="button" id="tab-email-signup" onclick="switchAuthEmailMode('signup')" class="flex-1 py-1.5 rounded-full text-zinc-500 hover:text-zinc-900 font-semibold text-xs transition-all text-center">
-                        Create Account
-                    </button>
-                </div>
-
-                <!-- Input Fields -->
-                <div class="flex flex-col gap-2.5">
-                    <div class="relative w-full">
-                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-400">
-                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <div class="relative z-10 w-full min-h-full flex flex-col justify-between">
+            <!-- TOP FLOATING GLASS NAVBAR -->
+            <nav class="w-full max-w-6xl mx-auto px-4 sm:px-6 pt-5 pb-2">
+                <div class="flex items-center justify-between py-3.5 px-6 rounded-full bg-[#0d0f15]/80 border border-white/10 backdrop-blur-2xl shadow-2xl">
+                    <!-- Brand Identity -->
+                    <div class="flex items-center gap-3 cursor-pointer select-none" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+                        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#70ef7d] via-[#38bdf8] to-[#c084fc] p-[1.5px] shadow-[0_0_15px_rgba(112,239,125,0.4)]">
+                            <div class="w-full h-full bg-[#070709] rounded-[10px] flex items-center justify-center">
+                                <svg class="w-4 h-4 text-[#70ef7d]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polygon points="12 2 2 8.5 12 22 22 8.5 12 2"/>
+                                    <line x1="2" y1="8.5" x2="22" y2="8.5"/>
+                                    <polyline points="7 15.25 12 22 17 15.25"/>
+                                </svg>
+                            </div>
                         </div>
-                        <input type="email" id="email-input" placeholder="Email address (e.g. alex@example.com)" class="w-full pl-10 pr-4 py-2.5 rounded-2xl text-xs sm:text-sm bg-white border border-zinc-200 text-zinc-900 focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 outline-none transition-all placeholder:text-zinc-400">
+                        <span class="font-extrabold text-lg sm:text-xl tracking-tight text-white font-['Outfit'] flex items-center">
+                            crystal
+                        </span>
                     </div>
 
-                    <div class="relative w-full">
-                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-400">
-                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    <!-- Desktop Nav Links -->
+                    <div class="hidden md:flex items-center gap-7 text-xs font-semibold text-zinc-300">
+                        <button type="button" onclick="openClueInfoModal('platform')" class="hover:text-white transition-colors cursor-pointer focus:outline-none">Platform</button>
+                        <button type="button" onclick="openClueInfoModal('models')" class="hover:text-white transition-colors cursor-pointer focus:outline-none">Models</button>
+                        <button type="button" onclick="openClueInfoModal('studio')" class="hover:text-white transition-colors cursor-pointer focus:outline-none">Studio</button>
+                        <button type="button" onclick="openClueInfoModal('integrations')" class="hover:text-white transition-colors cursor-pointer focus:outline-none">Integrations</button>
+                        <button type="button" onclick="openClueInfoModal('docs')" class="hover:text-white transition-colors cursor-pointer focus:outline-none">Docs</button>
+                        <button type="button" onclick="openClueInfoModal('pricing')" class="hover:text-white transition-colors cursor-pointer focus:outline-none">Pricing</button>
+                    </div>
+
+                    <!-- Right Action Button -->
+                    <div class="flex items-center gap-3">
+                        <button type="button" onclick="openAuthModal('signin')" class="px-5 py-2 rounded-full bg-white hover:bg-zinc-100 text-[#070709] font-bold text-xs shadow-md hover:shadow-lg transition-all active:scale-95 cursor-pointer">
+                            Sign in
+                        </button>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- MAIN HERO SECTION (SPLIT ASYMMETRIC GRID) -->
+            <main class="w-full max-w-6xl mx-auto px-4 sm:px-6 pt-10 sm:pt-16 pb-16 flex flex-col md:flex-row items-center justify-between gap-12 lg:gap-16">
+                <!-- Left Column: Iconic Layered Display Typography -->
+                <div class="w-full md:w-3/5 flex flex-col items-start select-none relative group">
+                    <!-- Subtle Floating Contour Loop SVG Overlay -->
+                    <svg class="absolute -top-12 -left-8 w-72 h-72 text-white/5 pointer-events-none" viewBox="0 0 200 200" fill="none" stroke="currentColor" stroke-width="1.2">
+                        <path d="M45,30 C90,10 160,40 170,90 C180,140 120,180 70,170 C20,160 10,90 30,50 Z"/>
+                        <path d="M55,40 C95,25 150,50 158,95 C166,135 115,165 75,158 C35,150 25,95 42,60 Z" stroke-dasharray="4 4"/>
+                    </svg>
+
+                    <!-- The 3-Tier Layered Typography: NEVER / LIMIT YOUR / MIND -->
+                    <div class="clue-hero-text text-5xl sm:text-7xl lg:text-[5.5rem] xl:text-[6.75rem] leading-[0.91] tracking-[-0.04em] font-black uppercase text-left relative z-10">
+                        <div class="flex items-baseline flex-wrap">
+                            <span class="clue-fill-gradient">NEV</span><span class="clue-stroke-outline">ER</span>
                         </div>
-                        <input type="password" id="password-input" placeholder="Password (min. 6 characters)" class="w-full pl-10 pr-4 py-2.5 rounded-2xl text-xs sm:text-sm bg-white border border-zinc-200 text-zinc-900 focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 outline-none transition-all placeholder:text-zinc-400" onkeydown="if(event.key==='Enter') submitEmailAuth(document.getElementById('email-submit-btn'))">
+                        <div class="flex items-baseline flex-wrap">
+                            <span class="clue-fill-gradient">LIMIT</span><span class="clue-stroke-outline ml-3 sm:ml-4">YOUR</span>
+                        </div>
+                        <div class="flex items-baseline flex-wrap">
+                            <span class="clue-stroke-outline">MI</span><span class="clue-fill-gradient">ND</span>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Primary Action Button -->
-                <button type="button" id="email-submit-btn" onclick="submitEmailAuth(this)" class="w-full py-3 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs sm:text-sm shadow-xs active:scale-[0.98] transition-all flex items-center justify-center gap-2 mt-1">
-                    <span id="email-submit-text">Sign In with Email</span>
+                <!-- Right Column: Value Proposition & Interactive Launch Controls -->
+                <div class="w-full md:w-2/5 flex flex-col items-start text-left relative z-10">
+                    <p class="text-sm sm:text-base text-zinc-400 font-normal leading-relaxed max-w-md mb-8">
+                        A cloud-based AI platform that synchronizes deep reasoning, photorealistic image creation, and real-time web grounding into a unified, privacy-first interface.
+                    </p>
+
+                    <!-- Interactive CTA Buttons (Matching the Clue.io Layout) -->
+                    <div class="flex flex-wrap items-center gap-3.5 w-full sm:w-auto">
+                        <button type="button" onclick="openAuthModal('signup')" class="clue-primary-btn font-extrabold text-xs sm:text-sm px-7 py-3.5 rounded-full cursor-pointer flex items-center justify-center gap-2">
+                            <span>Get started</span>
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                        </button>
+
+                        <button type="button" onclick="signInAnonymouslyUser(this)" class="clue-secondary-btn font-bold text-xs sm:text-sm px-6 py-3.5 rounded-full cursor-pointer flex items-center justify-center gap-2">
+                            <span>Explore as Guest</span>
+                        </button>
+                    </div>
+
+                    <!-- Trust Signals -->
+                    <div class="mt-6 flex items-center gap-4 text-xs text-zinc-500 font-medium">
+                        <span class="flex items-center gap-1.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-[#70ef7d] animate-pulse"></span>
+                            100% Free to Use
+                        </span>
+                        <span>•</span>
+                        <span>No credit card required</span>
+                        <span>•</span>
+                        <span>Zero telemetry</span>
+                    </div>
+                </div>
+            </main>
+
+            <!-- MIDDLE SOCIAL PROOF ECOSYSTEM STRIP -->
+            <section class="w-full max-w-6xl mx-auto px-4 sm:px-6 py-8 relative z-10 text-center">
+                <p class="text-[11px] sm:text-xs text-zinc-500 uppercase tracking-widest font-semibold mb-8">
+                    The world's most forward-thinking creators and teams build with Crystal
+                </p>
+
+                <!-- High-Fidelity Monochrome Partner Badges -->
+                <div class="flex flex-wrap items-center justify-center gap-8 sm:gap-12 lg:gap-16 opacity-75 grayscale hover:grayscale-0 transition-all duration-300">
+                    <!-- Cloudflare Workers AI -->
+                    <div class="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors cursor-pointer group" title="Cloudflare Workers AI GPU Inference">
+                        <svg class="w-6 h-6 fill-current text-zinc-400 group-hover:text-[#f38020] transition-colors" viewBox="0 0 24 24"><path d="M18.3 12.2c-.3-.8-.9-1.5-1.7-1.9-.8-.4-1.7-.5-2.6-.3-.7-1.3-1.8-2.2-3.2-2.7-1.4-.5-2.9-.4-4.2.2-1.3.6-2.3 1.7-2.8 3-.5 1.3-.5 2.8 0 4.1.5 1.3 1.5 2.3 2.8 2.9 1.3.6 2.8.6 4.1.2 1.4-.4 2.5-1.4 3.1-2.7.9.1 1.7-.2 2.4-.7.7-.6 1.1-1.4 1.2-2.3-.1-.3-.2-.5-.3-.7z"/></svg>
+                        <span class="font-extrabold text-xs tracking-wider">CLOUDFLARE</span>
+                    </div>
+
+                    <!-- Google Gemini -->
+                    <div class="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors cursor-pointer group" title="Google Gemini Multi-Modal Engine">
+                        <svg class="w-5 h-5 fill-current text-zinc-400 group-hover:text-[#4285F4] transition-colors" viewBox="0 0 24 24"><path d="M12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24Z"/></svg>
+                        <span class="font-extrabold text-xs tracking-wider">GEMINI</span>
+                    </div>
+
+                    <!-- Groq LPU -->
+                    <div class="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors cursor-pointer group" title="Groq Ultra-Fast LPU Engine">
+                        <svg class="w-5 h-5 stroke-current text-zinc-400 group-hover:text-[#f55036] transition-colors" viewBox="0 0 24 24" fill="none" stroke-width="2.2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                        <span class="font-extrabold text-xs tracking-wider">GROQ</span>
+                    </div>
+
+                    <!-- Hugging Face -->
+                    <div class="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors cursor-pointer group" title="Hugging Face Open Weights">
+                        <svg class="w-5 h-5 fill-current text-zinc-400 group-hover:text-[#ffd21e] transition-colors" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2" stroke="#000" stroke-width="2" fill="none"/><circle cx="9" cy="10" r="1.5" fill="#000"/><circle cx="15" cy="10" r="1.5" fill="#000"/></svg>
+                        <span class="font-extrabold text-xs tracking-wider">HUGGING FACE</span>
+                    </div>
+
+                    <!-- GitHub -->
+                    <div class="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors cursor-pointer group" title="GitHub Open Source Integration">
+                        <svg class="w-5 h-5 fill-current text-zinc-400 group-hover:text-white transition-colors" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                        <span class="font-extrabold text-xs tracking-wider">GITHUB</span>
+                    </div>
+
+                    <!-- Webflow -->
+                    <div class="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors cursor-pointer group" title="Webflow UI Components">
+                        <svg class="w-5 h-5 fill-current text-zinc-400 group-hover:text-[#146ef5] transition-colors" viewBox="0 0 24 24"><path d="M17.8 7.3l-3.3 9.4h-2.9l1.8-5.3-2.6 5.3H8.3l1.8-5.3-2.6 5.3H4.5L7.8 7.3h2.9l-1.8 5.3 2.6-5.3h2.5l-1.8 5.3 2.6-5.3h2.8z"/></svg>
+                        <span class="font-extrabold text-xs tracking-wider">WEBFLOW</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- BOTTOM BENTO STATS CARD (IDENTICAL FROSTED LUMINOUS PILL) -->
+            <section class="w-full max-w-5xl mx-auto px-4 sm:px-6 pb-16 relative z-10">
+                <div id="clue-bento-widget" class="clue-bento-card w-full p-8 sm:p-12 rounded-[28px] sm:rounded-[36px] grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-6 text-center cursor-default">
+                    <!-- Metric 1 -->
+                    <div class="flex flex-col items-center justify-center">
+                        <div class="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight font-['Outfit'] mb-2 flex items-baseline">
+                            +140<span class="text-[#70ef7d] text-3xl sm:text-4xl">+</span>
+                        </div>
+                        <p class="text-xs sm:text-sm text-zinc-400 font-medium">Global languages & native dialects</p>
+                    </div>
+
+                    <!-- Metric 2 -->
+                    <div class="flex flex-col items-center justify-center sm:border-x sm:border-white/10 sm:px-4">
+                        <div class="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight font-['Outfit'] mb-2 flex items-baseline">
+                            +2.4B<span class="text-[#38bdf8] text-3xl sm:text-4xl">/mo</span>
+                        </div>
+                        <p class="text-xs sm:text-sm text-zinc-400 font-medium">Neural tokens processed monthly</p>
+                    </div>
+
+                    <!-- Metric 3 -->
+                    <div class="flex flex-col items-center justify-center">
+                        <div class="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight font-['Outfit'] mb-2 flex items-baseline">
+                            99.98<span class="text-[#c084fc] text-3xl sm:text-4xl">%</span>
+                        </div>
+                        <p class="text-xs sm:text-sm text-zinc-400 font-medium">Annual GPU uptime & SLA guarantee</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- INTERACTIVE AUTHENTICATION MODAL (FROSTED GLASS CARD) -->
+        <div id="auth-modal" class="fixed inset-0 z-[120] bg-black/80 backdrop-blur-xl flex items-center justify-center p-4 hidden select-none">
+            <div class="w-full max-w-sm bg-[#0e1015]/95 border border-white/15 rounded-[28px] p-6 sm:p-7 shadow-2xl relative text-white flex flex-col items-center text-center animate-[fadeIn_0.2s_ease-out]">
+                <!-- Modal Close Button -->
+                <button type="button" onclick="closeAuthModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white p-2 rounded-full hover:bg-white/10 transition-all cursor-pointer focus:outline-none" aria-label="Close modal">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 </button>
 
-                <!-- Helper Switch Prompt -->
-                <div class="flex items-center justify-between text-xs px-1 pt-0.5">
-                    <span class="text-zinc-500 text-[11px]" id="email-switch-prompt">Don't have an account?</span>
-                    <button type="button" onclick="toggleEmailAuthMode()" class="text-indigo-600 font-bold text-[11px] hover:underline" id="email-switch-action">Create one</button>
+                <!-- Crystal App Icon -->
+                <div class="w-14 h-14 mb-3 rounded-2xl bg-gradient-to-tr from-[#70ef7d]/20 via-[#38bdf8]/20 to-[#c084fc]/20 border border-white/15 flex items-center justify-center shadow-lg">
+                    <svg class="w-7 h-7 text-[#70ef7d]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="12 2 2 8.5 12 22 22 8.5 12 2"/>
+                        <line x1="2" y1="8.5" x2="22" y2="8.5"/>
+                        <polyline points="7 15.25 12 22 17 15.25"/>
+                    </svg>
                 </div>
 
-                <button type="button" onclick="hideEmailForm()" class="text-xs font-semibold text-zinc-500 hover:text-zinc-900 transition text-center mt-1">← Back to options</button>
+                <h2 id="onboarding-crystal-logo-title" class="text-2xl font-black tracking-tight mb-1 text-white font-['Outfit']">Crystal</h2>
+                <p id="onboarding-crystal-logo-sub" class="text-zinc-400 font-medium mb-5 text-center text-xs">Sign in or create your personal account</p>
+
+                <!-- Login Error Banner (Preserved ID) -->
+                <div id="login-error" class="hidden w-full mb-4 p-3 border border-red-500/30 bg-red-500/10 text-red-400 text-xs font-semibold rounded-xl text-center"></div>
+
+                <!-- Terms & Conditions Checkbox (Preserved ID) -->
+                <div class="w-full mb-4 flex items-center justify-center gap-2 text-xs text-zinc-400">
+                    <input type="checkbox" id="terms-checkbox" checked class="w-4 h-4 accent-[#70ef7d] rounded cursor-pointer shrink-0">
+                    <label for="terms-checkbox" class="cursor-pointer select-none font-medium text-[11px]">
+                        I agree to the <button type="button" onclick="openTermsModal()" class="text-[#70ef7d] font-semibold hover:underline focus:outline-none ml-0.5">Terms & Conditions</button>
+                    </label>
+                </div>
+
+                <!-- PRIMARY AUTH BUTTONS (Preserved ID) -->
+                <div id="auth-buttons" class="w-full flex flex-col gap-2.5">
+                    <button type="button" onclick="signInWithGoogle(this)" class="w-full flex items-center justify-center gap-3 bg-white hover:bg-zinc-100 text-zinc-950 py-3 px-4 rounded-full font-bold text-xs sm:text-sm shadow-md transition duration-150 active:scale-[0.98] cursor-pointer">
+                        <span id="google-spinner" class="hidden w-4 h-4 border-2 border-zinc-950 border-t-transparent rounded-full animate-spin"></span>
+                        <span class="flex items-center gap-2.5">
+                            <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                            </svg>
+                            Continue with Google
+                        </span>
+                    </button>
+
+                    <button type="button" onclick="showEmailForm()" class="w-full flex items-center justify-center gap-2.5 bg-zinc-900 hover:bg-zinc-800 border border-white/10 text-white py-3 px-4 rounded-full font-bold text-xs sm:text-sm shadow-md transition duration-150 active:scale-[0.98] cursor-pointer">
+                        <svg class="w-4 h-4 text-zinc-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        <span>Continue with Email</span>
+                    </button>
+
+                    <button type="button" onclick="signInAnonymouslyUser(this)" class="w-full flex items-center justify-center gap-2.5 bg-zinc-800/80 hover:bg-zinc-700/80 border border-white/10 text-zinc-200 py-3 px-4 rounded-full font-bold text-xs sm:text-sm transition duration-150 active:scale-[0.98] cursor-pointer">
+                        <span id="guest-spinner" class="hidden w-4 h-4 border-2 border-zinc-200 border-t-transparent rounded-full animate-spin"></span>
+                        <svg class="w-4 h-4 text-[#70ef7d]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        <span>Continue as Guest</span>
+                    </button>
+                </div>
+
+                <!-- EMAIL SIGN IN / SIGN UP FORM (Preserved ID) -->
+                <div id="email-form" class="w-full hidden flex-col gap-3 bg-zinc-900/90 border border-white/10 rounded-2xl p-4 text-left">
+                    <!-- Segmented Tab Switcher -->
+                    <div class="flex items-center p-1 bg-black/40 rounded-full border border-white/10">
+                        <button type="button" id="tab-email-login" onclick="switchAuthEmailMode('login')" class="flex-1 py-1.5 rounded-full bg-white text-zinc-950 font-bold text-xs shadow-xs transition-all text-center">
+                            Sign In
+                        </button>
+                        <button type="button" id="tab-email-signup" onclick="switchAuthEmailMode('signup')" class="flex-1 py-1.5 rounded-full text-zinc-400 hover:text-white font-semibold text-xs transition-all text-center">
+                            Create Account
+                        </button>
+                    </div>
+
+                    <!-- Input Fields -->
+                    <div class="flex flex-col gap-2">
+                        <div class="relative w-full">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500">
+                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                            </div>
+                            <input type="email" id="email-input" placeholder="Email (e.g. alex@example.com)" class="w-full pl-10 pr-4 py-2.5 rounded-xl text-xs sm:text-sm bg-zinc-950 border border-white/15 text-white focus:border-[#70ef7d] focus:ring-1 focus:ring-[#70ef7d] outline-none transition-all placeholder:text-zinc-500">
+                        </div>
+
+                        <div class="relative w-full">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500">
+                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            </div>
+                            <input type="password" id="password-input" placeholder="Password (min. 6 characters)" class="w-full pl-10 pr-4 py-2.5 rounded-xl text-xs sm:text-sm bg-zinc-950 border border-white/15 text-white focus:border-[#70ef7d] focus:ring-1 focus:ring-[#70ef7d] outline-none transition-all placeholder:text-zinc-500" onkeydown="if(event.key==='Enter') submitEmailAuth(document.getElementById('email-submit-btn'))">
+                        </div>
+                    </div>
+
+                    <!-- Primary Action Button -->
+                    <button type="button" id="email-submit-btn" onclick="submitEmailAuth(this)" class="w-full py-2.5 rounded-full bg-[#70ef7d] hover:bg-[#5fe66d] text-zinc-950 font-black text-xs sm:text-sm shadow-md active:scale-[0.98] transition-all flex items-center justify-center gap-2 mt-1 cursor-pointer">
+                        <span id="email-submit-text">Sign In with Email</span>
+                    </button>
+
+                    <!-- Helper Switch Prompt -->
+                    <div class="flex items-center justify-between text-xs px-1 pt-0.5">
+                        <span class="text-zinc-400 text-[11px]" id="email-switch-prompt">Don't have an account?</span>
+                        <button type="button" onclick="toggleEmailAuthMode()" class="text-[#70ef7d] font-bold text-[11px] hover:underline" id="email-switch-action">Create one</button>
+                    </div>
+
+                    <button type="button" onclick="hideEmailForm()" class="text-xs font-semibold text-zinc-400 hover:text-white transition text-center mt-1 cursor-pointer">← Back to options</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- INTERACTIVE TOP NAV INFO DRAWER / MODAL -->
+        <div id="clue-info-modal" class="fixed inset-0 z-[115] bg-black/75 backdrop-blur-md flex items-center justify-center p-4 hidden select-none">
+            <div class="w-full max-w-lg bg-[#0e1015] border border-white/15 rounded-3xl p-6 sm:p-8 shadow-2xl relative text-white animate-[fadeIn_0.2s_ease-out]">
+                <button type="button" onclick="closeClueInfoModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white p-2 rounded-full hover:bg-white/10 transition-all cursor-pointer">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+                <div id="clue-info-content"></div>
             </div>
         </div>
     </div>
@@ -1321,7 +1621,7 @@
             <div class="flex flex-col gap-1">
                 <h3 id="guest-limit-title" class="text-base font-bold text-zinc-900">Account Required</h3>
                 <p id="guest-limit-desc" class="text-xs text-zinc-500 leading-relaxed">
-                    This feature requires a full registered Crystal AI account. Sign in or create an account to unlock.
+                    This feature requires a full registered Crystal account. Sign in or create an account to unlock.
                 </p>
             </div>
             <div class="w-full flex flex-col gap-2 mt-1">
@@ -1331,6 +1631,315 @@
                 <button onclick="closeGuestLimitModal()" class="w-full py-2 rounded-full bg-zinc-100 hover:bg-zinc-200/70 text-zinc-800 border border-zinc-200 font-semibold text-xs active:scale-[0.98] transition-all">
                     Continue as Guest
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CRYSTAL MODEL & ENGINE SELECTOR MODAL -->
+    <div id="crystal-model-modal" class="fixed inset-0 z-[120] bg-black/70 backdrop-blur-md hidden flex items-center justify-center p-4 transition-all duration-300" onclick="if(event.target === this) toggleModelSelectorModal()">
+        <div class="w-full max-w-md bg-[#0d1017] text-white rounded-3xl border border-white/10 p-5 sm:p-6 shadow-2xl flex flex-col gap-4 relative animate-in fade-in zoom-in-95 duration-200">
+            <!-- Header -->
+            <div class="flex items-center justify-between pb-3 border-b border-white/10">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#70ef7d] via-[#38bdf8] to-[#c084fc] p-[1.5px] shadow-[0_0_12px_rgba(112,239,125,0.3)]">
+                        <div class="w-full h-full bg-[#070709] rounded-[10px] flex items-center justify-center">
+                            <svg class="w-4 h-4 text-[#70ef7d]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 2 8.5 12 22 22 8.5 12 2"/></svg>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="font-extrabold text-base tracking-tight text-white">Select Crystal Engine</h3>
+                        <p class="text-[11px] text-zinc-400">Switch AI reasoning models & capabilities</p>
+                    </div>
+                </div>
+                <button type="button" onclick="toggleModelSelectorModal()" class="p-1.5 rounded-full hover:bg-white/10 text-zinc-400 hover:text-white transition-colors cursor-pointer" aria-label="Close">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+
+            <!-- Model Options List -->
+            <div class="flex flex-col gap-2.5 max-h-[60vh] overflow-y-auto pr-1">
+                <!-- Option 1: Crystal Pro 2.5 (Default) -->
+                <button type="button" onclick="selectCrystalEngine('pro', 'Crystal Pro')" class="engine-option-btn w-full p-3.5 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-[#70ef7d]/50 text-left transition-all active:scale-[0.99] flex items-start justify-between group cursor-pointer" data-engine="pro">
+                    <div class="flex items-start gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-[#70ef7d] shrink-0 mt-0.5">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polygon points="12 6 15 12 12 18 9 12"/></svg>
+                        </div>
+                        <div class="flex flex-col gap-0.5">
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-sm text-white group-hover:text-[#70ef7d] transition-colors">Crystal Pro 2.5</span>
+                                <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-[#70ef7d]/20 text-[#70ef7d] border border-[#70ef7d]/30">Recommended</span>
+                            </div>
+                            <p class="text-xs text-zinc-400 leading-relaxed">Balanced high intelligence, real-time web search, and fast conversational logic.</p>
+                        </div>
+                    </div>
+                    <div class="engine-check text-[#70ef7d] shrink-0 mt-1">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                </button>
+
+                <!-- Option 2: Crystal Ultra 3.0 -->
+                <button type="button" onclick="selectCrystalEngine('ultra', 'Crystal Ultra')" class="engine-option-btn w-full p-3.5 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-[#38bdf8]/50 text-left transition-all active:scale-[0.99] flex items-start justify-between group cursor-pointer" data-engine="ultra">
+                    <div class="flex items-start gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-sky-500/15 border border-sky-500/30 flex items-center justify-center text-[#38bdf8] shrink-0 mt-0.5">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="6 2 18 2 22 8 12 22 2 8 6 2"/><line x1="2" y1="8" x2="22" y2="8"/></svg>
+                        </div>
+                        <div class="flex flex-col gap-0.5">
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-sm text-white group-hover:text-[#38bdf8] transition-colors">Crystal Ultra 3.0</span>
+                                <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-sky-500/20 text-[#38bdf8] border border-sky-500/30">Deep Reasoning</span>
+                            </div>
+                            <p class="text-xs text-zinc-400 leading-relaxed">Step-by-step mathematical intuition, complex scientific analysis, and research chains.</p>
+                        </div>
+                    </div>
+                    <div class="engine-check text-[#38bdf8] opacity-0 shrink-0 mt-1">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                </button>
+
+                <!-- Option 3: Crystal Coder -->
+                <button type="button" onclick="selectCrystalEngine('coder', 'Crystal Coder')" class="engine-option-btn w-full p-3.5 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-[#fbbf24]/50 text-left transition-all active:scale-[0.99] flex items-start justify-between group cursor-pointer" data-engine="coder">
+                    <div class="flex items-start gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-[#fbbf24] shrink-0 mt-0.5">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                        </div>
+                        <div class="flex flex-col gap-0.5">
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-sm text-white group-hover:text-[#fbbf24] transition-colors">Crystal Coder</span>
+                                <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-[#fbbf24] border border-amber-500/30">Dev Studio</span>
+                            </div>
+                            <p class="text-xs text-zinc-400 leading-relaxed">Full-stack software architecture, code debugging, and scripts across 30+ languages.</p>
+                        </div>
+                    </div>
+                    <div class="engine-check text-[#fbbf24] opacity-0 shrink-0 mt-1">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                </button>
+
+                <!-- Option 4: Crystal Vision & Studio -->
+                <button type="button" onclick="selectCrystalEngine('vision', 'Crystal Vision')" class="engine-option-btn w-full p-3.5 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-[#e879f9]/50 text-left transition-all active:scale-[0.99] flex items-start justify-between group cursor-pointer" data-engine="vision">
+                    <div class="flex items-start gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-[#e879f9] shrink-0 mt-0.5">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                        </div>
+                        <div class="flex flex-col gap-0.5">
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-sm text-white group-hover:text-[#e879f9] transition-colors">Crystal Vision & Studio</span>
+                                <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-purple-500/20 text-[#e879f9] border border-purple-500/30">Multimodal</span>
+                            </div>
+                            <p class="text-xs text-zinc-400 leading-relaxed">Photorealistic image generation, visual OCR, diagram parsing & creative art direction.</p>
+                        </div>
+                    </div>
+                    <div class="engine-check text-[#e879f9] opacity-0 shrink-0 mt-1">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                </button>
+
+                <!-- Option 5: Crystal Flash -->
+                <button type="button" onclick="selectCrystalEngine('flash', 'Crystal Flash')" class="engine-option-btn w-full p-3.5 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-indigo-400/50 text-left transition-all active:scale-[0.99] flex items-start justify-between group cursor-pointer" data-engine="flash">
+                    <div class="flex items-start gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0 mt-0.5">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                        </div>
+                        <div class="flex flex-col gap-0.5">
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-sm text-white group-hover:text-indigo-400 transition-colors">Crystal Flash</span>
+                                <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">Ultra-Fast</span>
+                            </div>
+                            <p class="text-xs text-zinc-400 leading-relaxed">Sub-second generation latency optimized for casual chats, quick translations, and drafts.</p>
+                        </div>
+                    </div>
+                    <div class="engine-check text-indigo-400 opacity-0 shrink-0 mt-1">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- HELP US / COMMUNITY & FEEDBACK MODAL -->
+    <div id="help-us-modal" class="fixed inset-0 z-[120] bg-black/70 backdrop-blur-md hidden flex items-center justify-center p-4 transition-all duration-300" onclick="if(event.target === this) toggleHelpUsModal()">
+        <div class="w-full max-w-lg bg-[#0d1017] text-white rounded-3xl border border-white/10 p-5 sm:p-6 shadow-2xl flex flex-col gap-5 relative animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
+            <!-- Header -->
+            <div class="flex items-center justify-between pb-3 border-b border-white/10">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-2xl bg-gradient-to-tr from-pink-500 to-rose-500 p-[1.5px] flex items-center justify-center shadow-[0_0_15px_rgba(244,63,94,0.3)]">
+                        <div class="w-full h-full bg-[#0d1017] rounded-[14px] flex items-center justify-center text-pink-400">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="font-black text-lg tracking-tight text-white">Help Us Grow Crystal</h3>
+                        <p class="text-xs text-zinc-400">Your feedback, ratings, and ideas make Crystal better every day</p>
+                    </div>
+                </div>
+                <button type="button" onclick="toggleHelpUsModal()" class="p-1.5 rounded-full hover:bg-white/10 text-zinc-400 hover:text-white transition-colors cursor-pointer" aria-label="Close">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+
+            <!-- 1. Star Rating Experience -->
+            <div class="p-4 rounded-2xl bg-white/[0.04] border border-white/10 flex flex-col items-center text-center gap-2">
+                <span class="text-xs font-bold text-zinc-300 uppercase tracking-wider">Rate your experience with Crystal</span>
+                <div class="flex items-center gap-2 my-1" id="help-us-stars">
+                    <button type="button" onclick="rateCrystalExperience(1)" class="star-btn p-1 text-zinc-600 hover:text-amber-400 transition-transform hover:scale-125 cursor-pointer text-2xl" data-star="1">★</button>
+                    <button type="button" onclick="rateCrystalExperience(2)" class="star-btn p-1 text-zinc-600 hover:text-amber-400 transition-transform hover:scale-125 cursor-pointer text-2xl" data-star="2">★</button>
+                    <button type="button" onclick="rateCrystalExperience(3)" class="star-btn p-1 text-zinc-600 hover:text-amber-400 transition-transform hover:scale-125 cursor-pointer text-2xl" data-star="3">★</button>
+                    <button type="button" onclick="rateCrystalExperience(4)" class="star-btn p-1 text-zinc-600 hover:text-amber-400 transition-transform hover:scale-125 cursor-pointer text-2xl" data-star="4">★</button>
+                    <button type="button" onclick="rateCrystalExperience(5)" class="star-btn p-1 text-zinc-600 hover:text-amber-400 transition-transform hover:scale-125 cursor-pointer text-2xl" data-star="5">★</button>
+                </div>
+                <p id="help-us-rating-feedback" class="text-xs font-medium text-emerald-400 min-h-[18px]">Tap a star to rate</p>
+            </div>
+
+            <!-- 2. Send Feedback Form -->
+            <div class="p-4 rounded-2xl bg-white/[0.04] border border-white/10 flex flex-col gap-3">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-zinc-300 uppercase tracking-wider">Send Feedback or Feature Request</span>
+                    <span class="text-[10px] font-mono text-zinc-500">Fast Review</span>
+                </div>
+
+                <!-- Category Chips -->
+                <div class="flex flex-wrap gap-1.5" id="feedback-category-chips">
+                    <button type="button" onclick="selectFeedbackCategory(this, 'Feature Request')" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-[#70ef7d]/20 text-[#70ef7d] border border-[#70ef7d]/40 active:scale-95 cursor-pointer">Feature Request</button>
+                    <button type="button" onclick="selectFeedbackCategory(this, 'Bug Report')" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-white/[0.05] text-zinc-300 border border-white/10 hover:bg-white/10 active:scale-95 cursor-pointer">Bug Report</button>
+                    <button type="button" onclick="selectFeedbackCategory(this, 'Model Quality')" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-white/[0.05] text-zinc-300 border border-white/10 hover:bg-white/10 active:scale-95 cursor-pointer">Model Quality</button>
+                    <button type="button" onclick="selectFeedbackCategory(this, 'General Idea')" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-white/[0.05] text-zinc-300 border border-white/10 hover:bg-white/10 active:scale-95 cursor-pointer">General Idea</button>
+                </div>
+
+                <textarea id="help-us-feedback-input" rows="3" placeholder="Tell us what you love or what we can build next for you..." class="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-xs sm:text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#70ef7d] resize-none"></textarea>
+
+                <!-- Optional Image / Screenshot Attachment -->
+                <div class="flex flex-col gap-2">
+                    <div id="help-us-image-preview-box" class="hidden relative w-fit max-w-[200px] rounded-xl overflow-hidden border border-white/20 bg-black/60">
+                        <img id="help-us-image-preview" src="" class="max-h-24 w-auto object-cover" alt="Attachment Preview" />
+                        <button type="button" onclick="removeFeedbackImageAttachment()" class="absolute top-1 right-1 p-1 rounded-full bg-black/80 hover:bg-rose-600 text-white transition-colors cursor-pointer" title="Remove image">
+                            <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        </button>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <label for="help-us-image-file" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.05] hover:bg-white/10 text-zinc-300 text-xs font-semibold border border-white/10 cursor-pointer transition active:scale-95">
+                            <svg class="w-3.5 h-3.5 text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                            <span id="help-us-image-btn-label">Attach Image / Screenshot</span>
+                        </label>
+                        <input type="file" id="help-us-image-file" accept="image/*" class="hidden" onchange="handleFeedbackImageSelected(event)">
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <input type="email" id="help-us-email-input" placeholder="Your email (for status reply)" class="flex-1 p-2.5 rounded-xl bg-black/40 border border-white/10 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#70ef7d]">
+                    <button type="button" onclick="submitHelpUsFeedback()" class="px-4 py-2.5 rounded-xl bg-[#70ef7d] hover:bg-[#5cd469] text-black font-bold text-xs transition-all active:scale-95 flex items-center gap-1.5 shadow-md shrink-0 cursor-pointer">
+                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span>Send</span>
+                    </button>
+                </div>
+                <div class="flex items-center gap-2 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-300">
+                    <svg class="w-4 h-4 shrink-0 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <span>Delivered directly to Crystal Administrators and Engineering via secure dispatch.</span>
+                </div>
+            </div>
+
+            <!-- 3. Share & Community -->
+            <div class="grid grid-cols-2 gap-3">
+                <button type="button" onclick="shareCrystalApp()" class="p-3.5 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-left flex flex-col gap-1 transition-all active:scale-95 cursor-pointer group">
+                    <div class="flex items-center justify-between">
+                        <svg class="w-5 h-5 text-sky-400 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                        <span class="text-[10px] font-mono text-zinc-500">Share</span>
+                    </div>
+                    <span class="font-bold text-xs text-white">Share with Friends</span>
+                    <span class="text-[11px] text-zinc-400">Invite peers to use Crystal</span>
+                </button>
+
+                <button type="button" onclick="copyCrystalLink()" class="p-3.5 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-left flex flex-col gap-1 transition-all active:scale-95 cursor-pointer group">
+                    <div class="flex items-center justify-between">
+                        <svg class="w-5 h-5 text-emerald-400 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                        <span class="text-[10px] font-mono text-zinc-500" id="copy-link-badge">Copy</span>
+                    </div>
+                    <span class="font-bold text-xs text-white">Copy App URL</span>
+                    <span class="text-[11px] text-zinc-400">Direct link to web preview</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADMIN FEEDBACK INBOX MODAL (Restricted to Authorized Admins) -->
+    <div id="admin-inbox-modal" class="fixed inset-0 z-[125] bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-5 transition-all duration-300" onclick="if(event.target === this) closeAdminInboxModal()">
+        <div class="w-full max-w-2xl bg-[#0b0e14] text-white rounded-3xl border border-amber-500/30 p-5 sm:p-6 shadow-[0_0_50px_rgba(245,158,11,0.15)] flex flex-col gap-4 relative animate-in fade-in zoom-in-95 duration-200 max-h-[90vh]">
+            <!-- Header -->
+            <div class="flex items-center justify-between pb-3 border-b border-white/10">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-yellow-400 p-[1.5px] flex items-center justify-center shadow-[0_0_20px_rgba(245,158,11,0.4)]">
+                        <div class="w-full h-full bg-[#0b0e14] rounded-[14px] flex items-center justify-center text-amber-400">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="font-black text-lg tracking-tight text-white">Admin Feedback Inbox</h3>
+                            <span class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[10px] font-black uppercase tracking-wider">👑 Admins Only</span>
+                        </div>
+                        <p class="text-xs text-zinc-400">Live feed of verified user reports, feature requests &amp; community reviews</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <button type="button" onclick="loadAdminFeedbacks()" class="p-2 rounded-full hover:bg-white/10 text-zinc-400 hover:text-white transition-colors cursor-pointer" title="Refresh Feedbacks">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                    </button>
+                    <button type="button" onclick="closeAdminInboxModal()" class="p-2 rounded-full hover:bg-white/10 text-zinc-400 hover:text-white transition-colors cursor-pointer" aria-label="Close">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats & Quick Actions Toolbar -->
+            <div class="flex flex-wrap items-center justify-between gap-2 p-3 rounded-2xl bg-white/[0.03] border border-white/10 text-xs">
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-zinc-400 font-medium">Total:</span>
+                        <span id="admin-stat-total" class="font-bold text-white font-mono">0</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-zinc-400 font-medium">Unread:</span>
+                        <span id="admin-stat-unread" class="font-bold text-pink-400 font-mono">0</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-zinc-400 font-medium">Avg Rating:</span>
+                        <span id="admin-stat-avg" class="font-bold text-amber-400 font-mono">5.0★</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="markAllFeedbacksRead()" class="px-2.5 py-1 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] text-zinc-300 hover:text-white text-[11px] font-semibold transition active:scale-95 cursor-pointer">
+                        Mark All Read
+                    </button>
+                    <button type="button" onclick="sendTestFeedbackFromAdmin()" class="px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 text-[11px] font-semibold transition active:scale-95 cursor-pointer flex items-center gap-1">
+                        <span>Send Test</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Category Filter Chips -->
+            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none" id="admin-filter-bar">
+                <button type="button" onclick="setAdminFilter('all', this)" class="admin-filter-btn px-3 py-1 rounded-full text-xs font-semibold bg-amber-500 text-black active:scale-95 cursor-pointer shrink-0">All (<span id="filter-count-all">0</span>)</button>
+                <button type="button" onclick="setAdminFilter('unread', this)" class="admin-filter-btn px-3 py-1 rounded-full text-xs font-semibold bg-white/[0.05] text-zinc-300 border border-white/10 hover:bg-white/10 active:scale-95 cursor-pointer shrink-0">Unread (<span id="filter-count-unread">0</span>)</button>
+                <button type="button" onclick="setAdminFilter('Feature Request', this)" class="admin-filter-btn px-3 py-1 rounded-full text-xs font-semibold bg-white/[0.05] text-zinc-300 border border-white/10 hover:bg-white/10 active:scale-95 cursor-pointer shrink-0">Feature Requests</button>
+                <button type="button" onclick="setAdminFilter('Bug Report', this)" class="admin-filter-btn px-3 py-1 rounded-full text-xs font-semibold bg-white/[0.05] text-zinc-300 border border-white/10 hover:bg-white/10 active:scale-95 cursor-pointer shrink-0">Bug Reports</button>
+                <button type="button" onclick="setAdminFilter('5star', this)" class="admin-filter-btn px-3 py-1 rounded-full text-xs font-semibold bg-white/[0.05] text-zinc-300 border border-white/10 hover:bg-white/10 active:scale-95 cursor-pointer shrink-0">5-Star Reviews</button>
+            </div>
+
+            <!-- Feedbacks Feed List -->
+            <div id="admin-feedbacks-container" class="flex-1 overflow-y-auto pr-1 flex flex-col gap-3 min-h-[260px] max-h-[50vh] scrollbar-thin">
+                <!-- Dynamically populated -->
+                <div class="flex flex-col items-center justify-center p-8 text-center text-zinc-500 gap-2">
+                    <svg class="w-10 h-10 text-zinc-600 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                    <span class="text-xs font-medium">Connecting to feedback store...</span>
+                </div>
+            </div>
+
+            <!-- Admin Notice Footer -->
+            <div class="pt-2 border-t border-white/10 flex items-center justify-between text-[11px] text-zinc-500">
+                <span>Direct real-time notification dispatch via SMTP and persistent store.</span>
+                <span class="font-mono text-[10px] text-amber-400">Authorized Admin Operations</span>
             </div>
         </div>
     </div>
@@ -1423,7 +2032,7 @@
                                 <label id="settings-label-custom-instructions" for="custom-instructions" class="font-bold text-xs uppercase tracking-wider opacity-60">Custom AI Instructions</label>
                                 <span class="text-[10px] opacity-40 font-mono">Auto-Saved</span>
                             </div>
-                            <p id="settings-desc-custom-instructions" class="text-[11px] opacity-50 font-medium leading-normal mb-1">Set custom rules for how Crystal AI responds (e.g., tone, conciseness, preferred coding style).</p>
+                            <p id="settings-desc-custom-instructions" class="text-[11px] opacity-50 font-medium leading-normal mb-1">Set custom rules for how Crystal responds (e.g., tone, conciseness, preferred coding style).</p>
                             <textarea id="custom-instructions" rows="4" class="w-full bg-transparent border border-[var(--border-color)] text-[var(--text-color)] p-3 rounded-xl text-sm outline-none focus:border-indigo-500 resize-none font-medium leading-relaxed transition-colors placeholder:text-gray-500/50" placeholder="E.g., Always answer concisely, format code blocks with clean commentary, and prefer TypeScript..."></textarea>
                         </div>
                     </div>
@@ -1593,6 +2202,20 @@
                     </div>
                 </div>
 
+                <!-- SECTION: HELP US & FEEDBACK -->
+                <div class="flex flex-col gap-3 pt-2">
+                    <h2 class="text-xs font-bold uppercase tracking-wider text-pink-400 opacity-90 px-1">Community & Support</h2>
+                    <div class="flex flex-col gap-2">
+                        <button onclick="toggleSettings(); toggleHelpUsModal();" class="w-full p-4 bg-pink-500/10 hover:bg-pink-500/15 text-pink-400 rounded-2xl font-bold text-sm text-left flex items-center justify-between transition active:scale-[0.99] border border-pink-500/20">
+                            <div class="flex items-center gap-3">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                                <span>Help Us & Send Feedback</span>
+                            </div>
+                            <span class="text-xs opacity-60">→</span>
+                        </button>
+                    </div>
+                </div>
+
                 <!-- SECTION 4: ACCOUNT & DANGER ZONE -->
                 <div class="flex flex-col gap-3 pt-2">
                     <h2 id="settings-heading-account" class="text-xs font-bold uppercase tracking-wider text-indigo-400 opacity-90 px-1">Account & History</h2>
@@ -1641,7 +2264,7 @@
                     </div>
                     <div>
                         <div class="flex items-center gap-2">
-                            <h2 class="text-base font-bold text-white">Crystal AI Engine Pipeline</h2>
+                            <h2 class="text-base font-bold text-white">Crystal Engine Pipeline</h2>
                             <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Live Pipeline</span>
                         </div>
                         <p class="text-xs text-slate-400">Verifies active models in real time and discards decommissioned models</p>
@@ -1708,7 +2331,7 @@
                     </div>
                     <div>
                         <h2 class="text-lg font-bold text-white">Terms & Conditions</h2>
-                        <p class="text-xs text-gray-400">Crystal AI User Agreement</p>
+                        <p class="text-xs text-gray-400">Crystal User Agreement</p>
                     </div>
                 </div>
                 <button onclick="closeTermsModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-gray-400 hover:text-white transition">
@@ -1719,11 +2342,11 @@
             <div class="overflow-y-auto pr-2 space-y-4 text-xs md:text-sm text-gray-300 leading-relaxed font-sans scrollbar-thin">
                 <div>
                     <h3 class="font-bold text-white text-sm mb-1">1. Acceptance of Terms</h3>
-                    <p class="text-gray-400">By accessing or using Crystal AI, you agree to these terms. You agree not to use the application for illegal or unauthorized activities.</p>
+                    <p class="text-gray-400">By accessing or using Crystal, you agree to these terms. You agree not to use the application for illegal or unauthorized activities.</p>
                 </div>
                 <div>
                     <h3 class="font-bold text-white text-sm mb-1">2. AI & Automated Services</h3>
-                    <p class="text-gray-400">Crystal AI provides conversational assistance, code generation, live weather telemetry, and creative image rendering. AI responses are generated algorithmically and should be evaluated independently for critical tasks.</p>
+                    <p class="text-gray-400">Crystal provides conversational assistance, code generation, live weather telemetry, and creative image rendering. Responses are generated algorithmically and should be evaluated independently for critical tasks.</p>
                 </div>
                 <div>
                     <h3 class="font-bold text-white text-sm mb-1">3. Privacy & Data Handling</h3>
@@ -1735,7 +2358,7 @@
                 </div>
                 <div>
                     <h3 class="font-bold text-white text-sm mb-1">5. Limitation of Liability</h3>
-                    <p class="text-gray-400">Crystal AI is provided "as is" without express warranties. Under no circumstances shall Crystal AI be liable for indirect or consequential damages.</p>
+                    <p class="text-gray-400">Crystal is provided "as is" without express warranties. Under no circumstances shall Crystal be liable for indirect or consequential damages.</p>
                 </div>
             </div>
 
@@ -1949,6 +2572,17 @@
                 <svg viewBox="0 0 24 24" class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                 <span id="sidebar-personalize-text">Personalize Crystal Profile</span>
             </button>
+            <button id="sidebar-help-us-btn" onclick="toggleHelpUsModal(); toggleSidebar();" class="flex items-center gap-3 w-full py-2.5 px-4 bg-pink-500/10 hover:bg-pink-500/20 text-pink-400 border border-pink-500/25 rounded-full font-bold text-xs transition-all active:scale-[0.98] cursor-pointer">
+                <svg viewBox="0 0 24 24" class="w-4 h-4 text-pink-400" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                <span id="sidebar-help-us-text">Help Us & Feedback</span>
+            </button>
+            <button id="sidebar-admin-inbox-btn" onclick="openAdminInboxModal(); toggleSidebar();" class="hidden items-center justify-between w-full py-2.5 px-4 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-full font-bold text-xs transition-all active:scale-[0.98] cursor-pointer" style="display: none;">
+                <div class="flex items-center gap-3">
+                    <svg viewBox="0 0 24 24" class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    <span id="sidebar-admin-inbox-text">Admin Feedback Inbox</span>
+                </div>
+                <span id="sidebar-admin-unread-badge" class="px-1.5 py-0.5 rounded-full bg-amber-500 text-black text-[10px] font-black hidden">0</span>
+            </button>
             <button id="sidebar-settings-btn" onclick="toggleSettings(); toggleSidebar();" class="flex items-center gap-3 w-full py-3 px-4 hover:bg-[var(--md-sys-color-surface-container-high)] text-[var(--md-sys-color-on-surface)] rounded-full font-medium text-sm transition-colors active:scale-[0.98]">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
                     <circle cx="12" cy="12" r="3"></circle>
@@ -1956,39 +2590,59 @@
                 </svg>
                 <span id="sidebar-settings-text">Settings</span>
             </button>
+            <button id="sidebar-logout-btn" onclick="signOutUser(); toggleSidebar();" class="flex items-center gap-3 w-full py-2.5 px-4 hover:bg-red-500/10 text-red-400 border border-transparent hover:border-red-500/20 rounded-full font-semibold text-xs transition-colors active:scale-[0.98] cursor-pointer">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
+                </svg>
+                <span id="sidebar-logout-text">Log Out</span>
+            </button>
         </div>
     </aside>
 
     <div class="flex flex-col h-full w-full min-w-0 max-w-full overflow-x-hidden relative z-30">
         <!-- HEADER -->
-        <header class="flex justify-between items-center px-3 sm:px-5 py-2.5 sm:py-3 sticky top-0 z-30 border-b border-[var(--glass-border)] ios-liquid-glass">
+        <header class="flex justify-between items-center px-3 sm:px-5 py-2.5 sm:py-3 sticky top-0 z-30 border-b border-black/10 dark:border-white/[0.08] ios-liquid-glass">
             <div class="flex items-center gap-2 shrink-0">
-                <button id="sidebar-toggle-btn" onclick="toggleSidebar()" class="p-2 -ml-1 text-[var(--text-color)] rounded-full hover:bg-[var(--sidebar-hover)] active:scale-95 transition-all flex items-center justify-center cursor-pointer" title="Menu & History" aria-label="Open Sidebar Menu">
+                <button id="sidebar-toggle-btn" onclick="toggleSidebar()" class="p-2 -ml-1 text-zinc-700 dark:text-zinc-200 hover:text-black dark:hover:text-white rounded-full hover:bg-black/5 dark:hover:bg-white/[0.08] active:scale-95 transition-all flex items-center justify-center cursor-pointer" title="Menu & History" aria-label="Open Sidebar Menu">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="4" y1="8" x2="20" y2="8"/><line x1="4" y1="16" x2="20" y2="16"/></svg>
                 </button>
             </div>
 
-            <!-- Clean Crystal Logo & Name in Center -->
-            <div class="flex items-center justify-center gap-2 select-none">
-                <svg viewBox="0 0 32 32" class="w-5 h-5 shrink-0" fill="none">
-                    <path d="M16 2L2 12L16 18L30 12L16 2Z" fill="#38bdf8"/>
-                    <path d="M2 12L16 30L16 18L2 12Z" fill="#2563eb"/>
-                    <path d="M30 12L16 30L16 18L30 12Z" fill="#a855f7"/>
-                </svg>
-                <span id="header-crystal-logo-text" class="font-extrabold text-[17px] tracking-tight text-[var(--text-color)]">Crystal</span>
+            <!-- Clean Crystal Logo & Model Selector in Center -->
+            <div class="flex items-center justify-center gap-2.5 select-none">
+                <div class="flex items-center gap-2 cursor-pointer" onclick="startNewChat()">
+                    <svg viewBox="0 0 32 32" class="w-5 h-5 shrink-0" fill="none">
+                        <path d="M16 2L2 12L16 18L30 12L16 2Z" fill="#38bdf8"/>
+                        <path d="M2 12L16 30L16 18L2 12Z" fill="#2563eb"/>
+                        <path d="M30 12L16 30L16 18L30 12Z" fill="#70ef7d"/>
+                    </svg>
+                    <span id="header-crystal-logo-text" class="font-black text-[17px] tracking-tight text-zinc-900 dark:text-white">Crystal</span>
+                </div>
+                <!-- Model / Tier Selector Pill -->
+                <button type="button" onclick="toggleModelSelectorModal()" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/5 dark:bg-white/[0.06] hover:bg-black/10 dark:hover:bg-white/[0.12] border border-black/10 dark:border-white/10 text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-all active:scale-95 cursor-pointer shadow-2xs">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#70ef7d] animate-pulse"></span>
+                    <span id="header-active-model-name" class="text-[11px] font-bold tracking-tight">Crystal Pro</span>
+                    <svg class="w-3 h-3 text-zinc-500 dark:text-zinc-400 opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
             </div>
 
             <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
-                <button id="header-lang-btn" onclick="toggleQuickLanguageModal()" class="p-1.5 sm:p-2 text-[var(--text-color)] opacity-70 hover:opacity-100 active:scale-95 transition-all flex items-center gap-1 rounded-full hover:bg-[var(--sidebar-hover)]" title="Translate / Language">
-                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <button id="header-admin-inbox-btn" onclick="openAdminInboxModal()" class="relative p-2 text-amber-500 dark:text-amber-400 hover:text-amber-600 dark:hover:text-amber-300 active:scale-95 transition-all rounded-full bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 cursor-pointer hidden" style="display: none;" title="Admin Feedback Inbox">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                    <span id="header-admin-unread-badge" class="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-amber-500 text-black text-[9px] font-black flex items-center justify-center shadow-xs hidden">0</span>
+                </button>
+                <button id="header-lang-btn" onclick="toggleQuickLanguageModal()" class="px-2 py-1 sm:px-2.5 sm:py-1.5 text-zinc-700 dark:text-zinc-200 hover:text-black dark:hover:text-white rounded-full bg-black/5 dark:bg-white/[0.05] hover:bg-black/10 dark:hover:bg-white/[0.1] border border-black/10 dark:border-white/10 active:scale-95 transition-all flex items-center gap-1.5" title="Translate / Language">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="10"></circle>
                         <line x1="2" y1="12" x2="22" y2="12"></line>
                         <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
                     </svg>
-                    <span id="header-lang-badge" class="text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded-full bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] border border-[var(--md-sys-color-outline-variant)] leading-tight">EN</span>
+                    <span id="header-lang-badge" class="text-[10px] font-extrabold uppercase text-emerald-600 dark:text-[#70ef7d] tracking-wider leading-tight">EN</span>
                 </button>
-                <button id="header-new-chat-btn" onclick="startNewChat()" class="p-1.5 sm:p-2 text-[var(--text-color)] opacity-70 hover:opacity-100 active:scale-95 transition-all rounded-full hover:bg-[var(--sidebar-hover)]" title="New Chat">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <button id="header-new-chat-btn" onclick="startNewChat()" class="p-2 text-zinc-700 dark:text-zinc-200 hover:text-black dark:hover:text-white active:scale-95 transition-all rounded-full bg-black/5 dark:bg-white/[0.05] hover:bg-black/10 dark:hover:bg-white/[0.1] border border-black/10 dark:border-white/10" title="New Chat">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
                     </svg>
                 </button>
@@ -2001,31 +2655,33 @@
             <div id="empty-state" class="absolute inset-0 flex flex-col items-center justify-center p-4 sm:p-6 select-none transition-all duration-300 pointer-events-auto">
                 <div class="flex flex-col items-center max-w-xl w-full text-center my-auto py-8">
                     <!-- 3D Crystalline Prism Emblem with Ambient Refraction Aura -->
-                    <div class="relative w-24 h-24 sm:w-28 sm:h-28 mb-4 flex items-center justify-center">
-                        <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-sky-500/25 via-indigo-500/20 to-purple-500/25 blur-xl animate-pulse"></div>
-                        <canvas id="crystal-canvas" class="w-24 h-24 sm:w-28 sm:h-28 relative z-10 cursor-grab active:cursor-grabbing" style="touch-action: none;"></canvas>
+                    <div class="relative w-28 h-28 sm:w-32 sm:h-32 mb-5 flex items-center justify-center">
+                        <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-[#70ef7d]/20 via-[#38bdf8]/20 to-[#c084fc]/20 blur-2xl animate-pulse"></div>
+                        <canvas id="crystal-canvas" class="w-28 h-28 sm:w-32 sm:h-32 relative z-10 cursor-grab active:cursor-grabbing" style="touch-action: none;"></canvas>
                     </div>
 
-                    <!-- Clean Personalized Greeting Headline -->
-                    <h1 id="dynamic-greeting" class="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-[var(--text-color)] mb-2.5 leading-tight text-balance">Your move!</h1>
-                    <p id="empty-state-subtitle" class="text-sm sm:text-base text-[var(--text-color)] opacity-70 font-medium max-w-md mx-auto mb-6 sm:mb-8 leading-relaxed">Ask Crystal anything, find products, analyze code, or create images.</p>
+                    <!-- Clean Personalized Greeting Headline with Gradient Accent -->
+                    <h1 id="dynamic-greeting" class="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-zinc-900 dark:text-white mb-2 leading-tight text-balance">
+                        Ready when you are!
+                    </h1>
+                    <p id="empty-state-subtitle" class="text-sm sm:text-base text-zinc-600 dark:text-zinc-400 font-medium max-w-md mx-auto mb-7 leading-relaxed">Ask Crystal anything, find products, analyze code, or create images.</p>
 
                     <!-- Horizontal Crystalline Quick Action Chips -->
-                    <div class="flex flex-wrap items-center justify-center gap-2 max-w-lg w-full">
-                        <button id="empty-action-product" class="px-3.5 py-2 rounded-full bg-slate-900/5 dark:bg-white/10 hover:bg-slate-900/10 dark:hover:bg-white/15 border border-slate-900/10 dark:border-white/10 text-xs sm:text-[13px] font-semibold text-[var(--text-color)] transition-all active:scale-95 flex items-center gap-1.5 shadow-2xs" onclick="triggerAction('core'); injectPrompt('Recommend the top 3 best wireless noise-canceling headphones with prices and store links')">
-                            <svg class="w-4 h-4 opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                    <div class="flex flex-wrap items-center justify-center gap-2.5 max-w-xl w-full">
+                        <button id="empty-action-product" class="px-4 py-2.5 rounded-full bg-black/5 dark:bg-white/[0.05] hover:bg-black/10 dark:hover:bg-white/[0.1] border border-black/10 dark:border-white/10 hover:border-[#70ef7d]/50 text-xs sm:text-[13px] font-semibold text-zinc-800 dark:text-zinc-100 transition-all active:scale-95 flex items-center gap-2 shadow-sm cursor-pointer" onclick="triggerAction('core'); injectPrompt('Recommend the top 3 best wireless noise-canceling headphones with prices and store links')">
+                            <svg class="w-4 h-4 text-emerald-600 dark:text-[#70ef7d]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
                             <span id="empty-action-product-text">Find Products & Deals</span>
                         </button>
-                        <button id="empty-action-reason" class="px-3.5 py-2 rounded-full bg-slate-900/5 dark:bg-white/10 hover:bg-slate-900/10 dark:hover:bg-white/15 border border-slate-900/10 dark:border-white/10 text-xs sm:text-[13px] font-semibold text-[var(--text-color)] transition-all active:scale-95 flex items-center gap-1.5 shadow-2xs" onclick="toggleDeepThinking(); injectPrompt('Explain quantum entanglement step-by-step with mathematical intuition')">
-                            <svg class="w-4 h-4 opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="6 2 18 2 22 8 12 22 2 8 6 2"/><line x1="2" y1="8" x2="22" y2="8"/><line x1="12" y1="2" x2="8" y2="8"/><line x1="12" y1="2" x2="16" y2="8"/></svg>
+                        <button id="empty-action-reason" class="px-4 py-2.5 rounded-full bg-black/5 dark:bg-white/[0.05] hover:bg-black/10 dark:hover:bg-white/[0.1] border border-black/10 dark:border-white/10 hover:border-[#38bdf8]/50 text-xs sm:text-[13px] font-semibold text-zinc-800 dark:text-zinc-100 transition-all active:scale-95 flex items-center gap-2 shadow-sm cursor-pointer" onclick="toggleDeepThinking(); injectPrompt('Explain quantum entanglement step-by-step with mathematical intuition')">
+                            <svg class="w-4 h-4 text-sky-600 dark:text-[#38bdf8]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="6 2 18 2 22 8 12 22 2 8 6 2"/><line x1="2" y1="8" x2="22" y2="8"/><line x1="12" y1="2" x2="8" y2="8"/><line x1="12" y1="2" x2="16" y2="8"/></svg>
                             <span id="empty-action-reason-text">Deep Reasoning</span>
                         </button>
-                        <button id="empty-action-code" class="px-3.5 py-2 rounded-full bg-slate-900/5 dark:bg-white/10 hover:bg-slate-900/10 dark:hover:bg-white/15 border border-slate-900/10 dark:border-white/10 text-xs sm:text-[13px] font-semibold text-[var(--text-color)] transition-all active:scale-95 flex items-center gap-1.5 shadow-2xs" onclick="triggerAction('copilot'); injectPrompt('Build an interactive responsive dashboard in React and Tailwind CSS')">
-                            <svg class="w-4 h-4 opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                        <button id="empty-action-code" class="px-4 py-2.5 rounded-full bg-black/5 dark:bg-white/[0.05] hover:bg-black/10 dark:hover:bg-white/[0.1] border border-black/10 dark:border-white/10 hover:border-[#fbbf24]/50 text-xs sm:text-[13px] font-semibold text-zinc-800 dark:text-zinc-100 transition-all active:scale-95 flex items-center gap-2 shadow-sm cursor-pointer" onclick="triggerAction('copilot'); injectPrompt('Build an interactive responsive dashboard in React and Tailwind CSS')">
+                            <svg class="w-4 h-4 text-amber-500 dark:text-[#fbbf24]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
                             <span id="empty-action-code-text">Write & Debug Code</span>
                         </button>
-                        <button id="empty-action-image" class="px-3.5 py-2 rounded-full bg-slate-900/5 dark:bg-white/10 hover:bg-slate-900/10 dark:hover:bg-white/15 border border-slate-900/10 dark:border-white/10 text-xs sm:text-[13px] font-semibold text-[var(--text-color)] transition-all active:scale-95 flex items-center gap-1.5 shadow-2xs" onclick="triggerAction('image'); injectPrompt('Create a photorealistic image of a futuristic crystal observatory in the mountains')">
-                            <svg class="w-4 h-4 opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                        <button id="empty-action-image" class="px-4 py-2.5 rounded-full bg-black/5 dark:bg-white/[0.05] hover:bg-black/10 dark:hover:bg-white/[0.1] border border-black/10 dark:border-white/10 hover:border-[#e879f9]/50 text-xs sm:text-[13px] font-semibold text-zinc-800 dark:text-zinc-100 transition-all active:scale-95 flex items-center gap-2 shadow-sm cursor-pointer" onclick="triggerAction('image'); injectPrompt('Create a photorealistic image of a futuristic crystal observatory in the mountains')">
+                            <svg class="w-4 h-4 text-purple-600 dark:text-[#e879f9]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
                             <span id="empty-action-image-text">Create Image</span>
                         </button>
                     </div>
@@ -2103,6 +2759,21 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- One-Click Prompt Ideas & Direct Generate Action -->
+                        <div class="flex flex-col gap-2 pt-2 border-t border-[var(--border-color)]/30">
+                            <span class="text-[9px] font-bold text-gray-400 uppercase tracking-wide text-left">Quick Creative Ideas (Click to Try)</span>
+                            <div class="flex flex-wrap gap-1.5">
+                                <button type="button" onclick="injectPrompt('A majestic crystal palace on a snowy mountain peak at sunset, 8k, cinematic')" class="text-[11px] px-2.5 py-1 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 font-medium transition-all text-left">🏰 Crystal Palace</button>
+                                <button type="button" onclick="injectPrompt('Cyberpunk neon tiger in rain, glowing blue eyes, cinematic lighting, 8k photorealistic')" class="text-[11px] px-2.5 py-1 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 font-medium transition-all text-left">🐅 Cyber Neon Tiger</button>
+                                <button type="button" onclick="injectPrompt('Ethereal crystal lotus flower floating on calm iridescent waters at twilight')" class="text-[11px] px-2.5 py-1 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 font-medium transition-all text-left">🪷 Glowing Lotus</button>
+                                <button type="button" onclick="injectPrompt('Astronaut exploring a crystal cave on Mars, volumetric glow, ultra high detail')" class="text-[11px] px-2.5 py-1 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 font-medium transition-all text-left">🚀 Mars Crystal Cave</button>
+                            </div>
+                            <button type="button" onclick="triggerStudioImageSubmit()" class="w-full mt-1.5 py-2.5 px-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 hover:opacity-95 text-white rounded-xl font-bold text-xs shadow-md transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4 text-amber-300" viewBox="0 0 24 24" fill="currentColor"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>
+                                <span>Generate Image Now (Cloudflare Workers AI)</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -2141,21 +2812,21 @@
                         </button>
                     </div>
 
-                    <div class="w-full bg-[var(--md-sys-color-surface-container-high)] border border-[var(--md-sys-color-outline-variant)] rounded-[28px] p-2 pl-3 flex items-end gap-1.5 sm:gap-2 shadow-md">
+                    <div class="w-full bg-white/90 dark:bg-[#0c0f17]/90 backdrop-blur-xl border border-black/10 dark:border-white/10 rounded-[28px] p-2 pl-3 flex items-end gap-1.5 sm:gap-2 shadow-xl">
                         <input type="file" id="file-input" class="hidden" accept="image/*" multiple onchange="handleFileUpload(event)">
-                        <button onclick="toggleActionMenu(event)" class="p-2 sm:p-2.5 rounded-full hover:bg-[var(--md-sys-color-surface-container-highest)] text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] transition-all active:scale-95 shrink-0 flex items-center justify-center" title="Open Crystal Center Actions">
+                        <button onclick="toggleActionMenu(event)" class="p-2 sm:p-2.5 rounded-full hover:bg-black/5 dark:hover:bg-white/[0.08] text-zinc-500 hover:text-black dark:text-zinc-400 dark:hover:text-white transition-all active:scale-95 shrink-0 flex items-center justify-center cursor-pointer" title="Open Crystal Center Actions">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                         </button>
 
-                        <textarea id="message" rows="1" placeholder="Message Crystal..." oninput="autoExpandTextarea(this)" onkeydown="checkSubmitKey(event)" class="flex-1 min-w-0 bg-transparent border-none py-2 px-1 text-[15px] sm:text-[16px] max-h-28 text-[var(--md-sys-color-on-surface)] outline-none resize-none font-medium leading-relaxed scrollbar-none"></textarea>
+                        <textarea id="message" rows="1" placeholder="Message Crystal..." oninput="autoExpandTextarea(this)" onkeydown="checkSubmitKey(event)" class="flex-1 min-w-0 bg-transparent border-none py-2 px-1 text-[15px] sm:text-[16px] max-h-28 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 outline-none resize-none font-medium leading-relaxed scrollbar-none"></textarea>
 
                         <!-- VOICE SPEECH TO TEXT TRIGGER -->
-                        <button id="mic-btn" onclick="toggleSpeech()" class="p-2 sm:p-2.5 rounded-full transition-all duration-300 active:scale-95 text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-surface-container-highest)] shrink-0 items-center justify-center flex" title="Voice Input">
+                        <button id="mic-btn" onclick="toggleSpeech()" class="p-2 sm:p-2.5 rounded-full transition-all duration-300 active:scale-95 text-zinc-500 hover:text-black dark:text-zinc-400 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.08] shrink-0 items-center justify-center flex cursor-pointer" title="Voice Input">
                             <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
                         </button>
 
-                        <button type="submit" id="sendBtn" class="p-2.5 sm:p-3 bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] hover:opacity-90 disabled:opacity-30 rounded-full transition-all active:scale-95 flex items-center justify-center shadow-sm shrink-0" onclick="submitMessage(event)">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                        <button type="submit" id="sendBtn" class="p-2.5 sm:p-3 bg-[#70ef7d] text-black hover:bg-[#5cd469] disabled:opacity-30 rounded-full transition-all active:scale-95 flex items-center justify-center shadow-md shrink-0 cursor-pointer font-bold" onclick="submitMessage(event)">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                         </button>
                     </div>
                 </div>
@@ -3041,85 +3712,139 @@
          CORE INTERACTIVE JAVASCRIPT ENGINE
          ========================================================================== -->
     <script>
-        // Particle background Engine
-        const particleCanvas = document.getElementById('particle-canvas');
-        const particleCtx = particleCanvas ? particleCanvas.getContext('2d') : null;
+        // ============================================================================
+        // INTERACTIVE CHAT PARTICLE MATRIX & DYNAMIC AMBIENT BACKGROUND
+        // ============================================================================
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas ? canvas.getContext('2d') : null;
         let particlesArray = [];
-        
+
         function initParticles() {
             try {
-                if (!particleCanvas || !particleCtx) return;
-                particleCanvas.width = window.innerWidth;
-                particleCanvas.height = window.innerHeight;
+                if (!canvas) return;
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
                 particlesArray = [];
-                let numberOfParticles = Math.floor((particleCanvas.height * particleCanvas.width) / 16000);
-                for (let i = 0; i < numberOfParticles; i++) {
-                    let size = (Math.random() * 2.5) + 1;
-                    let x = (Math.random() * (particleCanvas.width - size * 4) + size * 2);
-                    let y = (Math.random() * (particleCanvas.height - size * 4) + size * 2);
-                    let directionX = (Math.random() * 0.35) - 0.175;
-                    let directionY = (Math.random() * 0.35) - 0.175;
+                const count = Math.min(Math.floor((canvas.height * canvas.width) / 13500), 85);
+                for (let i = 0; i < count; i++) {
+                    const size = (Math.random() * 2.8) + 1.2;
+                    const x = Math.random() * (canvas.width - size * 4) + size * 2;
+                    const y = Math.random() * (canvas.height - size * 4) + size * 2;
+                    const directionX = (Math.random() * 0.5) - 0.25;
+                    const directionY = (Math.random() * 0.5) - 0.25;
                     particlesArray.push(new Particle(x, y, directionX, directionY, size));
                 }
-            } catch (e) {}
+            } catch (e) {
+                console.warn('initParticles error:', e);
+            }
         }
 
         class Particle {
             constructor(x, y, directionX, directionY, size) {
-                this.x = x; this.y = y;
-                this.directionX = directionX; this.directionY = directionY;
+                this.x = x;
+                this.y = y;
+                this.directionX = directionX;
+                this.directionY = directionY;
                 this.size = size;
             }
             draw() {
-                if (!particleCtx) return;
-                particleCtx.beginPath();
-                particleCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
-                if (isGhostMode) {
-                    particleCtx.fillStyle = 'rgba(255, 180, 171, 0.35)';
-                } else if (isDarkMode) {
-                    particleCtx.fillStyle = 'rgba(208, 188, 255, 0.25)';
+                if (!ctx) return;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
+                const isGhost = (typeof isGhostMode !== 'undefined' && isGhostMode);
+                const isDark = (typeof isDarkMode !== 'undefined' ? isDarkMode : (document.documentElement.classList.contains('dark') || document.documentElement.classList.contains('dark-mode')));
+                if (isGhost) {
+                    ctx.fillStyle = 'rgba(239, 68, 68, 0.45)';
+                } else if (isDark) {
+                    ctx.fillStyle = 'rgba(168, 85, 247, 0.3)';
                 } else {
-                    particleCtx.fillStyle = 'rgba(103, 80, 164, 0.2)';
+                    ctx.fillStyle = 'rgba(59, 130, 246, 0.22)';
                 }
-                particleCtx.fill();
+                ctx.fill();
             }
             update() {
-                if (!particleCanvas) return;
-                if (this.x > particleCanvas.width || this.x < 0) this.directionX = -this.directionX;
-                if (this.y > particleCanvas.height || this.y < 0) this.directionY = -this.directionY;
-                this.x += this.directionX; this.y += this.directionY;
+                if (!canvas) return;
+                if (this.x > canvas.width || this.x < 0) this.directionX = -this.directionX;
+                if (this.y > canvas.height || this.y < 0) this.directionY = -this.directionY;
+                this.x += this.directionX;
+                this.y += this.directionY;
                 this.draw();
             }
         }
 
-        let lastParticleFrame = 0;
-        function animateParticles(time) {
+        function connectParticles() {
+            if (!ctx || !canvas) return;
+            const isGhost = (typeof isGhostMode !== 'undefined' && isGhostMode);
+            const isDark = (typeof isDarkMode !== 'undefined' ? isDarkMode : (document.documentElement.classList.contains('dark') || document.documentElement.classList.contains('dark-mode')));
+            const maxDistanceSq = 14400; // 120px threshold
+
+            for (let a = 0; a < particlesArray.length; a++) {
+                for (let b = a + 1; b < particlesArray.length; b++) {
+                    const dx = particlesArray[a].x - particlesArray[b].x;
+                    const dy = particlesArray[a].y - particlesArray[b].y;
+                    const distSq = dx * dx + dy * dy;
+                    if (distSq < maxDistanceSq) {
+                        const opacity = (1 - (distSq / maxDistanceSq));
+                        if (opacity > 0) {
+                            if (isGhost) {
+                                ctx.strokeStyle = `rgba(239, 68, 68, ${opacity * 0.22})`;
+                            } else if (isDark) {
+                                ctx.strokeStyle = `rgba(168, 85, 247, ${opacity * 0.16})`;
+                            } else {
+                                ctx.strokeStyle = `rgba(59, 130, 246, ${opacity * 0.12})`;
+                            }
+                            ctx.lineWidth = 0.85;
+                            ctx.beginPath();
+                            ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                            ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+                            ctx.stroke();
+                        }
+                    }
+                }
+            }
+        }
+
+        function animateParticles() {
             try {
                 requestAnimationFrame(animateParticles);
-                if (document.hidden || !particleCtx) return;
-                // Throttle particle animation to ~30fps for smooth ambient visuals with near-zero CPU overhead
-                if (time - lastParticleFrame < 32) return;
-                lastParticleFrame = time;
-                particleCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+                if (document.hidden || !canvas || !ctx) return;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
                 for (let i = 0; i < particlesArray.length; i++) {
                     particlesArray[i].update();
                 }
+                connectParticles();
             } catch (e) {}
         }
-        
-        let resizeParticleTimer = null;
+
         window.addEventListener('resize', () => {
-            clearTimeout(resizeParticleTimer);
-            resizeParticleTimer = setTimeout(() => {
-                if (particleCanvas) {
-                    particleCanvas.width = window.innerWidth;
-                    particleCanvas.height = window.innerHeight;
-                }
+            if (canvas) {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
                 initParticles();
-            }, 150);
+            }
         }, { passive: true });
-        initParticles();
-        requestAnimationFrame(animateParticles);
+
+        // Subtle interactive mouse repulsion/nudge
+        window.addEventListener('mousemove', (e) => {
+            if (!particlesArray.length || !canvas) return;
+            const mx = e.clientX;
+            const my = e.clientY;
+            for (let i = 0; i < particlesArray.length; i++) {
+                const p = particlesArray[i];
+                const dx = mx - p.x;
+                const dy = my - p.y;
+                const dist = Math.hypot(dx, dy);
+                if (dist < 90 && dist > 1) {
+                    p.x -= (dx / dist) * 1.5;
+                    p.y -= (dy / dist) * 1.5;
+                }
+            }
+        }, { passive: true });
+
+        if (canvas) {
+            initParticles();
+            animateParticles();
+        }
 
         // System Config, Local storage & States variables
         let auth = null;
@@ -3495,6 +4220,19 @@
             }
         }
 
+        window.triggerStudioImageSubmit = function() {
+            triggerHaptic('medium');
+            const msgInput = document.getElementById('message');
+            if (!msgInput) return;
+            const currentVal = msgInput.value.trim();
+            if (!currentVal) {
+                msgInput.value = "A majestic crystal palace glowing on a mountain peak at sunset, 8k cinematic lighting";
+                if (typeof autoResizeTextarea === 'function') autoResizeTextarea();
+            }
+            if (typeof setMode === 'function') setMode('image');
+            if (typeof submitMessage === 'function') submitMessage();
+        };
+
         // ==========================================================================
         // NEURAL TIMELINE SCRUBBER SYSTEM (REMOVED)
         // ==========================================================================
@@ -3835,6 +4573,13 @@
             render();
         }
         window.init3DCrystal = init3DCrystal;
+        try {
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => { setTimeout(init3DCrystal, 50); });
+            } else {
+                setTimeout(init3DCrystal, 50);
+            }
+        } catch(e) {}
 
         // Dynamic Greeting Pool & Generator (Changes every time app opens or session starts)
         let currentGreetingTemplateIndex = null;
@@ -4133,16 +4878,19 @@
         // Color alignment with status bars & navigation bars
         function updateSystemBars() {
             try {
+                const isDark = document.documentElement.classList.contains('dark') || document.documentElement.classList.contains('dark-mode');
+                isDarkMode = isDark;
+
                 const loginScreen = document.getElementById('login-screen');
                 const isLoginVisible = loginScreen && !loginScreen.classList.contains('hidden');
 
-                let hexColor = isDarkMode ? '#141218' : '#fffbfe';
-                let isDarkBg = isDarkMode;
+                let hexColor = isDark ? '#060709' : '#f8fafc';
+                let isDarkBg = isDark;
 
                 if (isLoginVisible) {
-                    hexColor = '#141218';
+                    hexColor = '#060709';
                     isDarkBg = true;
-                } else if (isGhostMode) {
+                } else if (typeof isGhostMode !== 'undefined' && isGhostMode) {
                     hexColor = '#1a0c0e';
                     isDarkBg = true;
                 }
@@ -4160,6 +4908,9 @@
                     }
                     if (window.Capacitor.Plugins.NavigationBar) {
                         const navBar = window.Capacitor.Plugins.NavigationBar;
+                        if (typeof navBar.setBackgroundColor === 'function') {
+                            navBar.setBackgroundColor({ color: hexColor });
+                        }
                         const navFn = navBar.set || navBar.setColor || navBar.setNavigationBarColor;
                         if (navFn) {
                             navFn.call(navBar, {
@@ -4169,7 +4920,9 @@
                         }
                     }
                 }
-            } catch (e) {}
+            } catch (err) {
+                console.debug("System bar update error:", err);
+            }
         }
 
         // Global External Link Opener (Capacitor Android, WebViews & Web)
@@ -4638,12 +5391,12 @@
                 const dateStr = new Date().toISOString().split('T')[0];
 
                 if (format === 'markdown') {
-                    textContent = `# Crystal AI Chat Export - ${dateStr}\n\n`;
+                    textContent = `# Crystal Chat Export - ${dateStr}\n\n`;
                     chatRows.forEach(row => {
                         const isUser = row.classList.contains('justify-end') || row.querySelector('.bg-\\[var\\(--bubble-user\\)\\]');
                         const text = (row.innerText || "").trim();
                         if (text) {
-                            textContent += `### ${isUser ? 'User' : 'Crystal AI'}\n${text}\n\n---\n\n`;
+                            textContent += `### ${isUser ? 'User' : 'Crystal'}\n${text}\n\n---\n\n`;
                         }
                     });
                 } else if (format === 'json') {
@@ -4661,12 +5414,12 @@
                     });
                     textContent = JSON.stringify({ exportDate: dateStr, messages: data }, null, 2);
                 } else {
-                    textContent = `Crystal AI Chat Export (${dateStr})\n\n`;
+                    textContent = `Crystal Chat Export (${dateStr})\n\n`;
                     chatRows.forEach(row => {
                         const isUser = row.classList.contains('justify-end');
                         const text = (row.innerText || "").trim();
                         if (text) {
-                            textContent += `[${isUser ? 'User' : 'Crystal AI'}]:\n${text}\n\n`;
+                            textContent += `[${isUser ? 'User' : 'Crystal'}]:\n${text}\n\n`;
                         }
                     });
                 }
@@ -5087,8 +5840,8 @@
                     if (navigator.canShare && navigator.canShare({ files: [file] })) {
                         await navigator.share({
                             files: [file],
-                            title: 'Crystal AI Generated Image',
-                            text: 'Created with Crystal AI'
+                            title: 'Crystal Generated Image',
+                            text: 'Created with Crystal'
                         });
                         if (typeof showToast === 'function') showToast("Image shared!");
                         return;
@@ -5096,7 +5849,7 @@
                 }
                 if (navigator.share && !src.startsWith('data:')) {
                     await navigator.share({
-                        title: 'Crystal AI Generated Image',
+                        title: 'Crystal Generated Image',
                         url: src
                     });
                     if (typeof showToast === 'function') showToast("Image link shared!");
@@ -6314,7 +7067,7 @@
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
                             messages: [
-                                { role: "system", content: "You are Crystal AI, a brilliant and precise AI assistant. Provide complete, articulate, accurate answers." },
+                                { role: "system", content: "You are Crystal, a brilliant and precise AI assistant. Provide complete, articulate, accurate answers." },
                                 { role: "user", content: typeof prompt === 'string' ? prompt : JSON.stringify(prompt) }
                             ],
                             model: "openai",
@@ -6342,7 +7095,7 @@
 
             // Stage 6: Emergency Safe Continuity
             return new Response(JSON.stringify({
-                reply: "I'm Crystal AI. All systems, callbacks, and memory channels are connected and ready. Please submit your question and I will generate the response immediately!",
+                reply: "I'm Crystal. All systems, callbacks, and memory channels are connected and ready. Please submit your question and I will generate the response immediately!",
                 provider: "Crystal Resilient Engine",
                 quota: { allowed: true, tokensLeft: 999, maxCap: 1000, refillSecs: 1 }
             }), {
@@ -11098,8 +11851,8 @@ echo "Termux test completed successfully!"`;
 
                 let botReply = data.reply || "Pipeline execution empty.";
 
-                // Client-side anti-repetition filter to prevent runaway loops in non-Latin scripts
-                if (typeof botReply === 'string' && botReply.length > 30) {
+                // Client-side anti-repetition filter to prevent runaway loops in non-Latin scripts (protect images)
+                if (typeof botReply === 'string' && botReply.length > 30 && !botReply.includes("data:image/") && !botReply.includes("![") && !botReply.includes("<img")) {
                     for (let len = 14; len >= 1; len--) {
                         const chunkRegex = new RegExp(`(.{${len}}?)\\1{3,}`, 'gu');
                         botReply = botReply.replace(chunkRegex, '$1$1');
@@ -11198,7 +11951,7 @@ echo "Termux test completed successfully!"`;
                             </div>
                             <p class="text-xs text-[var(--text-color)] opacity-85 leading-relaxed">
                                 ${isNetworkFailed 
-                                    ? 'Unable to reach the Crystal AI backend service. The server may still be spinning up, or your backend connection needs a moment.'
+                                    ? 'Unable to reach the Crystal backend service. The server may still be spinning up, or your backend connection needs a moment.'
                                     : err.message}
                             </p>
                             <div class="flex flex-wrap items-center gap-2 pt-1">
@@ -11388,6 +12141,50 @@ echo "Termux test completed successfully!"`;
             }
         }
 
+        function dismissLoginScreen() {
+            const login = document.getElementById('login-screen');
+            if (login && !login.classList.contains('hidden')) {
+                login.style.transition = 'opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1)';
+                login.style.opacity = '0';
+                login.style.transform = 'scale(1.02)';
+                login.style.pointerEvents = 'none';
+                setTimeout(() => {
+                    login.classList.add('hidden');
+                    login.style.display = 'none';
+                    login.style.opacity = '';
+                    login.style.transform = '';
+                    login.style.pointerEvents = '';
+                    if (typeof refreshDynamicGreeting === 'function') refreshDynamicGreeting();
+                    if (typeof updateProfileUI === 'function') updateProfileUI();
+                    if (typeof updateSystemBars === 'function') updateSystemBars();
+                    if (typeof init3DCrystal === 'function') init3DCrystal();
+                }, 350);
+            } else {
+                if (login) {
+                    login.classList.add('hidden');
+                    login.style.display = 'none';
+                }
+                if (typeof refreshDynamicGreeting === 'function') refreshDynamicGreeting();
+                if (typeof updateProfileUI === 'function') updateProfileUI();
+                if (typeof updateSystemBars === 'function') updateSystemBars();
+                if (typeof init3DCrystal === 'function') init3DCrystal();
+            }
+        }
+        window.dismissLoginScreen = dismissLoginScreen;
+
+        function showLoginScreen() {
+            const login = document.getElementById('login-screen');
+            if (!login) return;
+            login.classList.remove('hidden');
+            login.style.display = 'block';
+            login.style.opacity = '1';
+            login.style.transform = 'scale(1)';
+            login.style.pointerEvents = 'auto';
+            login.scrollTop = 0;
+            if (typeof updateSystemBars === 'function') updateSystemBars();
+        }
+        window.showLoginScreen = showLoginScreen;
+
         async function signInAnonymouslyUser(btn) {
             if (typeof triggerHaptic === 'function') triggerHaptic();
             localStorage.setItem('crystal_terms_accepted', 'true');
@@ -11414,10 +12211,7 @@ echo "Termux test completed successfully!"`;
                 await auth.signInAnonymously();
                 isLocalGuest = false;
                 localStorage.removeItem('crystal_local_guest');
-                document.getElementById('login-screen')?.classList.add('hidden');
-                refreshDynamicGreeting();
-                updateProfileUI();
-                updateSystemBars();
+                dismissLoginScreen();
                 loadSidebar();
                 authResolved = true;
                 checkDismissSplash();
@@ -11436,12 +12230,8 @@ echo "Termux test completed successfully!"`;
                 const randId = Math.random().toString(36).substring(2, 6).toUpperCase();
                 localStorage.setItem('crystal_guest_id', 'Guest_' + randId);
             }
-            document.getElementById('login-screen')?.classList.add('hidden');
-            refreshDynamicGreeting();
-            updateProfileUI();
-            updateSystemBars();
+            dismissLoginScreen();
             loadSidebar();
-            
             authResolved = true;
             checkDismissSplash();
         }
@@ -11536,8 +12326,7 @@ echo "Termux test completed successfully!"`;
                 if (errorEl) errorEl.classList.add('hidden');
 
                 await auth.signInWithEmailAndPassword(email, pass);
-                document.getElementById('login-screen')?.classList.add('hidden');
-                updateProfileUI();
+                dismissLoginScreen();
                 loadSidebar();
                 authResolved = true;
                 checkDismissSplash();
@@ -11584,8 +12373,7 @@ echo "Termux test completed successfully!"`;
                 if (errorEl) errorEl.classList.add('hidden');
 
                 await auth.createUserWithEmailAndPassword(email, pass);
-                document.getElementById('login-screen')?.classList.add('hidden');
-                updateProfileUI();
+                dismissLoginScreen();
                 loadSidebar();
                 authResolved = true;
                 checkDismissSplash();
@@ -11604,6 +12392,294 @@ echo "Termux test completed successfully!"`;
                 if (submitText) submitText.textContent = origText;
             }
         }
+
+        // ==========================================================================
+        // CLUE-INSPIRED MODERN LANDING INTERACTIVITY & LIVING CANVAS RIBBON
+        // ==========================================================================
+        function openAuthModal(mode = 'signup') {
+            triggerHaptic();
+            const modal = document.getElementById('auth-modal');
+            if (!modal) return;
+            switchAuthEmailMode(mode);
+            modal.classList.remove('hidden');
+            const err = document.getElementById('login-error');
+            if (err) err.classList.add('hidden');
+        }
+
+        function closeAuthModal() {
+            triggerHaptic();
+            const modal = document.getElementById('auth-modal');
+            if (modal) modal.classList.add('hidden');
+            hideEmailForm();
+        }
+
+        function openClueInfoModal(category) {
+            triggerHaptic();
+            const modal = document.getElementById('clue-info-modal');
+            const content = document.getElementById('clue-info-content');
+            if (!modal || !content) return;
+
+            const categoryData = {
+                platform: {
+                    badge: "Next-Gen Architecture",
+                    title: "The Crystal Multi-Modal Platform",
+                    desc: "Crystal unites low-latency neural reasoning, real-time live thinking tracing, high-definition visual generation, and web-grounded search into an intuitive, privacy-first computing environment.",
+                    features: ["Zero telemetry & zero data retention", "Real-time token streaming engine", "Native multilingual support in 134+ languages", "Optimized for both mobile and desktop"]
+                },
+                models: {
+                    badge: "Unified Model Hub",
+                    title: "State-of-the-Art Neural Engines",
+                    desc: "Crystal routes tasks dynamically through world-class AI models based on your exact intent — whether deep mathematical problem solving or creative visual design.",
+                    features: ["Gemini 2.5 Flash & Thinking models", "SDXL Lightning (Cloudflare Workers AI)", "DeepSeek R1 reasoning architecture", "Groq LPU ultra-high-speed inference"]
+                },
+                studio: {
+                    badge: "Creative Suite",
+                    title: "Integrated Generative Studio",
+                    desc: "Create photorealistic imagery, synthesize natural voice audio, and format complex code and mathematical equations in seconds with dedicated studio toolsets.",
+                    features: ["Cloudflare Workers AI SDXL generation", "Automatic multi-aspect ratio rendering", "KaTeX dynamic formula typesetting", "Smart code execution and syntax formatting"]
+                },
+                integrations: {
+                    badge: "Ecosystem Partners",
+                    title: "Open Developer Integrations",
+                    desc: "Built to interface seamlessly with modern developer tools, distributed edge GPU networks, and open-source model repositories without lock-in.",
+                    features: ["Cloudflare Edge Workers runtime", "Google Cloud AI infrastructure", "Hugging Face model compatibility", "One-click export to Markdown, PDF, and text"]
+                },
+                docs: {
+                    badge: "Developer Guide",
+                    title: "Documentation & Keyboard Shortcuts",
+                    desc: "Master Crystal with fluid interactions and natural workflows designed for speed and simplicity.",
+                    features: ["Enter to send, Shift+Enter for new line", "Esc to dismiss modals and popups", "Voice input with live transcription", "Direct drag & drop file and image attachment"]
+                },
+                pricing: {
+                    badge: "Open Access",
+                    title: "Free Forever. No Subscriptions.",
+                    desc: "Crystal is built to democratize high-intelligence tools. Enjoy full access without paywalls, credit cards, or hidden fees.",
+                    features: ["100% Free access to all intelligence features", "Unlimited standard conversational chats", "High-speed GPU image generation included", "No credit card or payment info ever required"]
+                }
+            };
+
+            const data = categoryData[category] || categoryData.platform;
+
+            content.innerHTML = `
+                <div class="flex flex-col text-left gap-4">
+                    <div class="flex items-center gap-2">
+                        <span class="px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-[#70ef7d]/15 text-[#70ef7d] border border-[#70ef7d]/30">
+                            ${data.badge}
+                        </span>
+                    </div>
+                    <h3 class="text-2xl font-black text-white font-['Outfit'] tracking-tight">${data.title}</h3>
+                    <p class="text-xs sm:text-sm text-zinc-300 leading-relaxed">${data.desc}</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2">
+                        ${data.features.map(f => `
+                            <div class="flex items-center gap-2 p-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs font-medium text-zinc-200">
+                                <svg class="w-4 h-4 text-[#70ef7d] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span>${f}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="pt-4 flex items-center justify-between border-t border-white/10 mt-2">
+                        <span class="text-xs text-zinc-500 font-medium">Ready to experience it?</span>
+                        <button type="button" onclick="closeClueInfoModal(); openAuthModal('signup');" class="clue-primary-btn px-5 py-2 rounded-full font-bold text-xs cursor-pointer">
+                            Get Started Free →
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeClueInfoModal() {
+            triggerHaptic();
+            const modal = document.getElementById('clue-info-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        // 3D Bento Card Interactive Tilt Effect
+        (function initBentoTilt() {
+            const bento = document.getElementById('clue-bento-widget');
+            if (!bento) return;
+
+            bento.addEventListener('mousemove', (e) => {
+                const rect = bento.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                const rotateX = ((y - centerY) / centerY) * -6;
+                const rotateY = ((x - centerX) / centerX) * 6;
+
+                bento.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-2px)`;
+            });
+
+            bento.addEventListener('mouseleave', () => {
+                bento.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px)';
+            });
+        })();
+
+        // Living Crystalline Aurora & Cosmic Stardust Canvas Animation (Synchronized with Chat & Splash)
+        (function initClueCanvasRibbon() {
+            const canvas = document.getElementById('clue-ribbon-canvas');
+            const loginScreen = document.getElementById('login-screen');
+            if (!canvas || !loginScreen) return;
+
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return;
+
+            let width = 0;
+            let height = 0;
+            let animationFrameId = null;
+            let mouseX = -1000;
+            let mouseY = -1000;
+            let targetMouseX = -1000;
+            let targetMouseY = -1000;
+            let isHovering = false;
+
+            function resize() {
+                const dpr = Math.min(window.devicePixelRatio || 1, 2);
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = width * dpr;
+                canvas.height = height * dpr;
+                canvas.style.width = width + 'px';
+                canvas.style.height = height + 'px';
+                ctx.scale(dpr, dpr);
+            }
+
+            window.addEventListener('resize', resize, { passive: true });
+            resize();
+
+            const updatePointer = (clientX, clientY) => {
+                targetMouseX = clientX;
+                targetMouseY = clientY;
+                isHovering = true;
+            };
+
+            loginScreen.addEventListener('mousemove', (e) => updatePointer(e.clientX, e.clientY), { passive: true });
+            loginScreen.addEventListener('touchmove', (e) => {
+                if (e.touches && e.touches[0]) updatePointer(e.touches[0].clientX, e.touches[0].clientY);
+            }, { passive: true });
+            loginScreen.addEventListener('mouseleave', () => { isHovering = false; }, { passive: true });
+            loginScreen.addEventListener('touchend', () => { isHovering = false; }, { passive: true });
+
+            // Ambient Crystalline Floating Micro-Stardust
+            const starCount = 42;
+            const stars = [];
+            for (let i = 0; i < starCount; i++) {
+                stars.push({
+                    x: Math.random(),
+                    y: Math.random(),
+                    size: Math.random() * 1.3 + 0.6,
+                    speed: 0.00012 + Math.random() * 0.0002,
+                    phase: Math.random() * Math.PI * 2,
+                    color: ['#70ef7d', '#38bdf8', '#c084fc', '#ffffff'][i % 4]
+                });
+            }
+
+            // Volumetric Atmospheric Light Orbs
+            const loginOrbs = [
+                { baseX: 0.20, baseY: 0.25, radiusRatio: 0.50, color: [112, 239, 125], alpha: 0.09, speedX: 0.00035, speedY: 0.00028, ampX: 70, ampY: 50 },
+                { baseX: 0.82, baseY: 0.75, radiusRatio: 0.55, color: [56, 189, 248], alpha: 0.08, speedX: -0.0003, speedY: 0.00038, ampX: 80, ampY: 60 },
+                { baseX: 0.50, baseY: 0.50, radiusRatio: 0.42, color: [192, 132, 252], alpha: 0.06, speedX: 0.00025, speedY: -0.0003, ampX: 55, ampY: 45 }
+            ];
+
+            let lastFrame = 0;
+            function draw(time) {
+                animationFrameId = requestAnimationFrame(draw);
+                if (loginScreen.classList.contains('hidden') || loginScreen.style.display === 'none' || document.hidden) {
+                    return;
+                }
+
+                if (time - lastFrame < 24) return;
+                lastFrame = time;
+
+                if (isHovering) {
+                    mouseX += (targetMouseX - mouseX) * 0.06;
+                    mouseY += (targetMouseY - mouseY) * 0.06;
+                } else {
+                    mouseX += (-1000 - mouseX) * 0.03;
+                    mouseY += (-1000 - mouseY) * 0.03;
+                }
+
+                ctx.clearRect(0, 0, width, height);
+
+                // 1. Draw Volumetric Atmospheric Light Blooms
+                ctx.save();
+                loginOrbs.forEach(orb => {
+                    let cx = width * orb.baseX + Math.sin(time * orb.speedX) * orb.ampX;
+                    let cy = height * orb.baseY + Math.cos(time * orb.speedY) * orb.ampY;
+
+                    if (isHovering) {
+                        const dx = mouseX - cx;
+                        const dy = mouseY - cy;
+                        const dist = Math.hypot(dx, dy);
+                        if (dist < 400 && dist > 1) {
+                            const pull = (1 - dist / 400) * 35;
+                            cx += (dx / dist) * pull;
+                            cy += (dy / dist) * pull;
+                        }
+                    }
+
+                    const radius = Math.max(width, height) * orb.radiusRatio;
+                    const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
+                    grad.addColorStop(0, `rgba(${orb.color[0]}, ${orb.color[1]}, ${orb.color[2]}, ${orb.alpha})`);
+                    grad.addColorStop(0.5, `rgba(${orb.color[0]}, ${orb.color[1]}, ${orb.color[2]}, ${orb.alpha * 0.35})`);
+                    grad.addColorStop(1, `rgba(${orb.color[0]}, ${orb.color[1]}, ${orb.color[2]}, 0)`);
+
+                    ctx.fillStyle = grad;
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+                ctx.restore();
+
+                // 2. Whisper-thin Neural Harmonic Contour Lines
+                ctx.save();
+                const harmonicContours = [
+                    { yRatio: 0.28, amp: 22, freq: 0.0013, speed: 0.0007, color: 'rgba(112, 239, 125, 0.08)' },
+                    { yRatio: 0.72, amp: 26, freq: 0.0015, speed: -0.0008, color: 'rgba(56, 189, 248, 0.07)' }
+                ];
+
+                harmonicContours.forEach((contour, cIdx) => {
+                    const baseY = height * contour.yRatio;
+                    ctx.beginPath();
+                    const segments = 32;
+                    const step = width / segments;
+
+                    for (let s = 0; s <= segments; s++) {
+                        const px = s * step;
+                        const harm = Math.sin(px * contour.freq + time * contour.speed + cIdx) * contour.amp;
+                        const py = baseY + harm;
+                        if (s === 0) ctx.moveTo(px, py);
+                        else ctx.lineTo(px, py);
+                    }
+                    ctx.strokeStyle = contour.color;
+                    ctx.lineWidth = 0.9;
+                    ctx.stroke();
+                });
+                ctx.restore();
+
+                // 3. Render Crystalline Floating Stardust
+                ctx.save();
+                for (let i = 0; i < starCount; i++) {
+                    const star = stars[i];
+                    star.y -= star.speed;
+                    if (star.y < 0) { star.y = 1; star.x = Math.random(); }
+                    const sx = star.x * width;
+                    const sy = star.y * height;
+                    const twinkle = (Math.sin(time * 0.002 + star.phase) + 1) / 2;
+
+                    ctx.beginPath();
+                    ctx.arc(sx, sy, star.size, 0, Math.PI * 2);
+                    ctx.fillStyle = star.color;
+                    ctx.globalAlpha = 0.1 + twinkle * 0.45;
+                    ctx.fill();
+                }
+                ctx.restore();
+            }
+
+            animationFrameId = requestAnimationFrame(draw);
+        })();
 
         function updateSettingsAccountStatus() {
             try {
@@ -11652,6 +12728,7 @@ echo "Termux test completed successfully!"`;
         }
 
         async function signOutUser() {
+            if (typeof triggerHaptic === 'function') triggerHaptic('notification');
             localStorage.removeItem('crystal_local_guest');
             isLocalGuest = false;
             try {
@@ -11671,14 +12748,25 @@ echo "Termux test completed successfully!"`;
             document.body.classList.remove('sidebar-open');
             chatHistory = [];
             currentChatId = null;
-            document.getElementById('sidebar-list').innerHTML = '';
-            document.getElementById('login-screen').classList.remove('hidden');
+            const sidebarList = document.getElementById('sidebar-list');
+            if (sidebarList) sidebarList.innerHTML = '';
+            
+            const sm = document.getElementById('settings-modal');
+            if (sm && !sm.classList.contains('hidden')) toggleSettings();
+            const hu = document.getElementById('help-us-modal');
+            if (hu && !hu.classList.contains('hidden')) toggleHelpUsModal();
+            const mm = document.getElementById('crystal-model-modal');
+            if (mm && !mm.classList.contains('hidden')) toggleModelSelectorModal();
+
+            showLoginScreen();
             refreshDynamicGreeting();
             updateProfileUI();
             updateSystemBars();
-            const sm = document.getElementById('settings-modal');
-            if (sm && !sm.classList.contains('hidden')) toggleSettings();
+            if (typeof showToast === 'function') {
+                showToast("Logged out successfully");
+            }
         }
+        window.signOutUser = signOutUser;
 
         // Sidebar lists loading with full localization support
         window.renderSidebarChatItems = function(chats) {
@@ -13669,18 +14757,12 @@ echo "Status: ONLINE"
         // Helper to resolve localized string
         window.getLocalizedUIString = function(key) {
             try {
-                const currentLang = (localStorage.getItem('crystal_language') || 'English').toLowerCase();
-                let dict = FULL_UI_DICTIONARY[currentLang];
-                if (!dict) {
-                    for (const k in FULL_UI_DICTIONARY) {
-                        if (currentLang.includes(k)) {
-                            dict = FULL_UI_DICTIONARY[k];
-                            break;
-                        }
-                    }
-                }
-                if (!dict) dict = FULL_UI_DICTIONARY.english;
-                return dict[key] || FULL_UI_DICTIONARY.english[key] || "";
+                const currentLang = localStorage.getItem('crystal_language') || 'English';
+                const dict = typeof window.resolveCrystalDictionary === 'function' 
+                    ? window.resolveCrystalDictionary(currentLang)
+                    : (window.FULL_UI_DICTIONARY ? (window.FULL_UI_DICTIONARY[currentLang.toLowerCase()] || window.FULL_UI_DICTIONARY.english) : null);
+                if (dict && dict[key]) return dict[key];
+                return "";
             } catch (e) {
                 return "";
             }
@@ -13689,25 +14771,20 @@ echo "Status: ONLINE"
         // Localized greeting generator for dynamic header
         window.getLocalizedGreeting = function(langName, userName) {
             try {
-                const l = (langName || 'English').toLowerCase();
-                let dict = FULL_UI_DICTIONARY[l];
-                if (!dict) {
-                    for (const k in FULL_UI_DICTIONARY) {
-                        if (l.includes(k)) {
-                            dict = FULL_UI_DICTIONARY[k];
-                            break;
-                        }
-                    }
-                }
+                const rawLang = (langName || localStorage.getItem('crystal_language') || 'English').trim();
+                const dict = typeof window.resolveCrystalDictionary === 'function'
+                    ? window.resolveCrystalDictionary(rawLang)
+                    : (window.FULL_UI_DICTIONARY ? (window.FULL_UI_DICTIONARY[rawLang.toLowerCase()] || window.FULL_UI_DICTIONARY.english) : null);
                 if (!dict) return null;
 
                 const hour = new Date().getHours();
-                let timeGreeting = dict.timeOfDay.morning;
-                if (hour >= 12 && hour < 17) timeGreeting = dict.timeOfDay.afternoon;
-                else if (hour >= 17 && hour < 22) timeGreeting = dict.timeOfDay.evening;
-                else if (hour >= 22 || hour < 5) timeGreeting = dict.timeOfDay.night;
+                let timeGreeting = dict.timeOfDay ? dict.timeOfDay.morning : "Good morning";
+                if (hour >= 12 && hour < 17) timeGreeting = dict.timeOfDay ? dict.timeOfDay.afternoon : "Good afternoon";
+                else if (hour >= 17 && hour < 22) timeGreeting = dict.timeOfDay ? dict.timeOfDay.evening : "Good evening";
+                else if (hour >= 22 || hour < 5) timeGreeting = dict.timeOfDay ? dict.timeOfDay.night : "Good night";
 
                 const brand = dict.crystal || "Crystal";
+                const l = rawLang.toLowerCase();
                 let greetingText = `${timeGreeting}, ${userName}!`;
                 if (l.includes('spanish')) greetingText = `¡${timeGreeting}, ${userName}!`;
                 else if (l.includes('french')) greetingText = `${timeGreeting}, ${userName} !`;
@@ -13727,27 +14804,13 @@ echo "Status: ONLINE"
         window.updateUIStrings = function(langName) {
             try {
                 const rawLang = (langName || localStorage.getItem('crystal_language') || 'English').trim();
-                const langLower = rawLang.toLowerCase();
-
-                let matched = FULL_UI_DICTIONARY[langLower];
-                if (!matched) {
-                    for (const k in FULL_UI_DICTIONARY) {
-                        if (langLower.includes(k)) {
-                            matched = FULL_UI_DICTIONARY[k];
-                            break;
-                        }
-                    }
-                }
+                const matched = typeof window.resolveCrystalDictionary === 'function'
+                    ? window.resolveCrystalDictionary(rawLang)
+                    : (window.FULL_UI_DICTIONARY ? (window.FULL_UI_DICTIONARY[rawLang.toLowerCase()] || window.FULL_UI_DICTIONARY.english) : null);
                 
-                // If language isn't directly in dictionary, synthesize from English base and localized brand
-                if (!matched) {
-                    const brandOverride = CRYSTAL_BRAND_NAMES[langLower] || rawLang || "Crystal";
-                    matched = Object.assign({}, FULL_UI_DICTIONARY.english, {
-                        crystal: brandOverride
-                    });
-                }
+                if (!matched) return;
 
-                // 1. BRAND LOGO TEXT TRANSFORM
+                // 1. BRAND LOGO TEXT TRANSFORM (Transform ALL occurrences of Crystal logo text)
                 const brandText = matched.crystal || "Crystal";
                 const headerLogo = document.getElementById('header-crystal-logo-text');
                 if (headerLogo) headerLogo.textContent = brandText;
@@ -13808,7 +14871,7 @@ echo "Status: ONLINE"
                 const sendBtn = document.getElementById('sendBtn');
                 if (sendBtn) sendBtn.setAttribute('title', matched.sendTooltip);
 
-                // 5. EMPTY STATE ACTION CHIPS & GREETING
+                // 5. EMPTY STATE ACTION CHIPS & SUBTITLE
                 const emptyProd = document.getElementById('empty-action-product-text');
                 if (emptyProd) emptyProd.textContent = matched.findProducts;
 
@@ -13821,15 +14884,58 @@ echo "Status: ONLINE"
                 const emptyImage = document.getElementById('empty-action-image-text');
                 if (emptyImage) emptyImage.textContent = matched.createImage;
 
-                const emptySub = document.getElementById('dynamic-greeting-sub');
-                if (emptySub) emptySub.textContent = matched.greeting;
+                const emptySub = document.getElementById('empty-state-subtitle');
+                if (emptySub) emptySub.textContent = matched.subtitle;
 
                 // Re-render dynamic greeting with localized time of day
                 if (typeof renderDynamicGreeting === 'function' && typeof getGuestDisplayName === 'function') {
                     renderDynamicGreeting(getGuestDisplayName());
                 }
 
-                // 6. QUICK LANGUAGE MODAL STRINGS
+                // 6. ACTION MENU (DRAWER) STRINGS
+                const menuTitle = document.getElementById('menu-title');
+                if (menuTitle && matched.menuTitle) menuTitle.textContent = matched.menuTitle;
+
+                const menuModeLabel = document.getElementById('menu-mode-label');
+                if (menuModeLabel && matched.menuMode) menuModeLabel.textContent = matched.menuMode;
+
+                const personaChat = document.getElementById('persona-btn-core');
+                if (personaChat && matched.modeChat) personaChat.textContent = matched.modeChat;
+
+                const personaImg = document.getElementById('persona-btn-image');
+                if (personaImg && matched.modeImage) personaImg.textContent = matched.modeImage;
+
+                const personaCode = document.getElementById('persona-btn-copilot');
+                if (personaCode && matched.modeCoder) personaCode.textContent = matched.modeCoder;
+
+                const menuTogglesLabel = document.getElementById('menu-toggles-label');
+                if (menuTogglesLabel && matched.toggles) menuTogglesLabel.textContent = matched.toggles;
+
+                const menuSearch = document.getElementById('menu-search-title');
+                if (menuSearch && matched.searchTitle) menuSearch.textContent = matched.searchTitle;
+
+                const menuThinking = document.getElementById('menu-thinking-title');
+                if (menuThinking && matched.thinkingTitle) menuThinking.textContent = matched.thinkingTitle;
+
+                const menuCoder = document.getElementById('menu-coder-title');
+                if (menuCoder && matched.coderTitle) menuCoder.textContent = matched.coderTitle;
+
+                const menuActionsLabel = document.getElementById('menu-actions-label');
+                if (menuActionsLabel && matched.actionsTitle) menuActionsLabel.textContent = matched.actionsTitle;
+
+                const menuUpload = document.getElementById('menu-act-upload');
+                if (menuUpload && matched.actUpload) menuUpload.textContent = matched.actUpload;
+
+                const menuCanvas = document.getElementById('menu-act-canvas');
+                if (menuCanvas && matched.actCanvas) menuCanvas.textContent = matched.actCanvas;
+
+                const menuEnhance = document.getElementById('menu-act-enhance');
+                if (menuEnhance && matched.actEnhance) menuEnhance.textContent = matched.actEnhance;
+
+                const menuMemory = document.getElementById('menu-act-memory');
+                if (menuMemory && matched.actMemory) menuMemory.textContent = matched.actMemory;
+
+                // 7. QUICK LANGUAGE MODAL STRINGS
                 const qlTitle = document.getElementById('quick-lang-modal-title');
                 if (qlTitle) qlTitle.textContent = matched.quickLangTitle;
 
@@ -13848,7 +14954,7 @@ echo "Status: ONLINE"
                 const qlDone = document.getElementById('quick-lang-done-btn');
                 if (qlDone) qlDone.textContent = matched.done;
 
-                // 7. ONBOARDING STRINGS
+                // 8. ONBOARDING STRINGS
                 const finishBtnText = document.getElementById('onboarding-finish-btn-text');
                 if (finishBtnText) finishBtnText.textContent = matched.finish;
                 
@@ -13981,6 +15087,12 @@ echo "Status: ONLINE"
         };
 
         document.addEventListener('DOMContentLoaded', () => {
+            if (typeof loadLocalSettings === 'function') {
+                loadLocalSettings();
+            }
+            if (typeof updateSystemBars === 'function') {
+                updateSystemBars();
+            }
             refreshDynamicGreeting();
             
             const savedLang = localStorage.getItem('crystal_language') || 'English';
@@ -14000,8 +15112,7 @@ echo "Status: ONLINE"
                     if (user) {
                         isLocalGuest = false;
                         localStorage.removeItem('crystal_local_guest');
-                        document.getElementById('login-screen')?.classList.add('hidden');
-                        updateProfileUI();
+                        dismissLoginScreen();
                         loadSidebar();
                         authResolved = true;
                         checkDismissSplash();
@@ -14009,8 +15120,7 @@ echo "Status: ONLINE"
                         const localGuestStored = localStorage.getItem('crystal_local_guest') === 'true';
                         if (localGuestStored || isLocalGuest) {
                             isLocalGuest = true;
-                            document.getElementById('login-screen')?.classList.add('hidden');
-                            updateProfileUI();
+                            dismissLoginScreen();
                             loadSidebar();
                             authResolved = true;
                             checkDismissSplash();
@@ -14026,7 +15136,7 @@ echo "Status: ONLINE"
                 const localGuestStored = localStorage.getItem('crystal_local_guest') === 'true';
                 if (localGuestStored || isLocalGuest) {
                     isLocalGuest = true;
-                    document.getElementById('login-screen')?.classList.add('hidden');
+                    dismissLoginScreen();
                 } else {
                     document.getElementById('login-screen')?.classList.remove('hidden');
                 }
@@ -14048,15 +15158,32 @@ echo "Status: ONLINE"
 
         // Crystal Model Selector Engine
         function toggleModelSelectorModal() {
-            triggerHaptic('selection');
+            if (typeof triggerHaptic === 'function') triggerHaptic('selection');
             const modal = document.getElementById('crystal-model-modal');
             if (!modal) return;
-            modal.classList.toggle('hidden');
+            const isHidden = modal.classList.contains('hidden');
+            if (isHidden) {
+                modal.classList.remove('hidden');
+                const currentKey = localStorage.getItem('crystal_selected_engine_key') || 'pro';
+                document.querySelectorAll('.engine-option-btn').forEach(btn => {
+                    const engine = btn.getAttribute('data-engine');
+                    const check = btn.querySelector('.engine-check');
+                    if (engine === currentKey) {
+                        btn.classList.add('border-[#70ef7d]', 'bg-white/[0.08]');
+                        if (check) check.classList.remove('opacity-0');
+                    } else {
+                        btn.classList.remove('border-[#70ef7d]', 'bg-white/[0.08]');
+                        if (check) check.classList.add('opacity-0');
+                    }
+                });
+            } else {
+                modal.classList.add('hidden');
+            }
         }
         window.toggleModelSelectorModal = toggleModelSelectorModal;
 
         function selectCrystalEngine(engineKey, engineName) {
-            triggerHaptic('selection');
+            if (typeof triggerHaptic === 'function') triggerHaptic('selection');
             if (typeof setMode === 'function') {
                 setMode(engineKey);
             }
@@ -14064,12 +15191,456 @@ echo "Status: ONLINE"
             if (nameEl) nameEl.textContent = engineName;
             localStorage.setItem('crystal_selected_engine_name', engineName);
             localStorage.setItem('crystal_selected_engine_key', engineKey);
+
+            document.querySelectorAll('.engine-option-btn').forEach(btn => {
+                const engine = btn.getAttribute('data-engine');
+                const check = btn.querySelector('.engine-check');
+                if (engine === engineKey) {
+                    btn.classList.add('border-[#70ef7d]', 'bg-white/[0.08]');
+                    if (check) check.classList.remove('opacity-0');
+                } else {
+                    btn.classList.remove('border-[#70ef7d]', 'bg-white/[0.08]');
+                    if (check) check.classList.add('opacity-0');
+                }
+            });
+
             toggleModelSelectorModal();
             if (typeof showToast === 'function') {
                 showToast(`Switched to ${engineName}`);
             }
         }
         window.selectCrystalEngine = selectCrystalEngine;
+
+        // Initialize saved engine on page load
+        (function initSavedEngine() {
+            const savedName = localStorage.getItem('crystal_selected_engine_name');
+            const nameEl = document.getElementById('header-active-model-name');
+            if (savedName && nameEl) {
+                nameEl.textContent = savedName;
+            }
+        })();
+
+        // ==========================================
+        // HELP US & COMMUNITY SUPPORT ENGINE
+        // ==========================================
+        let helpUsCurrentRating = 5;
+        let helpUsCurrentCategory = 'Feature Request';
+
+        function toggleHelpUsModal() {
+            if (typeof triggerHaptic === 'function') triggerHaptic('selection');
+            const modal = document.getElementById('help-us-modal');
+            if (!modal) return;
+            modal.classList.toggle('hidden');
+        }
+        window.toggleHelpUsModal = toggleHelpUsModal;
+
+        function rateCrystalExperience(stars) {
+            if (typeof triggerHaptic === 'function') triggerHaptic('selection');
+            helpUsCurrentRating = stars;
+            const container = document.getElementById('help-us-stars');
+            if (!container) return;
+            const starBtns = container.querySelectorAll('.star-btn');
+            starBtns.forEach((btn, index) => {
+                const svg = btn.querySelector('svg');
+                if (svg) {
+                    if (index < stars) {
+                        svg.setAttribute('fill', '#eab308');
+                        svg.setAttribute('stroke', '#eab308');
+                    } else {
+                        svg.setAttribute('fill', 'none');
+                        svg.setAttribute('stroke', '#71717a');
+                    }
+                } else {
+                    if (index < stars) {
+                        btn.classList.add('text-amber-400');
+                        btn.classList.remove('text-zinc-600');
+                    } else {
+                        btn.classList.remove('text-amber-400');
+                        btn.classList.add('text-zinc-600');
+                    }
+                }
+            });
+
+            const feedbackText = document.getElementById('help-us-rating-feedback');
+            if (feedbackText) {
+                const labels = ["Could be much better", "Needs improvement", "Good experience", "Great AI companion", "Absolutely phenomenal! 🌟"];
+                feedbackText.textContent = labels[stars - 1] || `${stars} Stars`;
+            }
+        }
+        window.rateCrystalExperience = rateCrystalExperience;
+
+        function selectFeedbackCategory(chip, category) {
+            if (typeof triggerHaptic === 'function') triggerHaptic('selection');
+            helpUsCurrentCategory = category;
+            
+            // Unselect all chips in parent or by class
+            const chips = document.querySelectorAll('#feedback-category-chips button, .feedback-cat-btn');
+            chips.forEach(b => {
+                b.classList.remove('bg-[#70ef7d]/20', 'text-[#70ef7d]', 'border-[#70ef7d]/40', 'bg-pink-500/20', 'text-pink-400', 'border-pink-500/40');
+                b.classList.add('bg-white/[0.05]', 'text-zinc-300', 'border-white/10');
+            });
+            chip.classList.remove('bg-white/[0.05]', 'text-zinc-300', 'border-white/10');
+            chip.classList.add('bg-[#70ef7d]/20', 'text-[#70ef7d]', 'border-[#70ef7d]/40');
+        }
+        window.selectFeedbackCategory = selectFeedbackCategory;
+
+        async function submitHelpUsFeedback() {
+            if (typeof triggerHaptic === 'function') triggerHaptic('notification');
+            const textEl = document.getElementById('help-us-feedback-input') || document.getElementById('help-us-text');
+            const emailEl = document.getElementById('help-us-email-input') || document.getElementById('help-us-email');
+            const feedbackText = textEl ? textEl.value.trim() : '';
+            const userEmail = emailEl ? emailEl.value.trim() : (localStorage.getItem('crystal_user_email') || '');
+
+            if (!feedbackText) {
+                if (typeof showToast === 'function') {
+                    showToast('Please type a brief feedback note before submitting.');
+                }
+                return;
+            }
+
+            const feedbackData = {
+                rating: helpUsCurrentRating,
+                category: helpUsCurrentCategory,
+                text: feedbackText,
+                email: userEmail || 'anonymous@crystal.user',
+                timestamp: new Date().toISOString()
+            };
+
+            // 1. Post to backend API to persist and email baddampujithareddy19@gmail.com & srishankjashankreddy@gmail.com
+            try {
+                const res = await fetch('/api/feedback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(feedbackData)
+                });
+                const result = await res.json();
+                if (result.success && result.item) {
+                    feedbackData.id = result.item.id;
+                }
+            } catch (err) {
+                console.warn('API feedback dispatch error (falling back to local):', err);
+            }
+
+            // 2. Also keep local storage copy
+            try {
+                const existing = JSON.parse(localStorage.getItem('crystal_community_feedback') || '[]');
+                existing.unshift(feedbackData);
+                localStorage.setItem('crystal_community_feedback', JSON.stringify(existing));
+            } catch (e) {}
+
+            if (textEl) textEl.value = '';
+            toggleHelpUsModal();
+
+            // Refresh admin badge count immediately
+            if (typeof loadAdminFeedbacks === 'function') {
+                loadAdminFeedbacks();
+            }
+
+            if (typeof showToast === 'function') {
+                showToast('Feedback sent directly to Crystal Admins (baddampujithareddy19 & srishankjashankreddy)! Thank you! ✨');
+            }
+        }
+        window.submitHelpUsFeedback = submitHelpUsFeedback;
+
+        // ==========================================
+        // ADMIN FEEDBACK INBOX ENGINE (baddampujithareddy19 & srishankjashankreddy)
+        // ==========================================
+        let adminFeedbacksList = [];
+        let currentAdminFilter = 'all';
+
+        function openAdminInboxModal() {
+            if (typeof triggerHaptic === 'function') triggerHaptic('selection');
+            const modal = document.getElementById('admin-inbox-modal');
+            if (!modal) return;
+            modal.classList.remove('hidden');
+            loadAdminFeedbacks();
+        }
+        window.openAdminInboxModal = openAdminInboxModal;
+
+        function closeAdminInboxModal() {
+            const modal = document.getElementById('admin-inbox-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+        window.closeAdminInboxModal = closeAdminInboxModal;
+
+        function setAdminFilter(filter, btn) {
+            if (typeof triggerHaptic === 'function') triggerHaptic('selection');
+            currentAdminFilter = filter;
+            document.querySelectorAll('.admin-filter-btn').forEach(b => {
+                b.classList.remove('bg-amber-500', 'text-black');
+                b.classList.add('bg-white/[0.05]', 'text-zinc-300', 'border', 'border-white/10');
+            });
+            if (btn) {
+                btn.classList.add('bg-amber-500', 'text-black');
+                btn.classList.remove('bg-white/[0.05]', 'text-zinc-300', 'border', 'border-white/10');
+            }
+            renderAdminFeedbacks();
+        }
+        window.setAdminFilter = setAdminFilter;
+
+        async function loadAdminFeedbacks() {
+            try {
+                let items = [];
+                try {
+                    const res = await fetch('/api/feedback');
+                    if (res.ok) {
+                        const data = await res.json();
+                        items = data.feedbacks || [];
+                    }
+                } catch (e) {}
+
+                // Merge with local fallback if empty
+                if (!items.length) {
+                    const localItems = JSON.parse(localStorage.getItem('crystal_community_feedback') || '[]');
+                    items = localItems.map((it, idx) => ({
+                        id: it.id || `local-${idx}`,
+                        ...it,
+                        read: it.read || false
+                    }));
+                }
+
+                adminFeedbacksList = items;
+                updateAdminStats();
+                renderAdminFeedbacks();
+            } catch (err) {
+                console.error('Error loading admin feedbacks:', err);
+            }
+        }
+        window.loadAdminFeedbacks = loadAdminFeedbacks;
+
+        function updateAdminStats() {
+            const total = adminFeedbacksList.length;
+            const unread = adminFeedbacksList.filter(f => !f.read).length;
+            const avg = total > 0 
+                ? (adminFeedbacksList.reduce((acc, cur) => acc + (Number(cur.rating) || 5), 0) / total).toFixed(1)
+                : '5.0';
+
+            const totalEl = document.getElementById('admin-stat-total');
+            const unreadEl = document.getElementById('admin-stat-unread');
+            const avgEl = document.getElementById('admin-stat-avg');
+            const countAllEl = document.getElementById('filter-count-all');
+            const countUnreadEl = document.getElementById('filter-count-unread');
+
+            if (totalEl) totalEl.textContent = total;
+            if (unreadEl) unreadEl.textContent = unread;
+            if (avgEl) avgEl.textContent = avg + '★';
+            if (countAllEl) countAllEl.textContent = total;
+            if (countUnreadEl) countUnreadEl.textContent = unread;
+
+            // Badges in header and sidebar
+            const headerBadge = document.getElementById('header-admin-unread-badge');
+            const sidebarBadge = document.getElementById('sidebar-admin-unread-badge');
+
+            [headerBadge, sidebarBadge].forEach(b => {
+                if (!b) return;
+                if (unread > 0) {
+                    b.textContent = unread > 99 ? '99+' : unread;
+                    b.classList.remove('hidden');
+                } else {
+                    b.classList.add('hidden');
+                }
+            });
+        }
+
+        function renderAdminFeedbacks() {
+            const container = document.getElementById('admin-feedbacks-container');
+            if (!container) return;
+
+            let filtered = [...adminFeedbacksList];
+            if (currentAdminFilter === 'unread') {
+                filtered = filtered.filter(f => !f.read);
+            } else if (currentAdminFilter === '5star') {
+                filtered = filtered.filter(f => Number(f.rating) === 5);
+            } else if (currentAdminFilter !== 'all') {
+                filtered = filtered.filter(f => f.category === currentAdminFilter);
+            }
+
+            if (!filtered.length) {
+                container.innerHTML = `
+                    <div class="flex flex-col items-center justify-center p-8 text-center text-zinc-500 gap-2 my-auto">
+                        <div class="w-12 h-12 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-center text-zinc-400 mb-1">
+                            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                        </div>
+                        <span class="text-xs font-bold text-zinc-300">No Feedback in This View</span>
+                        <p class="text-[11px] text-zinc-500 max-w-xs">New user submissions from the "Help Us" modal will appear here immediately and are dispatched to the admin emails.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filtered.map(item => {
+                const dateStr = item.timestamp ? new Date(item.timestamp).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Recently';
+                const starsCount = Math.max(1, Math.min(5, Number(item.rating) || 5));
+                const starsHtml = '★'.repeat(starsCount) + '☆'.repeat(5 - starsCount);
+                const isUnread = !item.read;
+
+                let catBadgeClass = 'bg-[#70ef7d]/20 text-[#70ef7d] border-[#70ef7d]/40';
+                if (item.category === 'Bug Report') catBadgeClass = 'bg-rose-500/20 text-rose-300 border-rose-500/40';
+                else if (item.category === 'Model Quality') catBadgeClass = 'bg-sky-500/20 text-sky-300 border-sky-500/40';
+                else if (item.category === 'General Idea') catBadgeClass = 'bg-purple-500/20 text-purple-300 border-purple-500/40';
+
+                const sender = item.email || 'Anonymous User';
+                const initial = sender.charAt(0).toUpperCase();
+
+                return `
+                    <div class="p-3.5 rounded-2xl ${isUnread ? 'bg-amber-500/[0.07] border-amber-500/30' : 'bg-white/[0.03] border-white/10'} border flex flex-col gap-2.5 transition-all hover:border-white/20 relative group">
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                <div class="w-7 h-7 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-500 text-black font-bold text-xs flex items-center justify-center shrink-0">
+                                    ${initial}
+                                </div>
+                                <div class="min-w-0 flex flex-col">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs font-bold text-white truncate max-w-[200px] sm:max-w-[280px]">${sender}</span>
+                                        ${isUnread ? '<span class="px-1.5 py-0.2 rounded-full bg-amber-500 text-black text-[9px] font-black uppercase tracking-wider shrink-0">NEW</span>' : ''}
+                                    </div>
+                                    <span class="text-[10px] text-zinc-500 font-mono">${dateStr}</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1.5 shrink-0">
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border ${catBadgeClass}">${item.category || 'General'}</span>
+                                <span class="text-amber-400 text-xs font-bold font-mono tracking-tighter">${starsHtml}</span>
+                            </div>
+                        </div>
+
+                        <p class="text-xs text-zinc-200 leading-relaxed break-words bg-black/30 p-2.5 rounded-xl border border-white/5 whitespace-pre-wrap">${item.text || ''}</p>
+
+                        <div class="flex items-center justify-between pt-1 text-[11px]">
+                            <div class="flex items-center gap-2">
+                                ${item.email && item.email.includes('@') ? `
+                                    <a href="mailto:${item.email}?subject=Reply%20from%20Crystal%20Team" class="text-sky-400 hover:text-sky-300 font-medium flex items-center gap-1 hover:underline">
+                                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                                        <span>Reply</span>
+                                    </a>
+                                ` : '<span class="text-zinc-600 text-[10px]">No email provided</span>'}
+                            </div>
+
+                            <div class="flex items-center gap-2">
+                                <button type="button" onclick="toggleFeedbackRead('${item.id}', ${!isUnread})" class="px-2 py-0.5 rounded-md bg-white/[0.06] hover:bg-white/[0.12] text-zinc-300 hover:text-white transition cursor-pointer text-[10px]">
+                                    ${isUnread ? 'Mark Read' : 'Mark Unread'}
+                                </button>
+                                <button type="button" onclick="deleteFeedbackItem('${item.id}')" class="p-1 rounded-md text-zinc-500 hover:text-rose-400 hover:bg-rose-500/10 transition cursor-pointer" title="Delete Feedback">
+                                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function toggleFeedbackRead(id, newReadState) {
+            if (typeof triggerHaptic === 'function') triggerHaptic('selection');
+            const target = adminFeedbacksList.find(f => f.id === id);
+            if (target) target.read = !newReadState;
+            updateAdminStats();
+            renderAdminFeedbacks();
+
+            try {
+                await fetch('/api/feedback/read', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, read: !newReadState })
+                });
+            } catch (e) {}
+        }
+        window.toggleFeedbackRead = toggleFeedbackRead;
+
+        async function markAllFeedbacksRead() {
+            if (typeof triggerHaptic === 'function') triggerHaptic('notification');
+            adminFeedbacksList.forEach(f => f.read = true);
+            updateAdminStats();
+            renderAdminFeedbacks();
+
+            try {
+                await fetch('/api/feedback/read', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ all: true })
+                });
+            } catch (e) {}
+
+            if (typeof showToast === 'function') showToast('All feedback marked as read');
+        }
+        window.markAllFeedbacksRead = markAllFeedbacksRead;
+
+        async function deleteFeedbackItem(id) {
+            if (typeof triggerHaptic === 'function') triggerHaptic('warning');
+            adminFeedbacksList = adminFeedbacksList.filter(f => f.id !== id);
+            updateAdminStats();
+            renderAdminFeedbacks();
+
+            try {
+                await fetch('/api/feedback/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id })
+                });
+            } catch (e) {}
+        }
+        window.deleteFeedbackItem = deleteFeedbackItem;
+
+        async function sendTestFeedbackFromAdmin() {
+            if (typeof triggerHaptic === 'function') triggerHaptic('notification');
+            if (typeof showToast === 'function') showToast('Sending test feedback to admin team...');
+            try {
+                const res = await fetch('/api/feedback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        rating: 5,
+                        category: 'Feature Request',
+                        text: 'Hello Admins! This is a test feedback notification verifying delivery to baddampujithareddy19@gmail.com and srishankjashankreddy@gmail.com.',
+                        email: 'baddampujithareddy19@gmail.com'
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    if (typeof showToast === 'function') {
+                        showToast('Test feedback dispatched to both admin emails & inbox! 📨');
+                    }
+                    loadAdminFeedbacks();
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+        window.sendTestFeedbackFromAdmin = sendTestFeedbackFromAdmin;
+
+        // Auto-load feedbacks on startup
+        setTimeout(loadAdminFeedbacks, 1500);
+
+        function shareCrystalApp() {
+            if (typeof triggerHaptic === 'function') triggerHaptic('selection');
+            const shareData = {
+                title: 'Crystal',
+                text: 'Experience Crystal – the smart, privacy-first personal assistant with zero subscription paywalls.',
+                url: window.location.href
+            };
+            if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+                navigator.share(shareData).catch(() => copyCrystalLink());
+            } else {
+                copyCrystalLink();
+            }
+        }
+        window.shareCrystalApp = shareCrystalApp;
+
+        function copyCrystalLink() {
+            if (typeof triggerHaptic === 'function') triggerHaptic('selection');
+            const url = window.location.href;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(url).then(() => {
+                    if (typeof showToast === 'function') {
+                        showToast('Crystal link copied to clipboard!');
+                    }
+                }).catch(() => {
+                    prompt('Copy this link:', url);
+                });
+            } else {
+                prompt('Copy this link:', url);
+            }
+        }
+        window.copyCrystalLink = copyCrystalLink;
 
 </script>
 </body>

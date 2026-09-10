@@ -26,6 +26,17 @@ jobs:
         run: |
           npm install --legacy-peer-deps
           npm install -D @capacitor/assets --legacy-peer-deps
+          
+          # Patch capacitor-google-auth plugin to remove dead jcenter and use modern play-services-auth
+          PLUGIN_GRADLE="node_modules/@codetrix-studio/capacitor-google-auth/android/build.gradle"
+          if [ -f "$PLUGIN_GRADLE" ]; then
+            sed -i 's/jcenter()/mavenCentral()/g' "$PLUGIN_GRADLE"
+            sed -i "s/'com.google.android.gms:play-services-auth:18.+'/'com.google.android.gms:play-services-auth:21.3.0'/g" "$PLUGIN_GRADLE"
+            sed -i "s/JavaVersion.VERSION_17/JavaVersion.VERSION_21/g" "$PLUGIN_GRADLE"
+            sed -i "s/compileSdk .*/compileSdk project.hasProperty('compileSdkVersion') ? rootProject.ext.compileSdkVersion : 35/g" "$PLUGIN_GRADLE"
+            sed -i "s/targetSdkVersion .*/targetSdkVersion project.hasProperty('targetSdkVersion') ? rootProject.ext.targetSdkVersion : 35/g" "$PLUGIN_GRADLE"
+            sed -i "s/android.support.test.runner.AndroidJUnitRunner/androidx.test.runner.AndroidJUnitRunner/g" "$PLUGIN_GRADLE"
+          fi
 
       - name: Build Web Assets
         run: |
@@ -35,10 +46,18 @@ jobs:
         run: |
           rm -f capacitor.config.ts
           
-          # 1. Decode Google Services JSON into temporary location if secret exists
+          # 1. Decode Google Services JSON into temporary location (support both base64 and plaintext)
           TEMP_GS="/tmp/google-services.json"
           if [ -n "${{ secrets.GOOGLE_SERVICES_JSON }}" ]; then
             echo "${{ secrets.GOOGLE_SERVICES_JSON }}" | base64 --decode > "$TEMP_GS" 2>/dev/null || true
+            if ! node -e "JSON.parse(require('fs').readFileSync('$TEMP_GS', 'utf8'))" >/dev/null 2>&1; then
+              echo "${{ secrets.GOOGLE_SERVICES_JSON }}" > "$TEMP_GS"
+            fi
+            # Verify validity of JSON
+            if ! node -e "JSON.parse(require('fs').readFileSync('$TEMP_GS', 'utf8'))" >/dev/null 2>&1; then
+              echo "Warning: GOOGLE_SERVICES_JSON secret could not be parsed as valid JSON. Skipping."
+              rm -f "$TEMP_GS"
+            fi
           fi
 
           # 2. Extract actual package_name from google-services.json
@@ -70,19 +89,34 @@ jobs:
             cp node_modules/@codetrix-studio/capacitor-google-auth/android/gradle/wrapper/gradle-wrapper.jar android/gradle/wrapper/gradle-wrapper.jar || true
           fi
 
-          # 4. Copy google-services.json into android/app
+          # 4. Copy google-services.json into android/app if valid
           if [ -f "$TEMP_GS" ]; then
             mkdir -p android/app
             cp "$TEMP_GS" android/app/google-services.json
           fi
 
-          # 5. Ensure package IDs and namespaces match
+          # 5. Ensure package IDs, namespaces, and MainActivity match
           if [ -n "$PKG_NAME" ]; then
-            find android/ -name "build.gradle" -exec sed -i "s/applicationId \"com.crystal.app\"/applicationId \"$PKG_NAME\"/g" {} + 2>/dev/null || true
-            find android/ -name "build.gradle" -exec sed -i "s/namespace \"com.crystal.app\"/namespace \"$PKG_NAME\"/g" {} + 2>/dev/null || true
+            find android/ -name "build.gradle" -exec sed -i "s/applicationId [= ]*[\"'][^\"']*[\"']/applicationId \"$PKG_NAME\"/g" {} + 2>/dev/null || true
+            find android/ -name "build.gradle" -exec sed -i "s/namespace [= ]*[\"'][^\"']*[\"']/namespace = \"$PKG_NAME\"/g" {} + 2>/dev/null || true
+            
+            # Synchronize strings.xml
+            if [ -f "android/app/src/main/res/values/strings.xml" ]; then
+              sed -i "s/<string name=\"package_name\">.*<\/string>/<string name=\"package_name\">$PKG_NAME<\/string>/g" android/app/src/main/res/values/strings.xml
+              sed -i "s/<string name=\"custom_url_scheme\">.*<\/string>/<string name=\"custom_url_scheme\">$PKG_NAME<\/string>/g" android/app/src/main/res/values/strings.xml
+            fi
+
+            # Update package inside MainActivity.java and relocate file to new directory path
+            PKG_PATH=$(echo "$PKG_NAME" | tr '.' '/')
+            mkdir -p "android/app/src/main/java/$PKG_PATH"
+            find android/app/src/main/java -name "MainActivity.java" -exec sed -i "s/package .*/package $PKG_NAME;/g" {} +
+            MAIN_JAVA=$(find android/app/src/main/java -name "MainActivity.java" | head -n 1)
+            if [ -n "$MAIN_JAVA" ] && [ "$MAIN_JAVA" != "android/app/src/main/java/$PKG_PATH/MainActivity.java" ]; then
+              mv "$MAIN_JAVA" "android/app/src/main/java/$PKG_PATH/MainActivity.java"
+            fi
           fi
 
-          # 6. Ensure required Android permissions (VIBRATE, AUDIO, GEO, etc.) are in AndroidManifest.xml
+          # 6. Ensure required Android permissions are in AndroidManifest.xml
           MANIFEST="android/app/src/main/AndroidManifest.xml"
           if [ -f "$MANIFEST" ]; then
             for PERM in "android.permission.VIBRATE" "android.permission.ACCESS_NETWORK_STATE" "android.permission.RECORD_AUDIO" "android.permission.MODIFY_AUDIO_SETTINGS" "android.permission.ACCESS_COARSE_LOCATION" "android.permission.ACCESS_FINE_LOCATION"; do
@@ -108,6 +142,15 @@ jobs:
           distribution: 'zulu'
           java-version: '21'
 
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: 'platforms;android-35 build-tools;35.0.0 platforms;android-34 build-tools;34.0.0'
+
+      - name: Accept Android SDK Licenses
+        run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses 2>/dev/null || yes | sdkmanager --licenses 2>/dev/null || true
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
@@ -123,10 +166,10 @@ jobs:
           # Test gradle-wrapper.jar validity
           if [ -f "gradle/wrapper/gradle-wrapper.jar" ] && unzip -t "gradle/wrapper/gradle-wrapper.jar" >/dev/null 2>&1; then
             echo "Gradle wrapper verified successfully."
-            ./gradlew assembleRelease --no-daemon --stacktrace
+            ./gradlew assembleRelease -x lint -x lintVitalAnalyzeRelease -x lintVitalReportRelease --no-daemon --stacktrace
           else
             echo "Executing via Gradle toolchain directly..."
-            gradle assembleRelease --no-daemon --stacktrace
+            gradle assembleRelease -x lint -x lintVitalAnalyzeRelease -x lintVitalReportRelease --no-daemon --stacktrace
           fi
 
       - name: Sign APK

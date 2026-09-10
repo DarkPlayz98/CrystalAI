@@ -9,7 +9,8 @@
     "build": "mkdir -p dist www && (if [ -f index.html ]; then cp index.html dist/index.html && cp index.html www/index.html; fi) && (if [ -f terms.html ]; then cp terms.html dist/terms.html && cp terms.html www/terms.html; fi) && (if [ -f manifest.json ]; then cp manifest.json dist/manifest.json && cp manifest.json www/manifest.json; fi) && (if [ -d assets ]; then cp -r assets dist/ && cp -r assets www/; fi) && (if [ -d www ] && [ -f www/index.html ]; then cp -r www/* dist/ 2>/dev/null || true; fi) && (if [ -d android/app/src/main/assets/public ]; then cp -r dist/* android/app/src/main/assets/public/ 2>/dev/null || true; fi)",
     "preview": "vite preview",
     "clean": "rm -rf dist",
-    "lint": "echo 'No linting needed for pure HTML app'"
+    "lint": "echo 'No linting needed for pure HTML app'",
+    "postinstall": "if [ -f node_modules/@codetrix-studio/capacitor-google-auth/android/build.gradle ]; then sed -i 's/jcenter()/mavenCentral()/g' node_modules/@codetrix-studio/capacitor-google-auth/android/build.gradle; sed -i \"s/'com.google.android.gms:play-services-auth:18.+'/'com.google.android.gms:play-services-auth:21.3.0'/g\" node_modules/@codetrix-studio/capacitor-google-auth/android/build.gradle; sed -i 's/JavaVersion.VERSION_17/JavaVersion.VERSION_21/g' node_modules/@codetrix-studio/capacitor-google-auth/android/build.gradle; fi"
   },
   "dependencies": {
     "@capacitor/android": "^8.4.1",
