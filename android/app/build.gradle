@@ -40,8 +40,16 @@ android {
 }
 
 tasks.configureEach { task ->
-    if (task.name.toLowerCase().contains("lint") || task.name.toLowerCase().contains("checkaarmetadata")) {
+    if (task.name.toLowerCase().contains("lint") || task.name.toLowerCase().contains("aarmetadata")) {
         task.enabled = false
+    }
+}
+
+gradle.taskGraph.whenReady { taskGraph ->
+    taskGraph.allTasks.each { task ->
+        if (task.name.toLowerCase().contains("lint") || task.name.toLowerCase().contains("aarmetadata")) {
+            task.enabled = false
+        }
     }
 }
 
