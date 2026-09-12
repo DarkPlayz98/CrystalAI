@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" class="dark dark-mode">
+<html lang="en" class="dark dark-mode notranslate" translate="no">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="google" content="notranslate">
     
     <!-- Dynamic Theme Color Meta Tag for Status Bar integration -->
     <meta name="theme-color" content="#050505" id="theme-color-meta">
@@ -195,21 +196,6 @@
     <!-- Three.js 3D Engine for Interactive Crystal Core -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
-    <!-- Google Website Translator Global Engine -->
-    <script type="text/javascript">
-        window.googleTranslateElementInit = function() {
-            try {
-                if (typeof google !== 'undefined' && google.translate) {
-                    new google.translate.TranslateElement({
-                        pageLanguage: 'en',
-                        autoDisplay: false,
-                        layout: google.translate.TranslateElement.InlineLayout.SIMPLE
-                    }, 'google_translate_element');
-                }
-            } catch(e) {}
-        };
-    </script>
-    <script type="text/javascript" async defer src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
     <!-- Crystal Comprehensive Multilingual Engine (134+ Languages) -->
     <script src="/translations.js"></script>
 
@@ -2434,10 +2420,8 @@
             <div id="lightbox-caption" class="absolute bottom-[-40px] left-1/2 transform -translate-x-1/2 text-white/85 text-xs font-bold tracking-wider uppercase bg-white/5 py-1.5 px-4 rounded-full border border-white/10 backdrop-blur-sm select-none">IMAGE PREVIEW</div>
         </div>
     </div>
-    <!-- GOOGLE TRANSLATE ANCHOR ELEMENT (HIDDEN OFF-SCREEN) -->
-    <div id="google_translate_element" style="position:fixed;left:-9999px;top:-9999px;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden;"></div>
 
-    <!-- QUICK FULL-APP LANGUAGE & GOOGLE TRANSLATE MODAL -->
+    <!-- QUICK FULL-APP LANGUAGE MODAL -->
     <div id="quick-language-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[120] hidden flex items-center justify-center p-3 sm:p-4 opacity-0 transition-all duration-300" onclick="toggleQuickLanguageModal()">
         <div class="w-full max-w-xl max-h-[85vh] bg-[var(--md-sys-color-surface)] border border-[var(--md-sys-color-outline-variant)] rounded-[28px] p-5 sm:p-6 flex flex-col shadow-2xl transform scale-95 transition-all duration-300 text-[var(--md-sys-color-on-surface)]" onclick="event.stopPropagation()">
             <!-- Header -->
@@ -14064,7 +14048,7 @@ echo "Status: ONLINE"
             // 3. Update Badges
             const headerBadge = document.getElementById('header-lang-badge');
             if (headerBadge) {
-                headerBadge.textContent = langCode.substring(0, 3).toUpperCase();
+                headerBadge.textContent = (langCode || 'EN').substring(0, 3).toUpperCase();
             }
             const obBadge = document.getElementById('onboarding-lang-selected-badge');
             if (obBadge) {
@@ -14077,45 +14061,13 @@ echo "Status: ONLINE"
                 settingsSelect.value = langName;
             }
 
-            // 5. Trigger Google Translate for 100% full-page DOM translation
+            // 5. Purge any legacy Google Translate cookies to prevent Chrome auto-translate overlay
             try {
                 const host = window.location.hostname;
-                if (langCode === 'en' || langName === 'English') {
-                    document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-                    document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=${host}; path=/;`;
-                    document.cookie = `googtrans=/en/en; path=/;`;
-                    document.cookie = `googtrans=/en/en; domain=${host}; path=/;`;
-                    const combo = document.querySelector('.goog-te-combo');
-                    if (combo) {
-                        combo.value = 'en';
-                        combo.dispatchEvent(new Event('change'));
-                    }
-                } else {
-                    let gtCode = langCode;
-                    if (gtCode === 'pt-PT' || gtCode === 'pt-BR') gtCode = 'pt';
-                    if (gtCode === 'zh-CN') gtCode = 'zh-CN';
-                    if (gtCode === 'zh-TW') gtCode = 'zh-TW';
-                    document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-                    document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=${host}; path=/;`;
-                    document.cookie = `googtrans=/en/${gtCode}; path=/;`;
-                    document.cookie = `googtrans=/en/${gtCode}; domain=${host}; path=/;`;
-                    const combo = document.querySelector('.goog-te-combo');
-                    if (combo) {
-                        combo.value = gtCode;
-                        combo.dispatchEvent(new Event('change'));
-                    } else {
-                        setTimeout(() => {
-                            const lateCombo = document.querySelector('.goog-te-combo');
-                            if (lateCombo) {
-                                lateCombo.value = gtCode;
-                                lateCombo.dispatchEvent(new Event('change'));
-                            }
-                        }, 500);
-                    }
-                }
-            } catch(e) {
-                console.warn("Translate sync:", e);
-            }
+                document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=${host}; path=/;`;
+                document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=.${host}; path=/;`;
+            } catch(e) {}
 
             // 6. Update lists
             renderQuickLanguages(document.getElementById('quick-lang-search')?.value || '');
