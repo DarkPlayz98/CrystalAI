@@ -1742,110 +1742,6 @@
         </div>
     </div>
 
-    <!-- HELP US / COMMUNITY & FEEDBACK MODAL -->
-    <div id="help-us-modal" class="fixed inset-0 z-[120] bg-black/70 backdrop-blur-md hidden flex items-center justify-center p-4 transition-all duration-300" onclick="if(event.target === this) toggleHelpUsModal()">
-        <div class="w-full max-w-lg bg-[#0d1017] text-white rounded-3xl border border-white/10 p-5 sm:p-6 shadow-2xl flex flex-col gap-5 relative animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
-            <!-- Header -->
-            <div class="flex items-center justify-between pb-3 border-b border-white/10">
-                <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-2xl bg-gradient-to-tr from-pink-500 to-rose-500 p-[1.5px] flex items-center justify-center shadow-[0_0_15px_rgba(244,63,94,0.3)]">
-                        <div class="w-full h-full bg-[#0d1017] rounded-[14px] flex items-center justify-center text-pink-400">
-                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="font-black text-lg tracking-tight text-white">Help Us Grow Crystal</h3>
-                        <p class="text-xs text-zinc-400">Your feedback, ratings, and ideas make Crystal better every day</p>
-                    </div>
-                </div>
-                <button type="button" onclick="toggleHelpUsModal()" class="p-1.5 rounded-full hover:bg-white/10 text-zinc-400 hover:text-white transition-colors cursor-pointer" aria-label="Close">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                </button>
-            </div>
-
-            <!-- 1. Star Rating Experience -->
-            <div class="p-4 rounded-2xl bg-white/[0.04] border border-white/10 flex flex-col items-center text-center gap-2">
-                <span class="text-xs font-bold text-zinc-300 uppercase tracking-wider">Rate your experience with Crystal</span>
-                <div class="flex items-center gap-2 my-1" id="help-us-stars">
-                    <button type="button" onclick="rateCrystalExperience(1)" class="star-btn p-1 text-zinc-600 hover:text-amber-400 transition-transform hover:scale-125 cursor-pointer text-2xl" data-star="1">★</button>
-                    <button type="button" onclick="rateCrystalExperience(2)" class="star-btn p-1 text-zinc-600 hover:text-amber-400 transition-transform hover:scale-125 cursor-pointer text-2xl" data-star="2">★</button>
-                    <button type="button" onclick="rateCrystalExperience(3)" class="star-btn p-1 text-zinc-600 hover:text-amber-400 transition-transform hover:scale-125 cursor-pointer text-2xl" data-star="3">★</button>
-                    <button type="button" onclick="rateCrystalExperience(4)" class="star-btn p-1 text-zinc-600 hover:text-amber-400 transition-transform hover:scale-125 cursor-pointer text-2xl" data-star="4">★</button>
-                    <button type="button" onclick="rateCrystalExperience(5)" class="star-btn p-1 text-zinc-600 hover:text-amber-400 transition-transform hover:scale-125 cursor-pointer text-2xl" data-star="5">★</button>
-                </div>
-                <p id="help-us-rating-feedback" class="text-xs font-medium text-emerald-400 min-h-[18px]">Tap a star to rate</p>
-            </div>
-
-            <!-- 2. Send Feedback Form -->
-            <div class="p-4 rounded-2xl bg-white/[0.04] border border-white/10 flex flex-col gap-3">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold text-zinc-300 uppercase tracking-wider">Send Feedback or Feature Request</span>
-                    <span class="text-[10px] font-mono text-zinc-500">Fast Review</span>
-                </div>
-
-                <!-- Category Chips -->
-                <div class="flex flex-wrap gap-1.5" id="feedback-category-chips">
-                    <button type="button" onclick="selectFeedbackCategory(this, 'Feature Request')" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-[#70ef7d]/20 text-[#70ef7d] border border-[#70ef7d]/40 active:scale-95 cursor-pointer">Feature Request</button>
-                    <button type="button" onclick="selectFeedbackCategory(this, 'Bug Report')" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-white/[0.05] text-zinc-300 border border-white/10 hover:bg-white/10 active:scale-95 cursor-pointer">Bug Report</button>
-                    <button type="button" onclick="selectFeedbackCategory(this, 'Model Quality')" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-white/[0.05] text-zinc-300 border border-white/10 hover:bg-white/10 active:scale-95 cursor-pointer">Model Quality</button>
-                    <button type="button" onclick="selectFeedbackCategory(this, 'General Idea')" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-white/[0.05] text-zinc-300 border border-white/10 hover:bg-white/10 active:scale-95 cursor-pointer">General Idea</button>
-                </div>
-
-                <textarea id="help-us-feedback-input" rows="3" placeholder="Tell us what you love or what we can build next for you..." class="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-xs sm:text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#70ef7d] resize-none"></textarea>
-
-                <!-- Optional Image / Screenshot Attachment -->
-                <div class="flex flex-col gap-2">
-                    <div id="help-us-image-preview-box" class="hidden relative w-fit max-w-[200px] rounded-xl overflow-hidden border border-white/20 bg-black/60">
-                        <img id="help-us-image-preview" src="" class="max-h-24 w-auto object-cover" alt="Attachment Preview" />
-                        <button type="button" onclick="removeFeedbackImageAttachment()" class="absolute top-1 right-1 p-1 rounded-full bg-black/80 hover:bg-rose-600 text-white transition-colors cursor-pointer" title="Remove image">
-                            <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                        </button>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <label for="help-us-image-file" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.05] hover:bg-white/10 text-zinc-300 text-xs font-semibold border border-white/10 cursor-pointer transition active:scale-95">
-                            <svg class="w-3.5 h-3.5 text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
-                            <span id="help-us-image-btn-label">Attach Image / Screenshot</span>
-                        </label>
-                        <input type="file" id="help-us-image-file" accept="image/*" class="hidden" onchange="handleFeedbackImageSelected(event)">
-                    </div>
-                </div>
-
-                <div class="flex items-center gap-2">
-                    <input type="email" id="help-us-email-input" placeholder="Your email (for status reply)" class="flex-1 p-2.5 rounded-xl bg-black/40 border border-white/10 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#70ef7d]">
-                    <button type="button" onclick="submitHelpUsFeedback()" class="px-4 py-2.5 rounded-xl bg-[#70ef7d] hover:bg-[#5cd469] text-black font-bold text-xs transition-all active:scale-95 flex items-center gap-1.5 shadow-md shrink-0 cursor-pointer">
-                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                        <span>Send</span>
-                    </button>
-                </div>
-                <div class="flex items-center gap-2 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-300">
-                    <svg class="w-4 h-4 shrink-0 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                    <span>Delivered directly to Crystal Administrators and Engineering via secure dispatch.</span>
-                </div>
-            </div>
-
-            <!-- 3. Share & Community -->
-            <div class="grid grid-cols-2 gap-3">
-                <button type="button" onclick="shareCrystalApp()" class="p-3.5 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-left flex flex-col gap-1 transition-all active:scale-95 cursor-pointer group">
-                    <div class="flex items-center justify-between">
-                        <svg class="w-5 h-5 text-sky-400 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-                        <span class="text-[10px] font-mono text-zinc-500">Share</span>
-                    </div>
-                    <span class="font-bold text-xs text-white">Share with Friends</span>
-                    <span class="text-[11px] text-zinc-400">Invite peers to use Crystal</span>
-                </button>
-
-                <button type="button" onclick="copyCrystalLink()" class="p-3.5 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-left flex flex-col gap-1 transition-all active:scale-95 cursor-pointer group">
-                    <div class="flex items-center justify-between">
-                        <svg class="w-5 h-5 text-emerald-400 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-                        <span class="text-[10px] font-mono text-zinc-500" id="copy-link-badge">Copy</span>
-                    </div>
-                    <span class="font-bold text-xs text-white">Copy App URL</span>
-                    <span class="text-[11px] text-zinc-400">Direct link to web preview</span>
-                </button>
-            </div>
-        </div>
-    </div>
-
     <!-- ADMIN FEEDBACK INBOX MODAL (Restricted to Authorized Admins) -->
     <div id="admin-inbox-modal" class="fixed inset-0 z-[125] bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-5 transition-all duration-300" onclick="if(event.target === this) closeAdminInboxModal()">
         <div class="w-full max-w-2xl bg-[#0b0e14] text-white rounded-3xl border border-amber-500/30 p-5 sm:p-6 shadow-[0_0_50px_rgba(245,158,11,0.15)] flex flex-col gap-4 relative animate-in fade-in zoom-in-95 duration-200 max-h-[90vh]">
@@ -2085,18 +1981,38 @@
                 <div class="flex flex-col gap-3">
                     <h2 class="text-xs font-bold uppercase tracking-wider text-pink-400 opacity-90 px-1">Help & Feedback</h2>
                     
-                    <div class="flex flex-col gap-4 p-5 bg-[var(--bubble-bot)] rounded-2xl border border-pink-500/20 shadow-sm">
+                    <div class="flex flex-col gap-4 p-4 sm:p-5 bg-[var(--bubble-bot)] rounded-2xl border border-pink-500/20 shadow-sm">
                         <!-- Rating Stars -->
-                        <div class="flex flex-col items-center text-center gap-1.5 pb-3 border-b border-[var(--border-color)]/30">
+                        <div class="flex flex-col items-center text-center gap-2 pb-3 border-b border-[var(--border-color)]/30">
                             <span class="text-xs font-bold opacity-75 uppercase tracking-wider">Rate Your Experience</span>
-                            <div class="flex items-center gap-2 my-0.5" id="help-us-stars">
-                                <button type="button" onclick="rateCrystalExperience(1)" class="star-btn p-1 text-zinc-600 hover:text-amber-400 transition-transform hover:scale-125 cursor-pointer text-2xl" data-star="1">★</button>
-                                <button type="button" onclick="rateCrystalExperience(2)" class="star-btn p-1 text-zinc-600 hover:text-amber-400 transition-transform hover:scale-125 cursor-pointer text-2xl" data-star="2">★</button>
-                                <button type="button" onclick="rateCrystalExperience(3)" class="star-btn p-1 text-zinc-600 hover:text-amber-400 transition-transform hover:scale-125 cursor-pointer text-2xl" data-star="3">★</button>
-                                <button type="button" onclick="rateCrystalExperience(4)" class="star-btn p-1 text-zinc-600 hover:text-amber-400 transition-transform hover:scale-125 cursor-pointer text-2xl" data-star="4">★</button>
-                                <button type="button" onclick="rateCrystalExperience(5)" class="star-btn p-1 text-amber-400 transition-transform hover:scale-125 cursor-pointer text-2xl" data-star="5">★</button>
+                            <div class="flex items-center justify-center gap-2 my-1" id="help-us-stars">
+                                <button type="button" onclick="rateCrystalExperience(1)" class="star-btn p-1.5 rounded-xl hover:bg-amber-400/10 text-amber-400 transition-transform active:scale-90 hover:scale-110 cursor-pointer focus:outline-none" data-star="1" aria-label="Rate 1 Star">
+                                    <svg class="w-7 h-7 star-icon transition-colors" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1.5">
+                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                    </svg>
+                                </button>
+                                <button type="button" onclick="rateCrystalExperience(2)" class="star-btn p-1.5 rounded-xl hover:bg-amber-400/10 text-amber-400 transition-transform active:scale-90 hover:scale-110 cursor-pointer focus:outline-none" data-star="2" aria-label="Rate 2 Stars">
+                                    <svg class="w-7 h-7 star-icon transition-colors" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1.5">
+                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                    </svg>
+                                </button>
+                                <button type="button" onclick="rateCrystalExperience(3)" class="star-btn p-1.5 rounded-xl hover:bg-amber-400/10 text-amber-400 transition-transform active:scale-90 hover:scale-110 cursor-pointer focus:outline-none" data-star="3" aria-label="Rate 3 Stars">
+                                    <svg class="w-7 h-7 star-icon transition-colors" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1.5">
+                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                    </svg>
+                                </button>
+                                <button type="button" onclick="rateCrystalExperience(4)" class="star-btn p-1.5 rounded-xl hover:bg-amber-400/10 text-amber-400 transition-transform active:scale-90 hover:scale-110 cursor-pointer focus:outline-none" data-star="4" aria-label="Rate 4 Stars">
+                                    <svg class="w-7 h-7 star-icon transition-colors" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1.5">
+                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                    </svg>
+                                </button>
+                                <button type="button" onclick="rateCrystalExperience(5)" class="star-btn p-1.5 rounded-xl hover:bg-amber-400/10 text-amber-400 transition-transform active:scale-90 hover:scale-110 cursor-pointer focus:outline-none" data-star="5" aria-label="Rate 5 Stars">
+                                    <svg class="w-7 h-7 star-icon transition-colors" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1.5">
+                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                    </svg>
+                                </button>
                             </div>
-                            <p id="help-us-rating-feedback" class="text-xs font-medium text-emerald-400 min-h-[16px]">Absolutely phenomenal! 🌟</p>
+                            <p id="help-us-rating-feedback" class="text-xs font-semibold text-emerald-400 min-h-[18px]">Absolutely phenomenal! 🌟</p>
                         </div>
 
                         <!-- Feedback Category Chips -->
@@ -2106,36 +2022,37 @@
                                 <span class="text-[10px] font-mono opacity-50">Direct Admin Delivery</span>
                             </div>
                             <div class="flex flex-wrap gap-1.5" id="feedback-category-chips">
-                                <button type="button" onclick="selectFeedbackCategory(this, 'Feature Request')" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-[#70ef7d]/20 text-[#70ef7d] border border-[#70ef7d]/40 active:scale-95 cursor-pointer">Feature Request</button>
-                                <button type="button" onclick="selectFeedbackCategory(this, 'Bug Report')" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-white/[0.05] text-zinc-300 border border-white/10 hover:bg-white/10 active:scale-95 cursor-pointer">Bug Report</button>
-                                <button type="button" onclick="selectFeedbackCategory(this, 'Model Quality')" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-white/[0.05] text-zinc-300 border border-white/10 hover:bg-white/10 active:scale-95 cursor-pointer">Model Quality</button>
-                                <button type="button" onclick="selectFeedbackCategory(this, 'General Idea')" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-white/[0.05] text-zinc-300 border border-white/10 hover:bg-white/10 active:scale-95 cursor-pointer">General Idea</button>
+                                <button type="button" onclick="selectFeedbackCategory(this, 'Feature Request')" class="feedback-cat-btn px-3 py-1.5 rounded-full text-xs font-semibold bg-pink-500/20 text-pink-400 border border-pink-500/50 shadow-xs active:scale-95 cursor-pointer transition-all">Feature Request</button>
+                                <button type="button" onclick="selectFeedbackCategory(this, 'Bug Report')" class="feedback-cat-btn px-3 py-1.5 rounded-full text-xs font-semibold bg-[var(--sidebar-hover)] text-[var(--text-color)] opacity-70 border border-[var(--border-color)] hover:opacity-100 active:scale-95 cursor-pointer transition-all">Bug Report</button>
+                                <button type="button" onclick="selectFeedbackCategory(this, 'Model Quality')" class="feedback-cat-btn px-3 py-1.5 rounded-full text-xs font-semibold bg-[var(--sidebar-hover)] text-[var(--text-color)] opacity-70 border border-[var(--border-color)] hover:opacity-100 active:scale-95 cursor-pointer transition-all">Model Quality</button>
+                                <button type="button" onclick="selectFeedbackCategory(this, 'General Idea')" class="feedback-cat-btn px-3 py-1.5 rounded-full text-xs font-semibold bg-[var(--sidebar-hover)] text-[var(--text-color)] opacity-70 border border-[var(--border-color)] hover:opacity-100 active:scale-95 cursor-pointer transition-all">General Idea</button>
                             </div>
                         </div>
 
                         <!-- Feedback Textarea -->
                         <div class="flex flex-col gap-2">
-                            <textarea id="help-us-feedback-input" rows="3" placeholder="Share your suggestions, bugs, or feature ideas..." class="w-full p-3 rounded-xl bg-[var(--sidebar-hover)] border border-[var(--border-color)] text-xs sm:text-sm text-[var(--text-color)] placeholder:text-gray-500/60 focus:outline-none focus:border-pink-500 resize-none transition-colors"></textarea>
+                            <textarea id="help-us-feedback-input" rows="3" placeholder="Share your suggestions, bugs, or feature ideas..." class="w-full p-3.5 rounded-xl bg-[var(--sidebar-hover)] border border-[var(--border-color)] text-xs sm:text-sm text-[var(--text-color)] placeholder:text-gray-500/60 focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500/40 resize-none transition-all"></textarea>
                         </div>
 
                         <!-- Optional Screenshot & Submit Row -->
-                        <div class="flex flex-col gap-2">
-                            <div id="help-us-image-preview-box" class="hidden relative w-fit max-w-[180px] rounded-xl overflow-hidden border border-white/20 bg-black/60">
-                                <img id="help-us-image-preview" src="" class="max-h-20 w-auto object-cover" alt="Attachment Preview" />
+                        <div class="flex flex-col gap-2.5">
+                            <div id="help-us-image-preview-box" class="hidden relative w-fit max-w-[180px] rounded-xl overflow-hidden border border-pink-500/30 bg-black/60 shadow-sm">
+                                <img id="help-us-image-preview" src="" class="max-h-24 w-auto object-cover" alt="Attachment Preview" />
                                 <button type="button" onclick="removeFeedbackImageAttachment()" class="absolute top-1 right-1 p-1 rounded-full bg-black/80 hover:bg-rose-600 text-white transition-colors cursor-pointer" title="Remove image">
                                     <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                                 </button>
                             </div>
-                            <div class="flex items-center gap-2">
-                                <label for="help-us-image-file" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[var(--sidebar-hover)] hover:bg-[var(--border-color)] text-[var(--text-color)] text-xs font-semibold border border-[var(--border-color)] cursor-pointer transition active:scale-95">
+                            
+                            <div class="flex flex-wrap sm:flex-nowrap items-center gap-2">
+                                <label for="help-us-image-file" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[var(--sidebar-hover)] hover:bg-[var(--border-color)] text-[var(--text-color)] text-xs font-semibold border border-[var(--border-color)] cursor-pointer transition active:scale-95 shrink-0">
                                     <svg class="w-3.5 h-3.5 text-pink-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
                                     <span id="help-us-image-btn-label">Screenshot</span>
                                 </label>
                                 <input type="file" id="help-us-image-file" accept="image/*" class="hidden" onchange="handleFeedbackImageSelected(event)">
                                 
-                                <input type="email" id="help-us-email-input" placeholder="Your email (optional)" class="flex-1 p-2 bg-[var(--sidebar-hover)] border border-[var(--border-color)] rounded-xl text-xs text-[var(--text-color)] placeholder:text-gray-500/60 focus:outline-none focus:border-pink-500">
+                                <input type="email" id="help-us-email-input" placeholder="Your email (optional)" class="flex-1 min-w-[140px] p-2 bg-[var(--sidebar-hover)] border border-[var(--border-color)] rounded-xl text-xs text-[var(--text-color)] placeholder:text-gray-500/60 focus:outline-none focus:border-pink-500">
                                 
-                                <button type="button" onclick="submitHelpUsFeedback()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-bold text-xs transition-all active:scale-95 flex items-center gap-1.5 shadow-md shrink-0 cursor-pointer">
+                                <button type="button" onclick="submitHelpUsFeedback()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-bold text-xs transition-all active:scale-95 flex items-center gap-1.5 shadow-md shrink-0 cursor-pointer">
                                     <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                                     <span>Send</span>
                                 </button>
@@ -6783,12 +6700,14 @@
 
         function toggleSettings() {
             const m = document.getElementById('settings-modal');
-            triggerHaptic();
+            if (typeof triggerHaptic === 'function') triggerHaptic();
 
             if (m.classList.contains('hidden')) {
                 if (typeof initBirthdayPickers === 'function') initBirthdayPickers();
                 if (typeof populateSettingsLanguageDropdown === 'function') populateSettingsLanguageDropdown();
                 if (typeof updateSettingsAccountStatus === 'function') updateSettingsAccountStatus();
+                if (typeof rateCrystalExperience === 'function') rateCrystalExperience(helpUsCurrentRating || 5);
+                if (typeof updateAdminUI === 'function') updateAdminUI();
                 m.classList.remove('hidden');
                 setTimeout(() => {
                     m.classList.remove('opacity-0');
@@ -12767,8 +12686,6 @@ echo "Termux test completed successfully!"`;
             
             const sm = document.getElementById('settings-modal');
             if (sm && !sm.classList.contains('hidden')) toggleSettings();
-            const hu = document.getElementById('help-us-modal');
-            if (hu && !hu.classList.contains('hidden')) toggleHelpUsModal();
             const mm = document.getElementById('crystal-model-modal');
             if (mm && !mm.classList.contains('hidden')) toggleModelSelectorModal();
 
@@ -15207,64 +15124,94 @@ echo "Status: ONLINE"
         // ==========================================
         let helpUsCurrentRating = 5;
         let helpUsCurrentCategory = 'Feature Request';
-
-        function toggleHelpUsModal() {
-            if (typeof triggerHaptic === 'function') triggerHaptic('selection');
-            const modal = document.getElementById('help-us-modal');
-            if (!modal) return;
-            modal.classList.toggle('hidden');
-        }
-        window.toggleHelpUsModal = toggleHelpUsModal;
+        let feedbackAttachedImageBase64 = null;
 
         function rateCrystalExperience(stars) {
             if (typeof triggerHaptic === 'function') triggerHaptic('selection');
-            helpUsCurrentRating = stars;
+            helpUsCurrentRating = Number(stars) || 5;
             const container = document.getElementById('help-us-stars');
             if (!container) return;
             const starBtns = container.querySelectorAll('.star-btn');
             starBtns.forEach((btn, index) => {
+                const starIdx = index + 1;
                 const svg = btn.querySelector('svg');
-                if (svg) {
-                    if (index < stars) {
-                        svg.setAttribute('fill', '#eab308');
-                        svg.setAttribute('stroke', '#eab308');
-                    } else {
-                        svg.setAttribute('fill', 'none');
-                        svg.setAttribute('stroke', '#71717a');
+                if (starIdx <= helpUsCurrentRating) {
+                    btn.classList.remove('opacity-30', 'text-zinc-600', 'text-gray-400');
+                    btn.classList.add('opacity-100', 'text-amber-400');
+                    if (svg) {
+                        svg.setAttribute('fill', '#f59e0b');
+                        svg.setAttribute('stroke', '#f59e0b');
                     }
                 } else {
-                    if (index < stars) {
-                        btn.classList.add('text-amber-400');
-                        btn.classList.remove('text-zinc-600');
-                    } else {
-                        btn.classList.remove('text-amber-400');
-                        btn.classList.add('text-zinc-600');
+                    btn.classList.remove('opacity-100', 'text-amber-400');
+                    btn.classList.add('opacity-30', 'text-zinc-600');
+                    if (svg) {
+                        svg.setAttribute('fill', 'none');
+                        svg.setAttribute('stroke', 'currentColor');
                     }
                 }
             });
 
             const feedbackText = document.getElementById('help-us-rating-feedback');
             if (feedbackText) {
-                const labels = ["Could be much better", "Needs improvement", "Good experience", "Great AI companion", "Absolutely phenomenal! 🌟"];
-                feedbackText.textContent = labels[stars - 1] || `${stars} Stars`;
+                const labels = [
+                    "Could be much better 😕",
+                    "Needs improvement 🛠️",
+                    "Good experience 👍",
+                    "Great AI companion 🚀",
+                    "Absolutely phenomenal! 🌟"
+                ];
+                feedbackText.textContent = labels[helpUsCurrentRating - 1] || `${helpUsCurrentRating} Stars`;
             }
         }
         window.rateCrystalExperience = rateCrystalExperience;
 
         function selectFeedbackCategory(chip, category) {
             if (typeof triggerHaptic === 'function') triggerHaptic('selection');
-            helpUsCurrentCategory = category;
+            helpUsCurrentCategory = category || 'Feature Request';
             
-            // Unselect all chips in parent or by class
             const chips = document.querySelectorAll('#feedback-category-chips button, .feedback-cat-btn');
             chips.forEach(b => {
-                b.classList.remove('bg-[#70ef7d]/20', 'text-[#70ef7d]', 'border-[#70ef7d]/40', 'bg-pink-500/20', 'text-pink-400', 'border-pink-500/40');
-                b.classList.add('bg-white/[0.05]', 'text-zinc-300', 'border-white/10');
+                b.className = 'feedback-cat-btn px-3 py-1.5 rounded-full text-xs font-semibold bg-[var(--sidebar-hover)] text-[var(--text-color)] opacity-70 border border-[var(--border-color)] hover:opacity-100 active:scale-95 cursor-pointer transition-all';
             });
-            chip.classList.remove('bg-white/[0.05]', 'text-zinc-300', 'border-white/10');
-            chip.classList.add('bg-[#70ef7d]/20', 'text-[#70ef7d]', 'border-[#70ef7d]/40');
+            if (chip) {
+                chip.className = 'feedback-cat-btn px-3 py-1.5 rounded-full text-xs font-semibold bg-pink-500/20 text-pink-400 border border-pink-500/50 shadow-xs active:scale-95 cursor-pointer transition-all opacity-100';
+            }
         }
         window.selectFeedbackCategory = selectFeedbackCategory;
+
+        function handleFeedbackImageSelected(event) {
+            const file = event && event.target && event.target.files && event.target.files[0];
+            if (!file) return;
+            if (!file.type.startsWith('image/')) {
+                if (typeof showToast === 'function') showToast('Please select a valid image file (PNG/JPG/WebP).');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                feedbackAttachedImageBase64 = e.target.result;
+                const previewBox = document.getElementById('help-us-image-preview-box');
+                const previewImg = document.getElementById('help-us-image-preview');
+                const btnLabel = document.getElementById('help-us-image-btn-label');
+                if (previewImg) previewImg.src = feedbackAttachedImageBase64;
+                if (previewBox) previewBox.classList.remove('hidden');
+                if (btnLabel) btnLabel.textContent = 'Change';
+                if (typeof showToast === 'function') showToast('Screenshot attached successfully 📸');
+            };
+            reader.readAsDataURL(file);
+        }
+        window.handleFeedbackImageSelected = handleFeedbackImageSelected;
+
+        function removeFeedbackImageAttachment() {
+            feedbackAttachedImageBase64 = null;
+            const fileInput = document.getElementById('help-us-image-file');
+            if (fileInput) fileInput.value = '';
+            const previewBox = document.getElementById('help-us-image-preview-box');
+            const btnLabel = document.getElementById('help-us-image-btn-label');
+            if (previewBox) previewBox.classList.add('hidden');
+            if (btnLabel) btnLabel.textContent = 'Screenshot';
+        }
+        window.removeFeedbackImageAttachment = removeFeedbackImageAttachment;
 
         // ==========================================
         // ADMIN FEEDBACK INBOX ENGINE (baddampujithareddy19 & srishankjashankreddy)
@@ -15339,8 +15286,9 @@ echo "Status: ONLINE"
 
             if (!feedbackText) {
                 if (typeof showToast === 'function') {
-                    showToast('Please type a brief feedback note before submitting.');
+                    showToast('Please type your feedback or suggestions first.');
                 }
+                if (textEl) textEl.focus();
                 return;
             }
 
@@ -15349,6 +15297,7 @@ echo "Status: ONLINE"
                 category: helpUsCurrentCategory,
                 text: feedbackText,
                 email: userEmail || 'anonymous@crystal.user',
+                image: feedbackAttachedImageBase64 || null,
                 timestamp: new Date().toISOString()
             };
 
@@ -15378,10 +15327,7 @@ echo "Status: ONLINE"
             } catch (e) {}
 
             if (textEl) textEl.value = '';
-            const helpModal = document.getElementById('help-us-modal');
-            if (helpModal && !helpModal.classList.contains('hidden')) {
-                toggleHelpUsModal();
-            }
+            removeFeedbackImageAttachment();
 
             // Refresh admin badge count immediately
             if (typeof loadAdminFeedbacks === 'function') {
@@ -15389,7 +15335,7 @@ echo "Status: ONLINE"
             }
 
             if (typeof showToast === 'function') {
-                showToast('Feedback logged for Crystal Admins (baddampujithareddy19 & srishankjashankreddy)! Thank you! ✨');
+                showToast('Feedback logged for Crystal Admins! Thank you! ✨');
             }
         }
         window.submitHelpUsFeedback = submitHelpUsFeedback;
