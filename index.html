@@ -1972,43 +1972,12 @@
 
                 <!-- SECTION 1: PERSONALIZATION -->
                 <div class="flex flex-col gap-3">
-                    <h2 id="settings-heading-personalization" class="text-xs font-bold uppercase tracking-wider text-indigo-400 opacity-90 px-1">Personalization</h2>
+                    <h2 id="settings-heading-personalization" class="text-xs font-bold uppercase tracking-wider text-indigo-400 opacity-90 px-1">Profile & Personalization</h2>
                     
                     <div class="flex flex-col gap-4 p-5 bg-[var(--bubble-bot)] rounded-2xl border border-[var(--glass-border)] shadow-sm">
                         <div class="flex flex-col gap-1.5">
                             <label id="settings-label-username" for="custom-username" class="font-bold text-xs uppercase tracking-wider opacity-60">Username / Preferred Name</label>
                             <input type="text" id="custom-username" class="w-full bg-transparent border-b border-[var(--border-color)] text-[var(--text-color)] py-2 text-sm outline-none focus:border-indigo-500 font-semibold transition-colors" placeholder="Input your Username">
-                        </div>
-
-                        <!-- Birthday Setting (Material 3 Easy 3-Part Picker) -->
-                        <div class="flex flex-col gap-2 pt-2 border-t border-[var(--border-color)]/30">
-                            <div class="flex items-center justify-between">
-                                <label id="settings-label-birthday" class="font-bold text-xs uppercase tracking-wider opacity-60">Birthday</label>
-                                <span id="settings-birthday-display" class="text-[11px] font-mono text-indigo-400 font-semibold">Not set</span>
-                            </div>
-                            <div class="grid grid-cols-3 gap-2">
-                                <select id="settings-bday-month" onchange="onCustomBirthdayChange('settings')" class="w-full bg-[var(--sidebar-hover)] border border-[var(--border-color)] text-[var(--text-color)] p-2 rounded-xl text-xs outline-none focus:border-indigo-500 font-semibold cursor-pointer transition-colors">
-                                    <option value="">Month</option>
-                                    <option value="01">Jan (01)</option>
-                                    <option value="02">Feb (02)</option>
-                                    <option value="03">Mar (03)</option>
-                                    <option value="04">Apr (04)</option>
-                                    <option value="05">May (05)</option>
-                                    <option value="06">Jun (06)</option>
-                                    <option value="07">Jul (07)</option>
-                                    <option value="08">Aug (08)</option>
-                                    <option value="09">Sep (09)</option>
-                                    <option value="10">Oct (10)</option>
-                                    <option value="11">Nov (11)</option>
-                                    <option value="12">Dec (12)</option>
-                                </select>
-                                <select id="settings-bday-day" onchange="onCustomBirthdayChange('settings')" class="w-full bg-[var(--sidebar-hover)] border border-[var(--border-color)] text-[var(--text-color)] p-2 rounded-xl text-xs outline-none focus:border-indigo-500 font-semibold cursor-pointer transition-colors">
-                                    <option value="">Day</option>
-                                </select>
-                                <select id="settings-bday-year" onchange="onCustomBirthdayChange('settings')" class="w-full bg-[var(--sidebar-hover)] border border-[var(--border-color)] text-[var(--text-color)] p-2 rounded-xl text-xs outline-none focus:border-indigo-500 font-semibold cursor-pointer transition-colors">
-                                    <option value="">Year</option>
-                                </select>
-                            </div>
                         </div>
 
                         <!-- Preferred Language Setting -->
@@ -2031,105 +2000,52 @@
                             </select>
                         </div>
 
+                        <!-- Custom Instructions -->
                         <div class="flex flex-col gap-1.5 pt-2 border-t border-[var(--border-color)]/30">
                             <div class="flex justify-between items-center">
                                 <label id="settings-label-custom-instructions" for="custom-instructions" class="font-bold text-xs uppercase tracking-wider opacity-60">Custom AI Instructions</label>
                                 <span class="text-[10px] opacity-40 font-mono">Auto-Saved</span>
                             </div>
-                            <p id="settings-desc-custom-instructions" class="text-[11px] opacity-50 font-medium leading-normal mb-1">Set custom rules for how Crystal responds (e.g., tone, conciseness, preferred coding style).</p>
-                            <textarea id="custom-instructions" rows="4" class="w-full bg-transparent border border-[var(--border-color)] text-[var(--text-color)] p-3 rounded-xl text-sm outline-none focus:border-indigo-500 resize-none font-medium leading-relaxed transition-colors placeholder:text-gray-500/50" placeholder="E.g., Always answer concisely, format code blocks with clean commentary, and prefer TypeScript..."></textarea>
+                            <p id="settings-desc-custom-instructions" class="text-[11px] opacity-50 font-medium leading-normal mb-1">Set rules for how Crystal responds (e.g., tone, conciseness, formatting).</p>
+                            <textarea id="custom-instructions" rows="3" class="w-full bg-transparent border border-[var(--border-color)] text-[var(--text-color)] p-3 rounded-xl text-sm outline-none focus:border-indigo-500 resize-none font-medium leading-relaxed transition-colors placeholder:text-gray-500/50" placeholder="E.g., Answer concisely, format code with syntax highlighting, and be helpful..."></textarea>
                         </div>
                     </div>
                 </div>
 
-                <!-- SECTION 1.5: ASSISTANT MODEL SETTINGS -->
+                <!-- SECTION 2: INTELLIGENCE & CAPABILITIES -->
                 <div class="flex flex-col gap-3">
-                    <h2 id="settings-heading-assistant" class="text-xs font-bold uppercase tracking-wider text-indigo-400 opacity-90 px-1">Assistant Settings</h2>
+                    <h2 id="settings-heading-assistant" class="text-xs font-bold uppercase tracking-wider text-indigo-400 opacity-90 px-1">AI Intelligence & Tools</h2>
                     
-                    <div class="p-5 bg-[var(--bubble-bot)] rounded-2xl border border-indigo-500/20 shadow-sm flex flex-col gap-3">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-2.5">
-                                <span class="w-3 h-3 rounded-full bg-indigo-400 animate-pulse"></span>
-                                <span id="settings-label-active-assistant" class="font-bold text-sm text-[var(--text-color)]">Active Assistant</span>
+                    <div class="flex flex-col divide-y divide-[var(--border-color)]/30 bg-[var(--bubble-bot)] rounded-2xl border border-[var(--glass-border)] shadow-sm overflow-hidden">
+                        <div class="flex items-center justify-between p-4 hover:bg-[var(--sidebar-hover)]/40 transition-colors">
+                            <div class="flex flex-col text-left">
+                                <span id="settings-label-web-search" class="font-semibold text-sm text-[var(--text-color)]">Live Web Search</span>
+                                <span id="settings-desc-web-search" class="text-[11px] text-[var(--text-color)] opacity-50 font-medium">Real-time web grounding and automated live sources</span>
                             </div>
-                            <span id="settings-tier-tag" class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">Crystal</span>
+                            <button id="web-search-toggle" onclick="toggleOption('web-search')" class="w-12 h-6 bg-blue-500 rounded-full relative transition-colors duration-300 flex-shrink-0">
+                                <div id="web-search-knob" class="w-5 h-5 bg-white rounded-full absolute top-0.5 left-0.5 transition-transform duration-300 shadow transform translate-x-[24px]"></div>
+                            </button>
                         </div>
-                        <p class="text-xs opacity-60 leading-relaxed">
-                            Default conversational assistant: <strong class="text-indigo-400 font-bold">Crystal</strong>. Clean, fast, and helpful everyday companion.
-                        </p>
-                        <div class="p-3 bg-[var(--sidebar-hover)] border border-[var(--border-color)] rounded-xl flex items-center justify-between text-xs">
-                            <div class="flex items-center gap-2">
-                                <span class="text-indigo-400 font-bold">Crystal Assistant</span>
-                                <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">Active</span>
+                        <div class="flex items-center justify-between p-4 hover:bg-[var(--sidebar-hover)]/40 transition-colors">
+                            <div class="flex flex-col text-left">
+                                <span id="settings-label-deep-thinking" class="font-semibold text-sm text-[var(--text-color)]">Deep Thinking</span>
+                                <span id="settings-desc-deep-thinking" class="text-[11px] text-[var(--text-color)] opacity-50 font-medium">Show reasoning traces and step-by-step thinking</span>
                             </div>
-                            <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-full">Standard</span>
-                        </div>
-                        <div class="pt-2 border-t border-[var(--border-color)]/40 flex flex-col gap-2">
-                            <div class="flex items-center justify-between p-2 rounded-xl hover:bg-[var(--sidebar-hover)] transition-colors">
-                                <div class="flex flex-col text-left">
-                                    <span id="settings-label-web-search" class="text-xs font-semibold text-[var(--text-color)]">Live Web Search</span>
-                                    <span id="settings-desc-web-search" class="text-[10px] text-[var(--text-color)] opacity-50">Real-time web grounding & automated live sources</span>
-                                </div>
-                                <button id="web-search-toggle" onclick="toggleOption('web-search')" class="w-10 h-5.5 bg-blue-500 rounded-full relative transition-colors duration-300 flex-shrink-0">
-                                    <div id="web-search-knob" class="w-4.5 h-4.5 bg-white rounded-full absolute top-0.5 left-0.5 transition-transform duration-300 shadow transform translate-x-[18px]"></div>
-                                </button>
-                            </div>
-                            <div class="flex items-center justify-between p-2 rounded-xl hover:bg-[var(--sidebar-hover)] transition-colors">
-                                <div class="flex flex-col text-left">
-                                    <span id="settings-label-deep-thinking" class="text-xs font-semibold text-[var(--text-color)]">Deep Thinking</span>
-                                    <span id="settings-desc-deep-thinking" class="text-[10px] text-[var(--text-color)] opacity-50">Show step-by-step reasoning trees and live trace</span>
-                                </div>
-                                <button id="deep-thinking-toggle" onclick="toggleOption('deep-thinking')" class="w-10 h-5.5 bg-indigo-500 rounded-full relative transition-colors duration-300 flex-shrink-0">
-                                    <div id="deep-thinking-knob" class="w-4.5 h-4.5 bg-white rounded-full absolute top-0.5 left-0.5 transition-transform duration-300 shadow transform translate-x-0"></div>
-                                </button>
-                            </div>
+                            <button id="deep-thinking-toggle" onclick="toggleOption('deep-thinking')" class="w-12 h-6 bg-indigo-500 rounded-full relative transition-colors duration-300 flex-shrink-0">
+                                <div id="deep-thinking-knob" class="w-5 h-5 bg-white rounded-full absolute top-0.5 left-0.5 transition-transform duration-300 shadow transform translate-x-0"></div>
+                            </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- SECTION 1.6: BACKEND & CLOUD RUNTIME -->
+                <!-- SECTION 3: DISPLAY & PREFERENCES -->
                 <div class="flex flex-col gap-3">
-                    <h2 id="settings-heading-backend" class="text-xs font-bold uppercase tracking-wider text-indigo-400 opacity-90 px-1">Cloud Engine & Backend Connection</h2>
-                    
-                    <div class="p-5 bg-[var(--bubble-bot)] rounded-2xl border border-[var(--glass-border)] shadow-sm flex flex-col gap-3.5">
-                        <div class="flex items-center justify-between">
-                            <div class="flex flex-col">
-                                <span class="font-bold text-sm text-[var(--text-color)]">API Server Status</span>
-                                <span class="text-[11px] opacity-50">Powers Gemini AI models & live search</span>
-                            </div>
-                            <div id="backend-status-indicator" class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                                <span>Connected</span>
-                            </div>
-                        </div>
-
-                        <div class="p-3 bg-[var(--sidebar-hover)] border border-[var(--border-color)] rounded-xl flex flex-col gap-1.5">
-                            <div class="flex items-center justify-between">
-                                <span class="text-[10px] font-bold uppercase tracking-wider opacity-60">Active Server Endpoint</span>
-                                <button type="button" onclick="testBackendConnection()" class="text-[10px] font-bold text-indigo-400 hover:text-indigo-300 underline cursor-pointer">Ping Server</button>
-                            </div>
-                            <div id="active-backend-display" class="text-xs font-mono font-medium text-[var(--text-color)] break-all select-all">Auto (Cloud Run)</div>
-                        </div>
-
-                        <div class="flex flex-col gap-1.5 pt-1">
-                            <label for="custom-backend-url" class="font-bold text-xs uppercase tracking-wider opacity-60">Custom Backend Endpoint (Optional)</label>
-                            <p class="text-[11px] opacity-50 leading-normal">Android apps auto-connect to the official cloud backend. You can optionally override this with your own self-hosted URL.</p>
-                            <div class="flex items-center gap-2">
-                                <input type="url" id="custom-backend-url" class="flex-1 bg-[var(--sidebar-hover)] border border-[var(--border-color)] text-[var(--text-color)] p-2.5 rounded-xl text-xs outline-none focus:border-indigo-500 font-mono transition-colors placeholder:text-gray-500/50" placeholder="https://your-custom-backend.com">
-                                <button type="button" onclick="testCustomBackendUrl()" class="px-3 py-2.5 text-xs font-semibold rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 border border-indigo-500/30 active:scale-95 transition-all">Test</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- SECTION 2: DISPLAY & PREFERENCES -->
-                <div class="flex flex-col gap-3">
-                    <h2 id="settings-heading-display" class="text-xs font-bold uppercase tracking-wider text-indigo-400 opacity-90 px-1">Display & Preferences</h2>
+                    <h2 id="settings-heading-display" class="text-xs font-bold uppercase tracking-wider text-indigo-400 opacity-90 px-1">Preferences & Appearance</h2>
                     
                     <div class="flex flex-col divide-y divide-[var(--border-color)]/30 bg-[var(--bubble-bot)] rounded-2xl border border-[var(--glass-border)] shadow-sm overflow-hidden">
                         <div class="flex items-center justify-between p-4 hover:bg-[var(--sidebar-hover)]/40 transition-colors">
                             <div class="flex flex-col">
-                                <span id="settings-label-dark-mode" class="font-semibold text-sm">Dark Mode</span>
+                                <span id="settings-label-dark-mode" class="font-semibold text-sm">Dark Theme</span>
                                 <span id="settings-desc-dark-mode" class="text-[11px] opacity-50 font-medium">Sleek dark color scheme</span>
                             </div>
                             <button id="dark-toggle" onclick="toggleDarkMode()" class="w-12 h-6 bg-indigo-500 rounded-full relative transition-colors duration-300">
@@ -2156,48 +2072,21 @@
                                 <div id="scroll-knob" class="w-5 h-5 bg-white rounded-full absolute top-0.5 left-0.5 transition-transform duration-300 shadow transform translate-x-[24px]"></div>
                             </button>
                         </div>
-                    </div>
-                </div>
-
-                <!-- SECTION 3: AUDIO & FEEDBACK -->
-                <div class="flex flex-col gap-3">
-                    <h2 id="settings-heading-audio" class="text-xs font-bold uppercase tracking-wider text-indigo-400 opacity-90 px-1">Audio & Feedback</h2>
-                    
-                    <div class="flex flex-col divide-y divide-[var(--border-color)]/30 bg-[var(--bubble-bot)] rounded-2xl border border-[var(--glass-border)] shadow-sm overflow-hidden">
-                        <div class="flex flex-col p-4 gap-2.5 hover:bg-[var(--sidebar-hover)]/40 transition-colors">
-                            <div class="flex items-center justify-between">
-                                <div class="flex flex-col">
-                                    <span id="settings-label-haptic" class="font-semibold text-sm">Haptic Feedback</span>
-                                    <span id="settings-desc-haptic" class="text-[11px] opacity-50 font-medium">Tactile motor vibrations on touch & interaction</span>
-                                </div>
-                                <button id="haptic-toggle" onclick="toggleOption('haptic')" class="w-12 h-6 bg-indigo-500 rounded-full relative transition-colors duration-300">
-                                    <div id="haptic-knob" class="w-5 h-5 bg-white rounded-full absolute top-0.5 left-0.5 transition-transform duration-300 shadow transform translate-x-[24px]"></div>
-                                </button>
-                            </div>
-                            <!-- Haptic Test Chips -->
-                            <div class="flex items-center gap-1.5 pt-1">
-                                <span class="text-[10px] font-mono opacity-50 uppercase mr-1">Test:</span>
-                                <button type="button" onclick="triggerHaptic('light')" class="px-2.5 py-1 text-[11px] font-medium rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 active:scale-95 transition-all">Light</button>
-                                <button type="button" onclick="triggerHaptic('medium')" class="px-2.5 py-1 text-[11px] font-medium rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 active:scale-95 transition-all">Medium</button>
-                                <button type="button" onclick="triggerHaptic('heavy')" class="px-2.5 py-1 text-[11px] font-medium rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 active:scale-95 transition-all">Heavy</button>
-                                <button type="button" onclick="triggerHaptic('success')" class="px-2.5 py-1 text-[11px] font-medium rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 active:scale-95 transition-all">Success</button>
-                            </div>
-                        </div>
 
                         <div class="flex items-center justify-between p-4 hover:bg-[var(--sidebar-hover)]/40 transition-colors">
                             <div class="flex flex-col">
-                                <span id="settings-label-permissions" class="font-semibold text-sm">Android App Permissions</span>
-                                <span id="settings-desc-permissions" class="text-[11px] opacity-50 font-medium">Verify vibration, microphone & location access</span>
+                                <span id="settings-label-haptic" class="font-semibold text-sm">Haptic Feedback</span>
+                                <span id="settings-desc-haptic" class="text-[11px] opacity-50 font-medium">Vibration feedback on tap and interaction</span>
                             </div>
-                            <button type="button" onclick="requestAndroidPermissions(); triggerHaptic('success');" class="px-3 py-1.5 text-xs font-semibold rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white shadow-xs active:scale-95 transition-all">
-                                <span id="settings-btn-permissions-text">Request</span>
+                            <button id="haptic-toggle" onclick="toggleOption('haptic')" class="w-12 h-6 bg-indigo-500 rounded-full relative transition-colors duration-300">
+                                <div id="haptic-knob" class="w-5 h-5 bg-white rounded-full absolute top-0.5 left-0.5 transition-transform duration-300 shadow transform translate-x-[24px]"></div>
                             </button>
                         </div>
 
                         <div class="flex items-center justify-between p-4 hover:bg-[var(--sidebar-hover)]/40 transition-colors">
                             <div class="flex flex-col">
-                                <span id="settings-label-synth" class="font-semibold text-sm">Typing Audio Synth</span>
-                                <span id="settings-desc-synth" class="text-[11px] opacity-50 font-medium">Tactile auditory key clicks and drone soundscape</span>
+                                <span id="settings-label-synth" class="font-semibold text-sm">Typing Sound Effects</span>
+                                <span id="settings-desc-synth" class="text-[11px] opacity-50 font-medium">Subtle sound effects when generating responses</span>
                             </div>
                             <button id="typing-synth-toggle" onclick="toggleOption('typing-synth')" class="w-12 h-6 bg-indigo-500 rounded-full relative transition-colors duration-300">
                                 <div id="typing-synth-knob" class="w-5 h-5 bg-white rounded-full absolute top-0.5 left-0.5 transition-transform duration-300 shadow transform translate-x-[24px]"></div>
@@ -2206,21 +2095,71 @@
                     </div>
                 </div>
 
-                <!-- SECTION: HELP US & FEEDBACK -->
-                <div class="flex flex-col gap-3 pt-2">
-                    <h2 class="text-xs font-bold uppercase tracking-wider text-pink-400 opacity-90 px-1">Community & Support</h2>
-                    <div class="flex flex-col gap-2">
-                        <button onclick="toggleSettings(); toggleHelpUsModal();" class="w-full p-4 bg-pink-500/10 hover:bg-pink-500/15 text-pink-400 rounded-2xl font-bold text-sm text-left flex items-center justify-between transition active:scale-[0.99] border border-pink-500/20">
-                            <div class="flex items-center gap-3">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                                <span>Help Us & Send Feedback</span>
+                <!-- SECTION 4: HELP & FEEDBACK (INTEGRATED DIRECTLY IN SETTINGS) -->
+                <div class="flex flex-col gap-3">
+                    <h2 class="text-xs font-bold uppercase tracking-wider text-pink-400 opacity-90 px-1">Help & Feedback</h2>
+                    
+                    <div class="flex flex-col gap-4 p-5 bg-[var(--bubble-bot)] rounded-2xl border border-pink-500/20 shadow-sm">
+                        <!-- Rating Stars -->
+                        <div class="flex flex-col items-center text-center gap-1.5 pb-3 border-b border-[var(--border-color)]/30">
+                            <span class="text-xs font-bold opacity-75 uppercase tracking-wider">Rate Your Experience</span>
+                            <div class="flex items-center gap-2 my-0.5" id="help-us-stars">
+                                <button type="button" onclick="rateCrystalExperience(1)" class="star-btn p-1 text-zinc-600 hover:text-amber-400 transition-transform hover:scale-125 cursor-pointer text-2xl" data-star="1">★</button>
+                                <button type="button" onclick="rateCrystalExperience(2)" class="star-btn p-1 text-zinc-600 hover:text-amber-400 transition-transform hover:scale-125 cursor-pointer text-2xl" data-star="2">★</button>
+                                <button type="button" onclick="rateCrystalExperience(3)" class="star-btn p-1 text-zinc-600 hover:text-amber-400 transition-transform hover:scale-125 cursor-pointer text-2xl" data-star="3">★</button>
+                                <button type="button" onclick="rateCrystalExperience(4)" class="star-btn p-1 text-zinc-600 hover:text-amber-400 transition-transform hover:scale-125 cursor-pointer text-2xl" data-star="4">★</button>
+                                <button type="button" onclick="rateCrystalExperience(5)" class="star-btn p-1 text-amber-400 transition-transform hover:scale-125 cursor-pointer text-2xl" data-star="5">★</button>
                             </div>
-                            <span class="text-xs opacity-60">→</span>
-                        </button>
+                            <p id="help-us-rating-feedback" class="text-xs font-medium text-emerald-400 min-h-[16px]">Absolutely phenomenal! 🌟</p>
+                        </div>
 
-                        <button id="settings-admin-inbox-btn" onclick="toggleSettings(); openAdminInboxModal();" class="w-full p-4 bg-amber-500/10 hover:bg-amber-500/15 text-amber-300 rounded-2xl font-bold text-sm text-left flex items-center justify-between transition active:scale-[0.99] border border-amber-500/25">
-                            <div class="flex items-center gap-3">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-400"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <!-- Feedback Category Chips -->
+                        <div class="flex flex-col gap-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold opacity-70 uppercase tracking-wider">Category</span>
+                                <span class="text-[10px] font-mono opacity-50">Direct Admin Delivery</span>
+                            </div>
+                            <div class="flex flex-wrap gap-1.5" id="feedback-category-chips">
+                                <button type="button" onclick="selectFeedbackCategory(this, 'Feature Request')" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-[#70ef7d]/20 text-[#70ef7d] border border-[#70ef7d]/40 active:scale-95 cursor-pointer">Feature Request</button>
+                                <button type="button" onclick="selectFeedbackCategory(this, 'Bug Report')" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-white/[0.05] text-zinc-300 border border-white/10 hover:bg-white/10 active:scale-95 cursor-pointer">Bug Report</button>
+                                <button type="button" onclick="selectFeedbackCategory(this, 'Model Quality')" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-white/[0.05] text-zinc-300 border border-white/10 hover:bg-white/10 active:scale-95 cursor-pointer">Model Quality</button>
+                                <button type="button" onclick="selectFeedbackCategory(this, 'General Idea')" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-white/[0.05] text-zinc-300 border border-white/10 hover:bg-white/10 active:scale-95 cursor-pointer">General Idea</button>
+                            </div>
+                        </div>
+
+                        <!-- Feedback Textarea -->
+                        <div class="flex flex-col gap-2">
+                            <textarea id="help-us-feedback-input" rows="3" placeholder="Share your suggestions, bugs, or feature ideas..." class="w-full p-3 rounded-xl bg-[var(--sidebar-hover)] border border-[var(--border-color)] text-xs sm:text-sm text-[var(--text-color)] placeholder:text-gray-500/60 focus:outline-none focus:border-pink-500 resize-none transition-colors"></textarea>
+                        </div>
+
+                        <!-- Optional Screenshot & Submit Row -->
+                        <div class="flex flex-col gap-2">
+                            <div id="help-us-image-preview-box" class="hidden relative w-fit max-w-[180px] rounded-xl overflow-hidden border border-white/20 bg-black/60">
+                                <img id="help-us-image-preview" src="" class="max-h-20 w-auto object-cover" alt="Attachment Preview" />
+                                <button type="button" onclick="removeFeedbackImageAttachment()" class="absolute top-1 right-1 p-1 rounded-full bg-black/80 hover:bg-rose-600 text-white transition-colors cursor-pointer" title="Remove image">
+                                    <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                </button>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <label for="help-us-image-file" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[var(--sidebar-hover)] hover:bg-[var(--border-color)] text-[var(--text-color)] text-xs font-semibold border border-[var(--border-color)] cursor-pointer transition active:scale-95">
+                                    <svg class="w-3.5 h-3.5 text-pink-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                                    <span id="help-us-image-btn-label">Screenshot</span>
+                                </label>
+                                <input type="file" id="help-us-image-file" accept="image/*" class="hidden" onchange="handleFeedbackImageSelected(event)">
+                                
+                                <input type="email" id="help-us-email-input" placeholder="Your email (optional)" class="flex-1 p-2 bg-[var(--sidebar-hover)] border border-[var(--border-color)] rounded-xl text-xs text-[var(--text-color)] placeholder:text-gray-500/60 focus:outline-none focus:border-pink-500">
+                                
+                                <button type="button" onclick="submitHelpUsFeedback()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-bold text-xs transition-all active:scale-95 flex items-center gap-1.5 shadow-md shrink-0 cursor-pointer">
+                                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                                    <span>Send</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Admin Direct Inbox Button (for admin accounts) -->
+                        <button id="settings-admin-inbox-btn" onclick="toggleSettings(); openAdminInboxModal();" class="w-full p-3.5 bg-amber-500/10 hover:bg-amber-500/15 text-amber-300 rounded-xl font-bold text-xs text-left flex items-center justify-between transition active:scale-[0.99] border border-amber-500/25 cursor-pointer mt-1">
+                            <div class="flex items-center gap-2.5">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="text-amber-400"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                                 <span>Admin Feedback Inbox</span>
                             </div>
                             <div class="flex items-center gap-2">
@@ -2231,9 +2170,9 @@
                     </div>
                 </div>
 
-                <!-- SECTION 4: ACCOUNT & DANGER ZONE -->
-                <div class="flex flex-col gap-3 pt-2">
-                    <h2 id="settings-heading-account" class="text-xs font-bold uppercase tracking-wider text-indigo-400 opacity-90 px-1">Account & History</h2>
+                <!-- SECTION 5: ACCOUNT & DATA MANAGEMENT -->
+                <div class="flex flex-col gap-3">
+                    <h2 id="settings-heading-account" class="text-xs font-bold uppercase tracking-wider text-indigo-400 opacity-90 px-1">Account & Data</h2>
                     
                     <div class="flex flex-col gap-3">
                         <!-- Dynamic Account Verification Status Card -->
@@ -2246,21 +2185,24 @@
                                 <span id="settings-account-badge" class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">Active</span>
                             </div>
                         </div>
-                        <button onclick="signOutUser()" class="w-full p-4 bg-red-500/10 hover:bg-red-500/15 text-red-500 rounded-2xl font-bold text-sm text-left flex items-center justify-between transition active:scale-[0.99] border border-red-500/20">
-                            <div class="flex items-center gap-3">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
-                                <span id="settings-btn-signout-text">Log Out Account</span>
-                            </div>
-                            <span class="text-xs opacity-60">→</span>
-                        </button>
                         
-                        <button onclick="deleteAllChats(this)" class="w-full p-4 bg-red-500/10 hover:bg-red-500/15 text-red-500 rounded-2xl font-bold text-sm text-left flex items-center justify-between transition active:scale-[0.99] border border-red-500/20">
-                            <div class="flex items-center gap-3">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                                <span id="settings-btn-clearchat-text">Delete All Chat History</span>
-                            </div>
-                            <span id="settings-btn-clearchat-badge" class="text-xs opacity-60">Clear</span>
-                        </button>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <button onclick="deleteAllChats(this)" class="p-3.5 bg-red-500/10 hover:bg-red-500/15 text-red-400 rounded-xl font-bold text-xs text-left flex items-center justify-between transition active:scale-[0.99] border border-red-500/20 cursor-pointer">
+                                <div class="flex items-center gap-2.5">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                    <span id="settings-btn-clearchat-text">Clear Chat History</span>
+                                </div>
+                                <span id="settings-btn-clearchat-badge" class="text-[10px] font-mono opacity-60">Clear</span>
+                            </button>
+
+                            <button onclick="signOutUser()" class="p-3.5 bg-red-500/10 hover:bg-red-500/15 text-red-400 rounded-xl font-bold text-xs text-left flex items-center justify-between transition active:scale-[0.99] border border-red-500/20 cursor-pointer">
+                                <div class="flex items-center gap-2.5">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+                                    <span id="settings-btn-signout-text">Log Out Account</span>
+                                </div>
+                                <span class="text-xs opacity-60">→</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -2586,10 +2528,6 @@
             <button id="sidebar-personalize-btn" onclick="showWelcomeOnboarding(); toggleSidebar();" class="flex items-center gap-3 w-full py-2.5 px-4 bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/25 rounded-full font-bold text-xs transition-all active:scale-[0.98]">
                 <svg viewBox="0 0 24 24" class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                 <span id="sidebar-personalize-text">Personalize Crystal Profile</span>
-            </button>
-            <button id="sidebar-help-us-btn" onclick="toggleHelpUsModal(); toggleSidebar();" class="flex items-center gap-3 w-full py-2.5 px-4 bg-pink-500/10 hover:bg-pink-500/20 text-pink-400 border border-pink-500/25 rounded-full font-bold text-xs transition-all active:scale-[0.98] cursor-pointer">
-                <svg viewBox="0 0 24 24" class="w-4 h-4 text-pink-400" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                <span id="sidebar-help-us-text">Help Us & Feedback</span>
             </button>
             <button id="sidebar-admin-inbox-btn" onclick="openAdminInboxModal(); toggleSidebar();" class="hidden items-center justify-between w-full py-2.5 px-4 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-full font-bold text-xs transition-all active:scale-[0.98] cursor-pointer" style="display: none;">
                 <div class="flex items-center gap-3">
@@ -6883,8 +6821,17 @@
 
         window.getApiBaseUrl = function() {
             let custom = (localStorage.getItem('crystal_backend_api') || '').trim();
-            // Automatically sanitize any obsolete/broken pre-deployment host from localStorage
-            if (custom && (custom.includes('ais-pre-') || custom.includes('undefined'))) {
+            // Automatically sanitize any obsolete/broken hosts or local mismatches from localStorage
+            if (custom && (
+                custom.includes('ais-pre-') || 
+                custom.includes('ais-dev-') || 
+                custom.includes('undefined') || 
+                custom.includes('null') || 
+                custom.includes('firebaseapp.com') || 
+                custom.includes('web.app') ||
+                custom.includes('localhost:3000') ||
+                (typeof window !== 'undefined' && custom === window.location.origin)
+            )) {
                 localStorage.removeItem('crystal_backend_api');
                 custom = '';
             }
@@ -6903,6 +6850,25 @@
             return '';
         };
 
+        window.resetBackendApiUrl = function(silent = false) {
+            localStorage.removeItem('crystal_backend_api');
+            const input = document.getElementById('custom-backend-url');
+            if (input) input.value = '';
+            const display = document.getElementById('active-backend-display');
+            if (display) display.textContent = 'Auto (Local Node API / Same Origin)';
+            const indicator = document.getElementById('backend-status-indicator');
+            if (indicator) {
+                indicator.className = 'text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5';
+                indicator.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span>Auto-Configured</span>';
+            }
+            if (!silent && typeof showToast === 'function') {
+                showToast('Backend URL reset to default local server.', 'success');
+            }
+            if (typeof testBackendConnection === 'function') {
+                testBackendConnection();
+            }
+        };
+
         window.getApiEndpoint = function(route = '/api/chat') {
             const base = window.getApiBaseUrl().replace(/\/+$/, '');
             const cleanRoute = route.startsWith('/') ? route : '/' + route;
@@ -6917,7 +6883,11 @@
             try {
                 const res = await fetch(endpoint, { method: 'GET', signal: AbortSignal.timeout(6000) });
                 if (res.ok) {
-                    if (display) display.textContent = `${endpoint} (Online 200 OK)`;
+                    const ct = res.headers.get('content-type') || '';
+                    if (ct.includes('text/html')) {
+                        throw new Error('Server returned HTML instead of JSON');
+                    }
+                    if (display) display.textContent = `${endpoint || '/health'} (Online 200 OK)`;
                     if (indicator) {
                         indicator.className = 'text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5';
                         indicator.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><span>Connected</span>';
@@ -6927,7 +6897,7 @@
                     throw new Error(`HTTP ${res.status}`);
                 }
             } catch (err) {
-                if (display) display.textContent = `${endpoint} (${err.message})`;
+                if (display) display.textContent = `${endpoint || '/health'} (${err.message})`;
                 if (indicator) {
                     indicator.className = 'text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-1.5';
                     indicator.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span><span>Unreachable</span>';
@@ -6946,6 +6916,10 @@
             try {
                 const res = await fetch(`${clean}/health`, { method: 'GET', signal: AbortSignal.timeout(6000) });
                 if (res.ok) {
+                    const ct = res.headers.get('content-type') || '';
+                    if (ct.includes('text/html')) {
+                        throw new Error('URL returned HTML instead of JSON (SPA page)');
+                    }
                     localStorage.setItem('crystal_backend_api', clean);
                     if (typeof showToast === 'function') showToast('Custom backend connected and saved!', 'success');
                     const display = document.getElementById('active-backend-display');
@@ -6967,6 +6941,24 @@
             const primaryEndpoint = window.getApiEndpoint(route);
             const cleanRoute = route.startsWith('/') ? route : '/' + route;
             const callerSignal = options.signal;
+
+            const isJsonResponse = async (res) => {
+                if (!res || !res.ok) return false;
+                const ct = res.headers.get('content-type') || '';
+                if (ct.includes('text/html')) return false;
+                try {
+                    const clone = res.clone();
+                    const text = await clone.text();
+                    const trimmed = text.trim();
+                    if (trimmed.startsWith('<') || trimmed.toLowerCase().startsWith('<!doctype')) {
+                        return false;
+                    }
+                    JSON.parse(trimmed);
+                    return true;
+                } catch (e) {
+                    return false;
+                }
+            };
 
             const executeFetch = async (targetUrl, customOpts = null, timeoutMs = 30000) => {
                 const controller = new AbortController();
@@ -7017,14 +7009,31 @@
             // Stage 1: Try Primary Endpoint (e.g. /api/chat)
             try {
                 const res = await executeFetch(primaryEndpoint, null, 30000);
-                if (res.ok) return res;
-                console.warn(`Primary endpoint ${primaryEndpoint} returned status ${res.status}. Engaging fallback callbacks...`);
+                if (await isJsonResponse(res)) {
+                    return res;
+                }
+                console.warn(`Primary endpoint ${primaryEndpoint} returned status ${res?.status} or HTML. Sanitizing backend and engaging fallback callbacks...`);
+                if (localStorage.getItem('crystal_backend_api')) {
+                    localStorage.removeItem('crystal_backend_api');
+                }
             } catch (err) {
                 if (callerSignal?.aborted || err.name === 'AbortError') throw err;
                 console.warn(`Primary endpoint ${primaryEndpoint} error (${err.message}). Engaging fallback callbacks...`);
             }
 
-            // Stage 2: Callback 1 - Crystal Core Fallback
+            // Stage 2: Direct local route fallback (relative /api/chat) if primary was custom
+            if (primaryEndpoint !== cleanRoute) {
+                try {
+                    console.log(`[Fallback Stage 2]: Attempting direct local ${cleanRoute}...`);
+                    const res = await executeFetch(cleanRoute, null, 25000);
+                    if (await isJsonResponse(res)) return res;
+                } catch (lErr) {
+                    if (callerSignal?.aborted || lErr.name === 'AbortError') throw lErr;
+                    console.warn('[Fallback Stage 2 Notice]:', lErr.message);
+                }
+            }
+
+            // Stage 3: Callback 1 - Crystal Core Fallback
             if (cleanRoute.includes('/chat') && options.body) {
                 try {
                     console.log('[Fallback Callback 1]: Attempting Crystal Core fallback...');
@@ -7036,14 +7045,14 @@
                         body: JSON.stringify(parsedBody)
                     };
                     const res = await executeFetch(cleanRoute, crystalOpts, 25000);
-                    if (res.ok) return res;
+                    if (await isJsonResponse(res)) return res;
                 } catch (cErr) {
                     if (callerSignal?.aborted || cErr.name === 'AbortError') throw cErr;
                     console.warn('[Fallback Callback 1 Notice]:', cErr.message);
                 }
             }
 
-            // Stage 3: Callback 2 - Groq Multi-Model Fallback
+            // Stage 4: Callback 2 - Groq Multi-Model Fallback
             if (cleanRoute.includes('/chat') && options.body) {
                 try {
                     console.log('[Fallback Callback 2]: Attempting Groq Multi-Model fallback...');
@@ -7055,30 +7064,17 @@
                         body: JSON.stringify(parsedBody)
                     };
                     const res = await executeFetch(cleanRoute, groqOpts, 25000);
-                    if (res.ok) return res;
+                    if (await isJsonResponse(res)) return res;
                 } catch (gErr) {
                     if (callerSignal?.aborted || gErr.name === 'AbortError') throw gErr;
                     console.warn('[Fallback Callback 2 Notice]:', gErr.message);
                 }
             }
 
-            // Stage 4: Callback 3 - Cloud Run Dev Server Fallback
-            const cloudFallback = 'https://ais-dev-ou77fkmqnai5ygl3akges5-278962941255.asia-southeast1.run.app' + cleanRoute;
-            if (primaryEndpoint !== cloudFallback) {
-                try {
-                    console.log(`[Fallback Callback 3]: Attempting cloud fallback ${cloudFallback}...`);
-                    const res = await executeFetch(cloudFallback, null, 25000);
-                    if (res.ok) return res;
-                } catch (fbErr) {
-                    if (callerSignal?.aborted || fbErr.name === 'AbortError') throw fbErr;
-                    console.warn('[Fallback Callback 3 Notice]:', fbErr.message);
-                }
-            }
-
-            // Stage 5: Callback 4 - Direct Browser Resilient AI Fallback (Pollinations)
+            // Stage 5: Callback 3 - Direct Browser Resilient AI Fallback (Pollinations)
             if (cleanRoute.includes('/chat') && options.body) {
                 try {
-                    console.log('[Fallback Callback 4]: Attempting direct browser AI inference...');
+                    console.log('[Fallback Callback 3]: Attempting direct browser AI inference...');
                     const parsed = JSON.parse(options.body);
                     const prompt = parsed.message || (parsed.messages && parsed.messages[parsed.messages.length - 1]?.content) || "Hello";
                     const polRes = await fetch("https://text.pollinations.ai/openai/chat/completions", {
@@ -7099,7 +7095,7 @@
                         if (reply) {
                             return new Response(JSON.stringify({
                                 reply: reply,
-                                provider: "Crystal Resilience Engine (Direct Browser Callback)",
+                                provider: "Crystal Resilience Engine (Direct Browser AI)",
                                 quota: { allowed: true, tokensLeft: 999, maxCap: 1000, refillSecs: 1 }
                             }), {
                                 status: 200,
@@ -11962,23 +11958,26 @@ echo "Termux test completed successfully!"`;
                     console.error('[Crystal Chat API Error]:', err);
                     const latencyMs = Math.round(performance.now() - requestStartTime);
                     const isNetworkFailed = String(err.message || '').includes('Failed to fetch') || String(err.message || '').includes('NetworkError') || String(err.message || '').includes('Load failed');
+                    const isHtmlResponse = String(err.message || '').includes('HTML instead of JSON') || String(err.message || '').includes('non-JSON');
                     const errorHtml = `
                         <div class="flex flex-col gap-2.5 p-1">
                             <div class="flex items-center gap-2 text-rose-400 font-bold text-sm">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                                <span>${isNetworkFailed ? 'Connection to Backend Failed' : 'Request Error'}</span>
+                                <span>${isNetworkFailed ? 'Connection to Backend Failed' : (isHtmlResponse ? 'Backend Configuration Notice' : 'Request Error')}</span>
                             </div>
                             <p class="text-xs text-[var(--text-color)] opacity-85 leading-relaxed">
-                                ${isNetworkFailed 
-                                    ? 'Unable to reach the Crystal backend service. The server may still be spinning up, or your backend connection needs a moment.'
-                                    : err.message}
+                                ${isHtmlResponse 
+                                    ? 'A custom or external Backend URL returned a webpage instead of an API response. Click "Auto-Fix & Retry" to connect directly to the built-in Crystal backend.' 
+                                    : (isNetworkFailed 
+                                        ? 'Unable to reach the backend service. The server may still be spinning up or your network needs a moment.'
+                                        : err.message)}
                             </p>
                             <div class="flex flex-wrap items-center gap-2 pt-1">
-                                <button onclick="window.retryLastUserMessage()" class="px-3 py-1.5 rounded-xl bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] font-bold text-xs hover:opacity-90 active:scale-95 transition flex items-center gap-1.5 shadow-sm">
+                                <button onclick="window.autoFixBackendAndRetry()" class="px-3 py-1.5 rounded-xl bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] font-bold text-xs hover:opacity-90 active:scale-95 transition flex items-center gap-1.5 shadow-sm cursor-pointer">
                                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
-                                    Retry
+                                    ${isHtmlResponse ? 'Auto-Fix & Retry' : 'Retry'}
                                 </button>
-                                <button onclick="openSettingsModal()" class="px-3 py-1.5 rounded-xl bg-[var(--sidebar-hover)] border border-[var(--border-color)] text-[var(--text-color)] font-semibold text-xs hover:border-indigo-500 active:scale-95 transition">
+                                <button onclick="openSettingsModal()" class="px-3 py-1.5 rounded-xl bg-[var(--sidebar-hover)] border border-[var(--border-color)] text-[var(--text-color)] font-semibold text-xs hover:border-indigo-500 active:scale-95 transition cursor-pointer">
                                     Backend Settings
                                 </button>
                             </div>
@@ -12026,6 +12025,18 @@ echo "Termux test completed successfully!"`;
                     submitMessage();
                 }
             }
+        };
+
+        window.autoFixBackendAndRetry = function() {
+            if (typeof window.resetBackendApiUrl === 'function') {
+                window.resetBackendApiUrl(true);
+            }
+            if (typeof showToast === 'function') {
+                showToast('Resetting backend connection and retrying...', 'info');
+            }
+            setTimeout(() => {
+                window.retryLastUserMessage();
+            }, 150);
         };
 
         // Terms & Conditions Modal Control
@@ -15415,7 +15426,10 @@ echo "Status: ONLINE"
             } catch (e) {}
 
             if (textEl) textEl.value = '';
-            toggleHelpUsModal();
+            const helpModal = document.getElementById('help-us-modal');
+            if (helpModal && !helpModal.classList.contains('hidden')) {
+                toggleHelpUsModal();
+            }
 
             // Refresh admin badge count immediately
             if (typeof loadAdminFeedbacks === 'function') {

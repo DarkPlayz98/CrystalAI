@@ -11,7 +11,8 @@ import {
   handleFeedbackRoute,
   handleGetFeedbackRoute,
   handleMarkFeedbackReadRoute,
-  handleDeleteFeedbackRoute
+  handleDeleteFeedbackRoute,
+  handleEmailImageRoute
 } from './api.js';
 
 function expressApiPlugin() {
@@ -19,8 +20,10 @@ function expressApiPlugin() {
     name: 'express-api-plugin',
     configureServer(server) {
       server.middlewares.use(async (req, res, next) => {
-        const url = req.url || '';
-        if (!url.startsWith('/api/') && !url.startsWith('/health') && !url.startsWith('/ping')) {
+        const rawUrl = req.url || '';
+        const pathname = rawUrl.split('?')[0];
+
+        if (!pathname.startsWith('/api/') && pathname !== '/health' && pathname !== '/ping' && !pathname.startsWith('/health/')) {
           return next();
         }
 
@@ -33,7 +36,7 @@ function expressApiPlugin() {
           return res.end();
         }
 
-        if (url === '/health' || url === '/ping' || url === '/api/health') {
+        if (pathname === '/health' || pathname === '/ping' || pathname === '/api/health') {
           res.setHeader('Content-Type', 'application/json');
           res.statusCode = 200;
           return res.end(JSON.stringify({ status: 'ok', uptime: process.uptime(), timestamp: new Date().toISOString() }));
@@ -42,34 +45,50 @@ function expressApiPlugin() {
         const handleRequestWithBody = async (bodyObj) => {
           req.body = bodyObj || {};
           try {
-            if (url.startsWith('/api/models')) {
+            if (pathname.startsWith('/api/models')) {
               await handleModelsRoute(req, res);
-            } else if (url.startsWith('/api/chat')) {
+            } else if (
+              pathname.startsWith('/api/chat') || 
+              pathname.startsWith('/api/generate') || 
+              pathname.startsWith('/api/conversation') || 
+              pathname.startsWith('/api/message') ||
+              pathname.startsWith('/api/v1/chat')
+            ) {
               await handleChatRoute(req, res);
-            } else if (url.startsWith('/api/termux/file')) {
+            } else if (pathname.startsWith('/api/termux/file')) {
               await handleTermuxFileRoute(req, res);
-            } else if (url.startsWith('/api/bug-analysis')) {
+            } else if (pathname.startsWith('/api/bug-analysis')) {
               await handleBugAnalysisRoute(req, res);
-            } else if (url.startsWith('/api/image/generate') || url.startsWith('/api/generate-image') || url === '/api/image' || url.startsWith('/api/image?')) {
+            } else if (
+              pathname.startsWith('/api/image/generate') || 
+              pathname.startsWith('/api/generate-image') || 
+              pathname === '/api/image' || 
+              pathname.startsWith('/api/image')
+            ) {
               await handleImageGenerateRoute(req, res);
-            } else if (url.startsWith('/api/image-proxy')) {
+            } else if (pathname.startsWith('/api/image-proxy')) {
               await handleImageProxyRoute(req, res);
-            } else if (url.startsWith('/api/termux/exec') || url.startsWith('/api/exec')) {
+            } else if (pathname.startsWith('/api/termux/exec') || pathname.startsWith('/api/exec')) {
               await handleTermuxExecRoute(req, res);
-            } else if (url.startsWith('/api/auth/send-verification') || url.startsWith('/api/send-email')) {
+            } else if (pathname.startsWith('/api/auth/send-verification') || pathname.startsWith('/api/send-email')) {
               await handleSendVerificationEmailRoute(req, res);
-            } else if (url === '/api/feedback/read') {
+            } else if (pathname === '/api/email-image') {
+              await handleEmailImageRoute(req, res);
+            } else if (pathname === '/api/feedback/read') {
               await handleMarkFeedbackReadRoute(req, res);
-            } else if (url === '/api/feedback/delete' || url.startsWith('/api/feedback/')) {
+            } else if (pathname === '/api/feedback/delete' || pathname.startsWith('/api/feedback/')) {
               await handleDeleteFeedbackRoute(req, res);
-            } else if (url === '/api/feedback' || url.startsWith('/api/feedback?')) {
+            } else if (pathname === '/api/feedback') {
               if (req.method === 'GET') {
                 await handleGetFeedbackRoute(req, res);
               } else {
                 await handleFeedbackRoute(req, res);
               }
             } else {
-              next();
+              // Unrecognized /api/* route: respond with JSON 404, never fallback to index.html
+              res.statusCode = 404;
+              res.setHeader('Content-Type', 'application/json');
+              res.end(JSON.stringify({ error: `API endpoint not found: ${pathname}`, status: 404 }));
             }
           } catch (err) {
             console.error('[API Middleware Error]:', err);
@@ -81,7 +100,7 @@ function expressApiPlugin() {
           }
         };
 
-        if (req.method === 'GET') {
+        if (req.method === 'GET' || req.method === 'HEAD') {
           return handleRequestWithBody({});
         }
 
@@ -104,7 +123,11 @@ function expressApiPlugin() {
 
         req.on('error', (err) => {
           console.error('[Request Stream Error]:', err);
-          next(err);
+          if (!res.writableEnded) {
+            res.statusCode = 500;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ error: err.message || 'Stream Error' }));
+          }
         });
       });
     }
